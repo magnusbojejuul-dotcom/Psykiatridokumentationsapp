@@ -508,8 +508,9 @@
                             
                             {/* Clear All Button */}
                             <button 
+                                type="button"
                                 onClick={clearAll}
-                                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors bg-white text-red-600 border border-red-200 hover:bg-red-50 hover:border-red-300"
+                                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors bg-white text-red-600 border border-red-200 hover:bg-red-50 hover:border-red-300 cursor-pointer"
                                 title="Fjern alle markeringer (Tomt resultat)"
                             >
                                 <Trash2 className="w-5 h-5" />
@@ -518,8 +519,9 @@
 
                             {/* Toggle for Summary Mode */}
                             <button 
+                                type="button"
                                 onClick={() => setShowSummary(!showSummary)}
-                                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border ${showSummary ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'}`}
+                                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border cursor-pointer ${showSummary ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'}`}
                                 title="Vis opsummering af fund øverst i notatet"
                             >
                                 {showSummary ? <ToggleRight className="w-5 h-5 text-emerald-400" /> : <ToggleLeft className="w-5 h-5 text-slate-400" />}
@@ -528,7 +530,7 @@
 
                             <div className="h-6 w-px bg-slate-200 mx-1"></div>
 
-                            <button onClick={toggleFullscreen} className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors" title={isFullscreen ? "Afslut fuldskærm" : "Fuldskærm"}>
+                            <button onClick={toggleFullscreen} className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer" title={isFullscreen ? "Afslut fuldskærm" : "Fuldskærm"}>
                                 {isFullscreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
                             </button>
                         </div>
