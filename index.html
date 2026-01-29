@@ -54,6 +54,7 @@
         const ToggleRight = ({ className }) => <Icon className={className}><rect width="20" height="12" x="2" y="6" rx="6" ry="6"/><circle cx="16" cy="12" r="2"/></Icon>;
         const MessageSquare = ({ className }) => <Icon className={className}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></Icon>;
         const Layers = ({ className }) => <Icon className={className}><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></Icon>;
+        const Trash2 = ({ className }) => <Icon className={className}><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></Icon>;
 
         // --- DATA ---
         const ACTUAL_PSYCH_OPTIONS = [
@@ -208,7 +209,14 @@
             { id: 'motor_weak_oe', label: 'Kraftnedsættelse OE', category: 'Neurologisk (Motorik)', text: 'Nedsat kraft i overekstremiteter.', exclude: ['motor_sys_normal'] },
             { id: 'motor_weak_ue', label: 'Kraftnedsættelse UE', category: 'Neurologisk (Motorik)', text: 'Nedsat kraft i underekstremiteter.', exclude: ['motor_sys_normal'] },
             
-            { id: 'reflex_normal', label: 'Reflekser normale', category: 'Neurologisk (Reflekser)', text: 'Reflekser: Normale og sidelige dybe senereflekser (biceps, patellar, achilles). Babinski negativ bilat.', isDefault: true, exclude: ['reflex_hyper', 'reflex_babinski'] },
+            { id: 'reflex_normal', label: 'Reflekser normale (Alle)', category: 'Neurologisk (Reflekser)', text: 'Reflekser: Normale og sidelige dybe senereflekser. Babinski negativ bilat.', isDefault: true, exclude: ['reflex_hyper', 'reflex_babinski', 'reflex_biceps', 'reflex_triceps', 'reflex_brachiorad', 'reflex_patellar', 'reflex_achilles', 'reflex_babinski_neg'] },
+            { id: 'reflex_biceps', label: 'Biceps (Normal)', category: 'Neurologisk (Reflekser)', text: 'Biceps: bilat. normal.', isDefault: false, exclude: ['reflex_normal'] },
+            { id: 'reflex_triceps', label: 'Triceps (Normal)', category: 'Neurologisk (Reflekser)', text: 'Triceps: bilat. normal.', isDefault: false, exclude: ['reflex_normal'] },
+            { id: 'reflex_brachiorad', label: 'Brachioradialis (Normal)', category: 'Neurologisk (Reflekser)', text: 'Brachioradialis: bilat. normal.', isDefault: false, exclude: ['reflex_normal'] },
+            { id: 'reflex_patellar', label: 'Patellar (Normal)', category: 'Neurologisk (Reflekser)', text: 'Patellar: bilat. normal.', isDefault: false, exclude: ['reflex_normal'] },
+            { id: 'reflex_achilles', label: 'Achilles (Normal)', category: 'Neurologisk (Reflekser)', text: 'Achilles: bilat. normal.', isDefault: false, exclude: ['reflex_normal'] },
+            { id: 'reflex_babinski_neg', label: 'Babinski Neg.', category: 'Neurologisk (Reflekser)', text: 'Babinski: Negativ.', isDefault: false, exclude: ['reflex_normal'] },
+            
             { id: 'reflex_hyper', label: 'Hyperrefleksi', category: 'Neurologisk (Reflekser)', text: 'Livlige/Hyperaktive reflekser.', exclude: ['reflex_normal'] },
             { id: 'reflex_babinski', label: 'Babinski Positiv', category: 'Neurologisk (Reflekser)', text: 'Babinski positiv (extensivt tå-respons).', exclude: ['reflex_normal'] },
 
@@ -293,6 +301,12 @@
                     option.exclude?.forEach(exId => newSelection.delete(exId));
                 }
                 setSelectedIds(newSelection);
+            };
+            
+            const clearAll = () => {
+                setSelectedIds(new Set());
+                setNotification({ message: 'Alle felter ryddet', type: 'success' });
+                setTimeout(() => setNotification(null), 3000);
             };
 
             const generateText = () => {
@@ -492,6 +506,16 @@
                         </div>
                         <div className="flex items-center gap-4">
                             
+                            {/* Clear All Button */}
+                            <button 
+                                onClick={clearAll}
+                                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors bg-white text-red-600 border border-red-200 hover:bg-red-50 hover:border-red-300"
+                                title="Fjern alle markeringer (Tomt resultat)"
+                            >
+                                <Trash2 className="w-5 h-5" />
+                                <span>Ryd alt</span>
+                            </button>
+
                             {/* Toggle for Summary Mode */}
                             <button 
                                 onClick={() => setShowSummary(!showSummary)}
