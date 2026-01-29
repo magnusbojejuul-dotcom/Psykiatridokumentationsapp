@@ -53,6 +53,7 @@
         const ToggleLeft = ({ className }) => <Icon className={className}><rect width="20" height="12" x="2" y="6" rx="6" ry="6"/><circle cx="8" cy="12" r="2"/></Icon>;
         const ToggleRight = ({ className }) => <Icon className={className}><rect width="20" height="12" x="2" y="6" rx="6" ry="6"/><circle cx="16" cy="12" r="2"/></Icon>;
         const MessageSquare = ({ className }) => <Icon className={className}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></Icon>;
+        const Layers = ({ className }) => <Icon className={className}><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></Icon>;
 
         // --- DATA ---
         const ACTUAL_PSYCH_OPTIONS = [
@@ -295,12 +296,20 @@
             };
 
             const generateText = () => {
-                const sections = [
+                const allSections = [
                     { id: 'psych_actual', title: 'AKTUELT PSYKISK', options: ACTUAL_PSYCH_OPTIONS },
                     { id: 'psych', title: 'OBJEKTIVT PSYKISK', options: PSYCH_OPTIONS },
                     { id: 'somatic_act', title: 'AKTUELT SOMATISK', options: SOMATIC_ACT_OPTIONS },
                     { id: 'somatic_obj', title: 'SOMATISK VURDERING', options: SOMATIC_OBJ_OPTIONS }
                 ];
+
+                // Filter sections based on activeSection (unless in 'full_note' mode)
+                let sectionsToRender = [];
+                if (activeSection === 'full_note') {
+                    sectionsToRender = allSections;
+                } else {
+                    sectionsToRender = allSections.filter(s => s.id === activeSection);
+                }
 
                 const lines = [];
                 const movedCategories = new Set(); // Track which categories are moved to top
@@ -309,7 +318,8 @@
                 if (showSummary) {
                     const obsLines = [];
                     
-                    sections.forEach(sec => {
+                    // We check all sections in 'full_note' mode, or only the active section otherwise
+                    sectionsToRender.forEach(sec => {
                         const categories = Array.from(new Set(sec.options.map(o => o.category)));
                         
                         categories.forEach(cat => {
@@ -336,7 +346,7 @@
                 }
 
                 // 2. Handle Main Sections
-                sections.forEach(sec => {
+                sectionsToRender.forEach(sec => {
                     const sectionLines = [];
                     const categories = Array.from(new Set(sec.options.map(o => o.category)));
 
@@ -352,16 +362,10 @@
                         }
                     });
 
-                    // Only show header if there are lines remaining OR if we want to show empty headers
-                    // (Here we only show if there's content to keep it clean)
                     if (sectionLines.length > 0) {
                         lines.push(sec.title);
                         lines.push(...sectionLines);
                         lines.push(""); // Spacing
-                    } else if (showSummary) {
-                         // Check if ALL content from this section was moved up? 
-                         // If so, maybe show header with reference? Or just hide. 
-                         // Let's hide empty sections to keep it clean as per "doesn't fit" request.
                     }
                 });
 
@@ -380,6 +384,10 @@
                 else if (activeSection === 'psych') currentOptions = PSYCH_OPTIONS;
                 else if (activeSection === 'somatic_obj') currentOptions = SOMATIC_OBJ_OPTIONS;
                 else if (activeSection === 'somatic_act') currentOptions = SOMATIC_ACT_OPTIONS;
+                else if (activeSection === 'full_note') {
+                    // Reset all
+                   currentOptions = [...ACTUAL_PSYCH_OPTIONS, ...PSYCH_OPTIONS, ...SOMATIC_ACT_OPTIONS, ...SOMATIC_OBJ_OPTIONS];
+                }
                 
                 const newSet = new Set(selectedIds);
                 currentOptions.forEach(o => newSet.delete(o.id));
@@ -521,6 +529,11 @@
                                     <Stethoscope className={`h-5 w-5 ${activeSection === 'somatic_obj' ? 'text-indigo-600' : 'text-slate-400'}`} />
                                     <span className="font-medium">Somatisk Vurdering</span>
                                 </button>
+                                <div className="h-px bg-slate-200 my-2"></div>
+                                <button onClick={() => setActiveSection('full_note')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${activeSection === 'full_note' ? 'bg-slate-800 text-white shadow ring-1 ring-slate-900' : 'text-slate-700 bg-slate-200 hover:bg-slate-300'}`}>
+                                    <Layers className={`h-5 w-5 ${activeSection === 'full_note' ? 'text-emerald-400' : 'text-slate-600'}`} />
+                                    <span className="font-bold">Samlet Notat</span>
+                                </button>
                             </div>
                             <div className="mt-auto p-4 border-t border-slate-200">
                                 <div className="bg-indigo-50 rounded-lg p-3 text-xs text-indigo-900">
@@ -538,8 +551,11 @@
                                             {activeSection === 'psych' && 'Klinisk vurdering (Psykisk)'}
                                             {activeSection === 'somatic_obj' && 'Somatisk Vurdering'}
                                             {activeSection === 'somatic_act' && 'Somatisk Anamnese'}
+                                            {activeSection === 'full_note' && 'Samlet Journalnotat (Oversigt)'}
                                         </h2>
-                                        <p className="text-sm text-slate-500 mt-1">Vælg relevante observationer. Standardværdier er præ-selekterede.</p>
+                                        <p className="text-sm text-slate-500 mt-1">
+                                            {activeSection === 'full_note' ? 'Her ses det samlede notat. Brug menuen til venstre for at redigere indholdet.' : 'Vælg relevante observationer. Standardværdier er præ-selekterede.'}
+                                        </p>
                                     </div>
                                     <button onClick={resetSection} className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-indigo-600 transition-colors shadow-sm">
                                         <RotateCcw className="h-4 w-4" /> Nulstil
@@ -549,6 +565,17 @@
                                 {activeSection === 'psych' && renderCardGrid(PSYCH_OPTIONS)}
                                 {activeSection === 'somatic_act' && renderCardGrid(SOMATIC_ACT_OPTIONS)}
                                 {activeSection === 'somatic_obj' && renderCardGrid(SOMATIC_OBJ_OPTIONS)}
+                                {activeSection === 'full_note' && (
+                                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-10 flex flex-col items-center justify-center text-center h-96">
+                                        <Layers className="h-16 w-16 text-slate-200 mb-4" />
+                                        <h3 className="text-lg font-medium text-slate-800">Samlet Visning</h3>
+                                        <p className="text-slate-500 max-w-md mt-2">
+                                            Tekstboksen til højre viser nu det komplette notat samlet fra alle sektioner.
+                                            <br/><br/>
+                                            Gå til de enkelte sektioner i menuen til venstre for at redigere indholdet.
+                                        </p>
+                                    </div>
+                                )}
                             </div>
                         </main>
 
@@ -556,7 +583,9 @@
                             <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                                 <div className="flex items-center gap-2">
                                     <FileText className="h-4 w-4 text-slate-500" />
-                                    <h3 className="font-semibold text-slate-700 text-sm uppercase tracking-wide">Resultat</h3>
+                                    <h3 className="font-semibold text-slate-700 text-sm uppercase tracking-wide">
+                                        {activeSection === 'full_note' ? 'Hele Notatet' : 'Resultat (Sektion)'}
+                                    </h3>
                                 </div>
                                 {showSummary && <span className="text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-medium">Resume aktivt</span>}
                             </div>
@@ -570,7 +599,8 @@
                             </div>
                             <div className="p-4 bg-slate-50 border-t border-slate-200">
                                 <button onClick={copyToClipboard} className="w-full flex justify-center items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-4 py-3 rounded-lg font-medium transition-all shadow-lg hover:shadow-xl active:transform active:scale-95">
-                                    <Clipboard className="h-4 w-4" /> Kopier tekst til journal
+                                    <Clipboard className="h-4 w-4" /> 
+                                    {activeSection === 'full_note' ? 'Kopier HELE notatet' : 'Kopier SEKTION'}
                                 </button>
                             </div>
                         </aside>
