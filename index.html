@@ -32,7 +32,7 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        // --- IKONER (SVG komponenter for at undgå eksterne dependencies) ---
+        // --- IKONER ---
         const Icon = ({ children, className }) => (
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
                 {children}
@@ -50,78 +50,192 @@
         const CheckCircle2 = ({ className }) => <Icon className={className}><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></Icon>;
         const AlertCircle = ({ className }) => <Icon className={className}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></Icon>;
         const XCircle = ({ className }) => <Icon className={className}><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></Icon>;
+        const ListPlus = ({ className }) => <Icon className={className}><path d="M11 12H3"/><path d="M16 6H3"/><path d="M16 18H3"/><path d="M21 6h-6a2.25 2.25 0 1 0 0 4.5h6"/><path d="M21 12h-6a2.25 2.25 0 1 0 0 4.5h6"/><path d="M18 12v6"/></Icon>;
+        const ToggleLeft = ({ className }) => <Icon className={className}><rect width="20" height="12" x="2" y="6" rx="6" ry="6"/><circle cx="8" cy="12" r="2"/></Icon>;
+        const ToggleRight = ({ className }) => <Icon className={className}><rect width="20" height="12" x="2" y="6" rx="6" ry="6"/><circle cx="16" cy="12" r="2"/></Icon>;
 
-        // --- DATA ---
+        // --- DATA STRUKTUR ---
+        // 'isDefault': Vises ikke i resumeet.
+        // 'exclude': Liste af IDs der fravælges hvis denne vælges.
+        // 'summaryLabel': (Optional) Kort tekst til resumeet. Hvis ikke angivet, bruges 'label'.
+
         const PSYCH_OPTIONS = [
-            { id: 'orient_normal', label: 'Fuldt orienteret', category: 'Bevidsthed', text: 'Vågen, klar og orienteret i tid, sted og egne data.', isDefault: true, exclude: ['orient_confused', 'orient_delir'] },
+            // --- BEVIDSTHED & ORIENTERING ---
+            { id: 'orient_normal', label: 'Fuldt orienteret', category: 'Bevidsthed', text: 'Vågen, klar og orienteret i tid, sted og egne data.', isDefault: true, exclude: ['orient_confused', 'orient_delir', 'orient_sløv'] },
+            { id: 'orient_sløv', label: 'Somnolent/Sløv', category: 'Bevidsthed', text: 'Vågen, men fremstår somnolent og sløv i kontakten.', exclude: ['orient_normal', 'orient_confused'] },
             { id: 'orient_confused', label: 'Konfus', category: 'Bevidsthed', text: 'Vågen, men fremstår konfus og desorienteret.', exclude: ['orient_normal'] },
-            { id: 'orient_delir', label: 'Delirøs', category: 'Bevidsthed', text: 'Fremstår med svingende bevidsthedsniveau og opmærksomhedsforstyrrelse, obs delir.', exclude: ['orient_normal'] },
-            { id: 'appear_normal', label: 'Normal fremtoning', category: 'Fremtoning', text: 'Normal fremtoning, herunder soigneret og alderssvarende påklædning.', isDefault: true, exclude: ['appear_unkept'] },
-            { id: 'appear_unkept', label: 'Usoigneret', category: 'Fremtoning', text: 'Fremstår usoigneret, lugtende og med mangelfuld hygiejne.', exclude: ['appear_normal'] },
-            { id: 'contact_normal', label: 'Formel/Emotionel intakt', category: 'Kontakt', text: 'Formel og emotionel kontakt er intakt. Øjenkontakten er naturlig.', isDefault: true, exclude: ['contact_form_bad', 'contact_emo_bad', 'contact_avig'] },
-            { id: 'contact_form_bad', label: 'Formel kontakt afvigende', category: 'Kontakt', text: 'Formel kontakt er afvigende, præget af distancering.', exclude: ['contact_normal'] },
-            { id: 'contact_emo_bad', label: 'Emotionel kontakt nedsat', category: 'Kontakt', text: 'Emotionel kontakt er nedsat, virker affladet.', exclude: ['contact_normal'] },
-            { id: 'contact_avig', label: 'Afvigende øjenkontakt', category: 'Kontakt', text: 'Undvigende øjenkontakt.', exclude: ['contact_normal'] },
-            { id: 'mood_neutral', label: 'Neutralt', category: 'Stemningsleje', text: 'Stemningslejet vurderes neutralt.', isDefault: true, exclude: ['mood_low', 'mood_high', 'mood_dys', 'mood_labile'] },
-            { id: 'mood_low', label: 'Sænket', category: 'Stemningsleje', text: 'Stemningslejet vurderes tydeligt sænket.', exclude: ['mood_neutral', 'mood_high'] },
-            { id: 'mood_high', label: 'Løftet/Manisk', category: 'Stemningsleje', text: 'Stemningslejet er løftet, præget af øget energi og foretagsomhed.', exclude: ['mood_neutral', 'mood_low'] },
-            { id: 'mood_dys', label: 'Dysforisk', category: 'Stemningsleje', text: 'Fremstår dysforisk og irritabel.', exclude: ['mood_neutral'] },
-            { id: 'mood_labile', label: 'Grådlabil', category: 'Stemningsleje', text: 'Fremstår grådlabil under samtalen.', exclude: ['mood_neutral'] },
+            { id: 'orient_delir', label: 'Delirøs', category: 'Bevidsthed', text: 'Fremstår med svingende bevidsthedsniveau, opmærksomhedsforstyrrelse og usammenhængende tale, obs delir.', exclude: ['orient_normal'] },
+            
+            // --- FREMTONING & ADFÆRD ---
+            { id: 'appear_normal', label: 'Normal fremtoning', category: 'Fremtoning & Adfærd', text: 'Normal fremtoning, herunder soigneret og alderssvarende påklædning.', isDefault: true, exclude: ['appear_unkept', 'appear_bizarre_dress'] },
+            { id: 'appear_unkept', label: 'Usoigneret', category: 'Fremtoning & Adfærd', text: 'Fremstår usoigneret, lugtende og med mangelfuld hygiejne.', exclude: ['appear_normal'] },
+            { id: 'appear_bizarre_dress', label: 'Bizart påklædt', category: 'Fremtoning & Adfærd', text: 'Fremstår bizart eller uhensigtsmæssigt påklædt ift. årstiden.', exclude: ['appear_normal'] },
+            { id: 'behav_coop', label: 'Samarbejdsvillig', category: 'Fremtoning & Adfærd', text: 'Venlig og samarbejdsvillig i kontakten.', isDefault: true, exclude: ['behav_guard', 'behav_aggress', 'behav_threat'] },
+            { id: 'behav_guard', label: 'Afvisende/Guarded', category: 'Fremtoning & Adfærd', text: 'Fremstår afvisende, mistroisk og guarded.', exclude: ['behav_coop'] },
+            { id: 'behav_threat', label: 'Truende adfærd', category: 'Fremtoning & Adfærd', text: 'Fremstår verbalt truende og grænseoverskridende.', exclude: ['behav_coop'] },
+            { id: 'behav_aggress', label: 'Aggressiv', category: 'Fremtoning & Adfærd', text: 'Fremstår fysisk aggressiv og udadreagerende.', exclude: ['behav_coop'] },
+
+            // --- KONTAKT ---
+            { id: 'contact_norm_form', label: 'Formel kontakt intakt', category: 'Kontakt', text: 'Formel kontakt er intakt.', isDefault: true, exclude: ['contact_form_bad', 'contact_distanc'] },
+            { id: 'contact_distanc', label: 'Distancerende', category: 'Kontakt', text: 'Formel kontakt er præget af distancering.', exclude: ['contact_norm_form'] },
+            { id: 'contact_form_bad', label: 'Afvigende formel', category: 'Kontakt', text: 'Formel kontakt er svært afvigende og usikker.', exclude: ['contact_norm_form'] },
+            
+            { id: 'contact_norm_emo', label: 'Emotionel kontakt intakt', category: 'Kontakt', text: 'Emotionel kontakt er intakt og svinger relevant.', isDefault: true, exclude: ['contact_emo_flat', 'contact_emo_labile', 'contact_emo_incong'] },
+            { id: 'contact_emo_flat', label: 'Affladet', category: 'Kontakt', text: 'Emotionel kontakt er nedsat, virker affladet.', exclude: ['contact_norm_emo'] },
+            { id: 'contact_emo_labile', label: 'Labil', category: 'Kontakt', text: 'Emotionelt labil.', exclude: ['contact_norm_emo'] },
+            { id: 'contact_emo_incong', label: 'Inkongruent', category: 'Kontakt', text: 'Affekt er inkongruent ift. tankeindhold (inadekvat).', exclude: ['contact_norm_emo'] },
+            
+            { id: 'contact_eye_norm', label: 'Øjenkontakt naturlig', category: 'Kontakt', text: 'Øjenkontakten er naturlig.', isDefault: true, exclude: ['contact_eye_avoid', 'contact_eye_stare'] },
+            { id: 'contact_eye_avoid', label: 'Undvigende øjne', category: 'Kontakt', text: 'Undvigende øjenkontakt.', exclude: ['contact_eye_norm'] },
+            { id: 'contact_eye_stare', label: 'Stirrende', category: 'Kontakt', text: 'Intens, stirrende øjenkontakt.', exclude: ['contact_eye_norm'] },
+
+            // --- STEMNINGSLEJE ---
+            { id: 'mood_neutral', label: 'Neutralt', category: 'Stemningsleje', text: 'Stemningslejet vurderes neutralt.', isDefault: true, exclude: ['mood_low_light', 'mood_low_severe', 'mood_high_hypo', 'mood_high_mania', 'mood_dys'] },
+            { id: 'mood_low_light', label: 'Let sænket', category: 'Stemningsleje', text: 'Stemningslejet vurderes let sænket.', exclude: ['mood_neutral', 'mood_low_severe', 'mood_high_hypo', 'mood_high_mania'] },
+            { id: 'mood_low_severe', label: 'Svært sænket', category: 'Stemningsleje', text: 'Stemningslejet vurderes svært sænket/depressivt.', exclude: ['mood_neutral', 'mood_low_light', 'mood_high_hypo', 'mood_high_mania'] },
+            { id: 'mood_high_hypo', label: 'Løftet/Hypoman', category: 'Stemningsleje', text: 'Stemningslejet er løftet, præget af øget energi.', exclude: ['mood_neutral', 'mood_low_light', 'mood_low_severe', 'mood_high_mania'] },
+            { id: 'mood_high_mania', label: 'Manisk', category: 'Stemningsleje', text: 'Stemningslejet er udtalt løftet (manisk) med tab af hæmninger.', exclude: ['mood_neutral', 'mood_low_light', 'mood_low_severe', 'mood_high_hypo'] },
+            { id: 'mood_dys', label: 'Dysforisk', category: 'Stemningsleje', text: 'Fremstår dysforisk.', summaryLabel: 'Dysfori' },
+            { id: 'mood_irritabel', label: 'Irritabel', category: 'Stemningsleje', text: 'Fremstår irritabel og med kort lunte.', summaryLabel: 'Irritabilitet' },
+            { id: 'mood_labile', label: 'Grådlabil', category: 'Stemningsleje', text: 'Fremstår grådlabil under samtalen.', summaryLabel: 'Grådlabil' },
+            
+            // --- PSYKOMOTORIK ---
             { id: 'motor_normal', label: 'Normal psykomotorik', category: 'Psykomotorik', text: 'Psykomotorisk normalt.', isDefault: true, exclude: ['motor_agit', 'motor_inhib', 'motor_restless'] },
-            { id: 'motor_agit', label: 'Agiteret', category: 'Psykomotorik', text: 'Psykomotorisk agiteret/urolig.', exclude: ['motor_normal', 'motor_inhib'] },
-            { id: 'motor_inhib', label: 'Hæmmet', category: 'Psykomotorik', text: 'Psykomotorisk hæmmet med lang latenstid.', exclude: ['motor_normal', 'motor_agit'] },
+            { id: 'motor_agit', label: 'Agiteret', category: 'Psykomotorik', text: 'Psykomotorisk agiteret.', exclude: ['motor_normal', 'motor_inhib'] },
+            { id: 'motor_inhib', label: 'Hæmmet', category: 'Psykomotorik', text: 'Psykomotorisk hæmmet med nedsat mimik og gestik.', exclude: ['motor_normal', 'motor_agit'] },
             { id: 'motor_restless', label: 'Indre uro', category: 'Psykomotorik', text: 'Angiver indre uro, men fremstår motorisk rolig.', exclude: ['motor_normal'] },
-            { id: 'think_normal', label: 'Samlet/Relevant', category: 'Tænkning', text: 'Talen er samlet, relevant og velorganiseret uden latenstid eller talepres.', isDefault: true, exclude: ['think_press', 'think_incoh', 'think_latency'] },
-            { id: 'think_press', label: 'Talepres', category: 'Tænkning', text: 'Der er udtalt talepres og svært afledelighed.', exclude: ['think_normal'] },
-            { id: 'think_incoh', label: 'Inkohærent', category: 'Tænkning', text: 'Tanken er springende og præget af løse associationer (inkohærent).', exclude: ['think_normal'] },
-            { id: 'think_latency', label: 'Latenstid', category: 'Tænkning', text: 'Svarer relevant, men med betydelig latenstid.', exclude: ['think_normal'] },
-            { id: 'psychosis_none', label: 'Ingen psykose', category: 'Perception/Indhold', text: 'Ingen tegn på produktive psykotiske symptomer, herunder ingen hallucinationer eller vrangforestillinger.', isDefault: true, exclude: ['psychosis_hallu', 'psychosis_paranoia', 'psychosis_megalo'] },
-            { id: 'psychosis_hallu', label: 'Hallucinationer', category: 'Perception/Indhold', text: 'Der er evidens for hørehallucinationer (kommenterende/bydende).', exclude: ['psychosis_none'] },
-            { id: 'psychosis_paranoia', label: 'Paranoia', category: 'Perception/Indhold', text: 'Præget af paranoide vrangforestillinger og forfølgelsestanker.', exclude: ['psychosis_none'] },
-            { id: 'psychosis_megalo', label: 'Storhedsvanvid', category: 'Perception/Indhold', text: 'Giver udtryk for megalomane vrangforestillinger.', exclude: ['psychosis_none'] },
-            { id: 'cog_normal', label: 'Normal kognition', category: 'Kognition', text: 'Kognitivt upåfaldende i samtalen.', isDefault: true, exclude: ['cog_imp'] },
-            { id: 'cog_imp', label: 'Kognitivt svækket', category: 'Kognition', text: 'Virker kognitivt svækket med hukommelsesbesvær.', exclude: ['cog_normal'] },
+            
+            // --- TÆNKNING & TALE ---
+            { id: 'think_form_norm', label: 'Formel tænkning normal', category: 'Tænkning (Form & Tempo)', text: 'Talen er samlet og relevant.', isDefault: true, exclude: ['think_incoh', 'think_tang', 'think_circum'] },
+            { id: 'think_incoh', label: 'Inkohærent', category: 'Tænkning (Form & Tempo)', text: 'Tanken er springende, præget af løse associationer og "ordsalat" (inkohærent).', exclude: ['think_form_norm'] },
+            { id: 'think_tang', label: 'Tangential', category: 'Tænkning (Form & Tempo)', text: 'Svarer tangentielt og går uden om emnet.', exclude: ['think_form_norm'] },
+            
+            { id: 'think_speed_norm', label: 'Normalt tempo', category: 'Tænkning (Form & Tempo)', text: 'Normal talestrøm og tempo.', isDefault: true, exclude: ['think_press', 'think_latency', 'think_block'] },
+            { id: 'think_press', label: 'Talepres', category: 'Tænkning (Form & Tempo)', text: 'Der er udtalt talepres, svært at afbryde.', exclude: ['think_speed_norm', 'think_latency'] },
+            { id: 'think_latency', label: 'Latenstid', category: 'Tænkning (Form & Tempo)', text: 'Svarer relevant, men med betydelig latenstid.', exclude: ['think_speed_norm', 'think_press'] },
+            { id: 'think_block', label: 'Tankestop', category: 'Tænkning (Form & Tempo)', text: 'Oplever tankestop under samtalen.', exclude: ['think_speed_norm'] },
+
+            { id: 'think_content_norm', label: 'Normalt indhold', category: 'Tænkning (Indhold)', text: 'Indholdsmæssigt relevant uden bizariteter eller neologismer.', isDefault: true, exclude: ['think_ruminate', 'think_quarrel'] },
+            { id: 'think_ruminate', label: 'Ruminerende', category: 'Tænkning (Indhold)', text: 'Præget af depressive grublerier (ruminationer).', exclude: ['think_content_norm'] },
+            { id: 'think_quarrel', label: 'Kværulerende', category: 'Tænkning (Indhold)', text: 'Indholdet er præget af kværulans og misfornøjelse.', exclude: ['think_content_norm'] },
+
+            // --- PERCEPTION (PSYKOTISKE SYMPTOMER) ---
+            { id: 'psychosis_none', label: 'Ingen hallucinationer', category: 'Perception (Hallucinationer)', text: 'Ingen tegn på produktive psykotiske symptomer, herunder ingen hallucinationer.', isDefault: true, exclude: ['hallu_audit', 'hallu_visual', 'hallu_olfact'] },
+            { id: 'hallu_audit', label: 'Hørehallucinationer', category: 'Perception (Hallucinationer)', text: 'Der er evidens for hørehallucinationer (stemmer/lyde).', exclude: ['psychosis_none'] },
+            { id: 'hallu_visual', label: 'Synshallucinationer', category: 'Perception (Hallucinationer)', text: 'Angiver synshallucinationer.', exclude: ['psychosis_none'] },
+            { id: 'hallu_olfact', label: 'Lugt/Smag', category: 'Perception (Hallucinationer)', text: 'Angiver lugt- eller smagshallucinationer.', exclude: ['psychosis_none'] },
+
+            // --- VRANGFORESTILLINGER ---
+            { id: 'delusion_none', label: 'Ingen vrangforestillinger', category: 'Indhold (Vrangforestillinger)', text: 'Ingen vrangforestillinger.', isDefault: true, exclude: ['delusion_para', 'delusion_megalo', 'delusion_depress', 'delusion_bizarre', 'delusion_control'] },
+            { id: 'delusion_para', label: 'Paranoia', category: 'Indhold (Vrangforestillinger)', text: 'Præget af paranoide vrangforestillinger og forfølgelsestanker.', exclude: ['delusion_none'] },
+            { id: 'delusion_megalo', label: 'Storhed', category: 'Indhold (Vrangforestillinger)', text: 'Giver udtryk for megalomane vrangforestillinger (storhedsvanvid).', exclude: ['delusion_none'] },
+            { id: 'delusion_depress', label: 'Depressive/Skyld', category: 'Indhold (Vrangforestillinger)', text: 'Udviser depressive vrangforestillinger (ruin, skyld, fortabele).', exclude: ['delusion_none'] },
+            { id: 'delusion_control', label: 'Styring/Påvirkning', category: 'Indhold (Vrangforestillinger)', text: 'Oplever tankepåvirknings- eller styringsoplevelser.', exclude: ['delusion_none'] },
+            
+            // --- KOGNITION ---
+            { id: 'cog_normal', label: 'Normal kognition', category: 'Kognition', text: 'Kognitivt upåfaldende i samtalen.', isDefault: true, exclude: ['cog_imp', 'cog_memory', 'cog_conc'] },
+            { id: 'cog_imp', label: 'Kognitivt svækket', category: 'Kognition', text: 'Virker generelt kognitivt svækket.', exclude: ['cog_normal'] },
+            { id: 'cog_memory', label: 'Hukommelsesbesvær', category: 'Kognition', text: 'Udviser tegn på hukommelsesbesvær (korttid).', exclude: ['cog_normal'] },
+            { id: 'cog_conc', label: 'Koncentrationsbesvær', category: 'Kognition', text: 'Præget af koncentrationsbesvær, svært ved at fastholde fokus.', exclude: ['cog_normal'] },
+            
+            // --- INDSIGT ---
             { id: 'insight_good', label: 'God indsigt', category: 'Indsigt', text: 'Har relevant og god sygdomsindsigt.', isDefault: true, exclude: ['insight_none', 'insight_part'] },
-            { id: 'insight_part', label: 'Partiel indsigt', category: 'Indsigt', text: 'Har partiel sygdomsindsigt.', exclude: ['insight_good', 'insight_none'] },
+            { id: 'insight_part', label: 'Partiel indsigt', category: 'Indsigt', text: 'Har partiel sygdomsindsigt, erkender symptomer men ikke behandlingsbehov.', exclude: ['insight_good', 'insight_none'] },
             { id: 'insight_none', label: 'Ingen indsigt', category: 'Indsigt', text: 'Ingen sygdomsindsigt.', exclude: ['insight_good', 'insight_part'] },
-            { id: 'sui_none', label: 'Ingen suicidalitet', category: 'Risikovurdering', text: 'Ingen aktuelle tanker om død eller selvmord. Ingen selvmordsplaner eller -intentioner.', isDefault: true, exclude: ['sui_passive', 'sui_active'] },
-            { id: 'sui_passive', label: 'Passive tanker', category: 'Risikovurdering', text: 'Angiver passive dødstanker ("kunne være rart ikke at vågne"), men ingen aktuelle planer eller intentioner.', exclude: ['sui_none', 'sui_active'] },
-            { id: 'sui_active', label: 'Aktive planer', category: 'Risikovurdering', text: 'OBS: Tilkendegiver konkrete selvmordstanker og planer.', exclude: ['sui_none', 'sui_passive'] },
+            
+            // --- SUICIDALITET ---
+            { id: 'sui_none', label: 'Ingen suicidalitet', category: 'Risikovurdering (Suic)', text: 'Ingen aktuelle tanker om død eller selvmord. Ingen selvmordsplaner eller -intentioner.', isDefault: true, exclude: ['sui_passive', 'sui_active_thoughts', 'sui_plans', 'sui_intent'] },
+            { id: 'sui_passive', label: 'Passive dødstanker', category: 'Risikovurdering (Suic)', text: 'Angiver passive dødstanker/livsled ("kunne være rart ikke at vågne"), men ingen aktuelle planer eller intentioner.', exclude: ['sui_none', 'sui_active_thoughts'] },
+            { id: 'sui_active_thoughts', label: 'Aktive selvmordstanker', category: 'Risikovurdering (Suic)', text: 'Tilkendegiver aktive selvmordstanker.', exclude: ['sui_none', 'sui_passive'] },
+            { id: 'sui_plans', label: 'Konkrete planer', category: 'Risikovurdering (Suic)', text: 'Har udarbejdet konkrete planer for selvmord.', exclude: ['sui_none'] },
+            { id: 'sui_intent', label: 'Aktuel intention', category: 'Risikovurdering (Suic)', text: 'Tilkendegiver intention om at handle på tankerne.', exclude: ['sui_none'] },
+            { id: 'sui_prev', label: 'Tidl. forsøg', category: 'Risikovurdering (Suic)', text: 'Tidligere selvmordsforsøg i anamnesen.', summaryLabel: 'Tidl. suicidalforsøg' },
         ];
 
         const SOMATIC_OBJ_OPTIONS = [
-            { id: 'gen_upavirket', label: 'Upåvirket', category: 'Almentilstand', text: 'Almentilstand upåvirket. Normal ernæringstilstand.', isDefault: true, exclude: ['gen_medtaget', 'gen_adipos'] },
-            { id: 'gen_medtaget', label: 'Medtaget/Kakektisk', category: 'Almentilstand', text: 'Fremstår kronisk medtaget og kakektisk.', exclude: ['gen_upavirket'] },
-            { id: 'cp_normal', label: 'St.c. et p. normal', category: 'Stethoscopia', text: 'St.c.: Regelmæssig hjerteaktion uden mislyde. St.p.: Vesikulær respiration uden bilyde.', isDefault: true, exclude: ['cp_abnorm'] },
-            { id: 'cp_abnorm', label: 'St.c. uregelmæssig', category: 'Stethoscopia', text: 'St.c.: Uregelmæssig hjerteaktion (arytmi).', exclude: ['cp_normal'] },
-            { id: 'cn_normal', label: 'Kranienerver normal', category: 'Neurologisk', text: 'Kranienerver: Intet abnormt påvist, systematisk undersøgt (II-XII). Pupiller egale med normal lysrefleks. Ingen nystagmus.', isDefault: true, exclude: ['cn_abnorm'] },
-            { id: 'cn_abnorm', label: 'CN udfald', category: 'Neurologisk', text: 'Kranienerver: [UDFYLD SPECIFIKT FUND HER].', exclude: ['cn_normal'] },
-            { id: 'motor_sys_normal', label: 'Motorik/Kraft normal', category: 'Neurologisk', text: 'Motorisk system: Strakt arm- og bentest uden nedsynkning. Egal kraft over de større led (intet abnormt påvist).', isDefault: true, exclude: ['motor_sys_weak'] },
-            { id: 'reflex_normal', label: 'Reflekser normale', category: 'Neurologisk', text: 'Reflekser: Normale og sidelige dybe senereflekser. Babinski negativ bilat.', isDefault: true, exclude: ['reflex_hyper'] },
-            { id: 'coord_normal', label: 'Koordination normal', category: 'Neurologisk', text: 'Cerebellart: Normal koordination ved finger-næse forsøg og knæ-hæl forsøg.', isDefault: true, exclude: ['coord_ataxia'] },
-            { id: 'gait_normal', label: 'Gang/Stand normal', category: 'Neurologisk', text: 'Gang og stand: Sikker gang, vending og stand.', isDefault: true, exclude: ['gait_unsure'] },
-            { id: 'eps_none', label: 'Ingen EPS', category: 'Neurologisk (EPS)', text: 'Ekstrapyramidale system: Ingen bradykinesi, rigiditet eller ufrivillige bevægelser. Ingen hvile- eller intentionstremor.', isDefault: true, exclude: ['eps_rigid', 'eps_tremor', 'eps_dyskinesia'] },
+            // --- ALMENTILSTAND ---
+            { id: 'gen_upavirket', label: 'Upåvirket', category: 'Almentilstand', text: 'Almentilstand upåvirket. Normal ernæringstilstand.', isDefault: true, exclude: ['gen_medtaget', 'gen_adipos', 'gen_emaciated'] },
+            { id: 'gen_medtaget', label: 'Medtaget', category: 'Almentilstand', text: 'Fremstår kronisk medtaget.', exclude: ['gen_upavirket'] },
+            { id: 'gen_emaciated', label: 'Afmagret/Kakektisk', category: 'Almentilstand', text: 'Fremstår afmagret/kakektisk.', exclude: ['gen_upavirket', 'gen_adipos'] },
+            { id: 'gen_adipos', label: 'Adipositas', category: 'Almentilstand', text: 'Adipøs ernæringstilstand.', exclude: ['gen_upavirket', 'gen_emaciated'] },
+            
+            // --- CARDIO / PULM ---
+            { id: 'cp_normal', label: 'St.c. et p. normal', category: 'Stethoscopia', text: 'St.c.: Regelmæssig hjerteaktion uden mislyde. St.p.: Vesikulær respiration uden bilyde.', isDefault: true, exclude: ['cp_abnorm_c', 'cp_abnorm_p'] },
+            { id: 'cp_abnorm_c', label: 'St.c. uregelmæssig', category: 'Stethoscopia', text: 'St.c.: Uregelmæssig hjerteaktion (arytmi).', exclude: ['cp_normal'] },
+            { id: 'cp_abnorm_p', label: 'St.p. bilyde', category: 'Stethoscopia', text: 'St.p.: Der høres bilyde (rhonchi/crepitatio).', exclude: ['cp_normal'] },
+
+            // --- NEURO: KRANIENERVER ---
+            { id: 'cn_normal', label: 'Kranienerver II-XII normal', category: 'Neurologisk (Kranienerver)', text: 'Kranienerver: Intet abnormt påvist, systematisk undersøgt (II-XII). Pupiller egale med normal lysrefleks. Ingen nystagmus. Ingen facialisparese. Ingen tungedeviation.', isDefault: true, exclude: ['cn_pupil', 'cn_nystag', 'cn_facial', 'cn_other'] },
+            { id: 'cn_pupil', label: 'Pupilforhold afviger', category: 'Neurologisk (Kranienerver)', text: 'Pupiller: [Beskriv afvigelse, fx miosis/mydriasis].', exclude: ['cn_normal'] },
+            { id: 'cn_nystag', label: 'Nystagmus', category: 'Neurologisk (Kranienerver)', text: 'Der ses nystagmus.', exclude: ['cn_normal'] },
+            { id: 'cn_facial', label: 'Facialisparese', category: 'Neurologisk (Kranienerver)', text: 'Tegn på facialisparese (central/perifer).', exclude: ['cn_normal'] },
+
+            // --- NEURO: MOTORIK & REFLEKSER ---
+            { id: 'motor_sys_normal', label: 'Motorik/Kraft normal', category: 'Neurologisk (Motorik)', text: 'Motorisk system: Strakt arm- og bentest uden nedsynkning. Egal kraft (5/5) over de større led (OE+UE). Normal tonus.', isDefault: true, exclude: ['motor_weak_oe', 'motor_weak_ue', 'motor_tonus'] },
+            { id: 'motor_weak_oe', label: 'Kraftnedsættelse OE', category: 'Neurologisk (Motorik)', text: 'Nedsat kraft i overekstremiteter.', exclude: ['motor_sys_normal'] },
+            { id: 'motor_weak_ue', label: 'Kraftnedsættelse UE', category: 'Neurologisk (Motorik)', text: 'Nedsat kraft i underekstremiteter.', exclude: ['motor_sys_normal'] },
+            
+            { id: 'reflex_normal', label: 'Reflekser normale', category: 'Neurologisk (Reflekser)', text: 'Reflekser: Normale og sidelige dybe senereflekser (biceps, patellar, achilles). Babinski negativ bilat.', isDefault: true, exclude: ['reflex_hyper', 'reflex_babinski'] },
+            { id: 'reflex_hyper', label: 'Hyperrefleksi', category: 'Neurologisk (Reflekser)', text: 'Livlige/Hyperaktive reflekser.', exclude: ['reflex_normal'] },
+            { id: 'reflex_babinski', label: 'Babinski Positiv', category: 'Neurologisk (Reflekser)', text: 'Babinski positiv (extensivt tå-respons).', exclude: ['reflex_normal'] },
+
+            // --- NEURO: KOORDINATION & GANG ---
+            { id: 'coord_normal', label: 'Koordination normal', category: 'Neurologisk (Cerebellart)', text: 'Cerebellart: Normal koordination ved finger-næse forsøg og knæ-hæl forsøg. Ingen ataksi.', isDefault: true, exclude: ['coord_ataxia', 'coord_romberg'] },
+            { id: 'coord_ataxia', label: 'Ataksi/Usikker FNF', category: 'Neurologisk (Cerebellart)', text: 'Usikkerhed ved finger-næse forsøg (ataksi).', exclude: ['coord_normal'] },
+            { id: 'coord_romberg', label: 'Romberg Positiv', category: 'Neurologisk (Cerebellart)', text: 'Rombergs test positiv (faldtendens ved lukkede øjne).', exclude: ['coord_normal'] },
+            
+            { id: 'gait_normal', label: 'Gang/Stand normal', category: 'Neurologisk (Gang)', text: 'Gang og stand: Sikker gang, vending og stand. Linegang upåfaldende.', isDefault: true, exclude: ['gait_unsure', 'gait_broad'] },
+            { id: 'gait_unsure', label: 'Usikker gang', category: 'Neurologisk (Gang)', text: 'Gangen er usikker/bredsporet.', exclude: ['gait_normal'] },
+
+            // --- NEURO: EPS ---
+            { id: 'eps_none', label: 'Ingen EPS', category: 'Neurologisk (EPS)', text: 'Ekstrapyramidale system: Ingen bradykinesi, rigiditet eller ufrivillige bevægelser. Ingen hvile- eller intentionstremor.', isDefault: true, exclude: ['eps_rigid', 'eps_tremor', 'eps_dyskinesia', 'eps_aca'] },
             { id: 'eps_rigid', label: 'Rigiditet', category: 'Neurologisk (EPS)', text: 'Der findes rigiditet (tandhjulsrigiditet) ved passiv bevægelse.', exclude: ['eps_none'] },
-            { id: 'eps_tremor', label: 'Tremor', category: 'Neurologisk (EPS)', text: 'Der observeres tremor.', exclude: ['eps_none'] },
+            { id: 'eps_tremor', label: 'Tremor', category: 'Neurologisk (EPS)', text: 'Der observeres tremor (hvile/intention).', exclude: ['eps_none'] },
             { id: 'eps_dyskinesia', label: 'Dyskinesier', category: 'Neurologisk (EPS)', text: 'Der ses orofaciale dyskinesier.', exclude: ['eps_none'] },
-            { id: 'skin_normal', label: 'Hud: ingen mærker', category: 'Hud/Traumer', text: 'Ingen tegn på friske eller ældre læsioner, injektionsmærker eller scars.', isDefault: true, exclude: ['skin_cut'] },
-            { id: 'skin_cut', label: 'Snitsår/Ar', category: 'Hud/Traumer', text: 'Der ses overfladiske snitsår/ar antebrachium.', exclude: ['skin_normal'] },
+            { id: 'eps_aca', label: 'Akatisi', category: 'Neurologisk (EPS)', text: 'Motorisk urolig, tegn på akatisi.', exclude: ['eps_none'] },
+
+            // --- HUD/TRAUMER ---
+            { id: 'skin_normal', label: 'Hud: ingen mærker', category: 'Hud/Traumer', text: 'Ingen tegn på friske eller ældre læsioner, injektionsmærker eller scars.', isDefault: true, exclude: ['skin_cut_fresh', 'skin_cut_old', 'skin_inject'] },
+            { id: 'skin_cut_fresh', label: 'Friske snitsår', category: 'Hud/Traumer', text: 'Der ses friske overfladiske snitsår (lokalisation: ).', exclude: ['skin_normal'] },
+            { id: 'skin_cut_old', label: 'Gamle ar', category: 'Hud/Traumer', text: 'Gamle ar efter selvskade (scars).', exclude: ['skin_normal'] },
+            { id: 'skin_inject', label: 'Injektionsmærker', category: 'Hud/Traumer', text: 'Injektionsmærker i lysken/albuebøjning.', exclude: ['skin_normal'] },
         ];
 
         const SOMATIC_ACT_OPTIONS = [
-            { id: 'act_cns_ok', label: 'Ingen CNS klager', category: 'CNS', text: 'CNS: Benægter hovedpine, svimmelhed, besvimelse, synsforstyrrelser eller kramper.', isDefault: true, exclude: ['act_cns_headache', 'act_cns_dizzy'] },
+            // --- CNS ---
+            { id: 'act_cns_ok', label: 'Ingen CNS klager', category: 'CNS', text: 'CNS: Benægter hovedpine, svimmelhed, besvimelse, synsforstyrrelser eller kramper.', isDefault: true, exclude: ['act_cns_headache', 'act_cns_dizzy', 'act_cns_faint'] },
             { id: 'act_cns_headache', label: 'Hovedpine', category: 'CNS', text: 'CNS: Angiver hovedpine.', exclude: ['act_cns_ok'] },
-            { id: 'act_cp_ok', label: 'Ingen CP klager', category: 'Cardio/Pulm', text: 'CP: Ingen klager over brystsmerter, hjertebanken eller dyspnø.', isDefault: true, exclude: ['act_cp_pain'] },
-            { id: 'act_gi_ok', label: 'Ingen GI klager', category: 'Gastro-Intestinal', text: 'GI: Ingen kvalme, opkastninger eller ændring i afføringsmønster.', isDefault: true, exclude: ['act_gi_nausea', 'act_gi_obst'] },
+            { id: 'act_cns_dizzy', label: 'Svimmelhed', category: 'CNS', text: 'CNS: Angiver svimmelhed (karakter: ).', exclude: ['act_cns_ok'] },
+            
+            // --- CARDIO/PULM ---
+            { id: 'act_cp_ok', label: 'Ingen CP klager', category: 'Cardio/Pulm', text: 'CP: Ingen klager over brystsmerter, hjertebanken eller dyspnø.', isDefault: true, exclude: ['act_cp_pain', 'act_cp_palp', 'act_cp_dysp'] },
+            { id: 'act_cp_pain', label: 'Brystsmerter', category: 'Cardio/Pulm', text: 'CP: Angiver brystsmerter.', exclude: ['act_cp_ok'] },
+            { id: 'act_cp_palp', label: 'Hjertebanken', category: 'Cardio/Pulm', text: 'CP: Angiver hjertebanken.', exclude: ['act_cp_ok'] },
+            
+            // --- GI ---
+            { id: 'act_gi_ok', label: 'Ingen GI klager', category: 'Gastro-Intestinal', text: 'GI: Ingen kvalme, opkastninger eller ændring i afføringsmønster.', isDefault: true, exclude: ['act_gi_nausea', 'act_gi_obst', 'act_gi_dia', 'act_gi_pain'] },
             { id: 'act_gi_nausea', label: 'Kvalme', category: 'Gastro-Intestinal', text: 'GI: Angiver kvalme.', exclude: ['act_gi_ok'] },
             { id: 'act_gi_obst', label: 'Obstipation', category: 'Gastro-Intestinal', text: 'GI: Angiver tendens til forstoppelse.', exclude: ['act_gi_ok'] },
-            { id: 'act_uro_ok', label: 'Ingen URO klager', category: 'Urologisk', text: 'Uro: Ingen vandladningsgener (svie, hyppighed eller retention).', isDefault: true, exclude: ['act_uro_retention'] },
+            { id: 'act_gi_pain', label: 'Mavesmerter', category: 'Gastro-Intestinal', text: 'GI: Angiver mavesmerter.', exclude: ['act_gi_ok'] },
+            
+            // --- URO ---
+            { id: 'act_uro_ok', label: 'Ingen URO klager', category: 'Urologisk', text: 'Uro: Ingen vandladningsgener (svie, hyppighed eller retention).', isDefault: true, exclude: ['act_uro_retention', 'act_uro_pain'] },
             { id: 'act_uro_retention', label: 'Retention', category: 'Urologisk', text: 'Uro: Oplever besvær med at lade vandet (retention).', exclude: ['act_uro_ok'] },
-            { id: 'act_musc_ok', label: 'Ingen smerter', category: 'Bevægeapparat', text: 'Bevægeapparat: Ingen aktuelle smerter eller bevægeindskrænkning.', isDefault: true, exclude: ['act_musc_pain'] },
-            { id: 'act_musc_pain', label: 'Smerter', category: 'Bevægeapparat', text: 'Bevægeapparat: Angiver rygsmerter/ledsmerter.', exclude: ['act_musc_ok'] },
-            { id: 'act_sleep_ok', label: 'Søvn normal', category: 'Søvn/Appetit', text: 'Søvn: Sover uforstyrret igennem natten.', isDefault: true, exclude: ['act_sleep_bad'] },
-            { id: 'act_sleep_bad', label: 'Søvnforstyrrelse', category: 'Søvn/Appetit', text: 'Søvn: Angiver indsovningsbesvær og gentagne opvågninger.', exclude: ['act_sleep_ok'] },
-            { id: 'act_appetite_ok', label: 'Appetit normal', category: 'Søvn/Appetit', text: 'Appetit: Normal appetit og stabil vægt.', isDefault: true, exclude: ['act_appetite_low'] },
+            
+            // --- BEVÆGEAPPARAT ---
+            { id: 'act_musc_ok', label: 'Ingen smerter', category: 'Bevægeapparat', text: 'Bevægeapparat: Ingen aktuelle smerter eller bevægeindskrænkning.', isDefault: true, exclude: ['act_musc_back', 'act_musc_joint'] },
+            { id: 'act_musc_back', label: 'Rygsmerter', category: 'Bevægeapparat', text: 'Bevægeapparat: Angiver rygsmerter.', exclude: ['act_musc_ok'] },
+            { id: 'act_musc_joint', label: 'Ledsmerter', category: 'Bevægeapparat', text: 'Bevægeapparat: Angiver ledsmerter.', exclude: ['act_musc_ok'] },
+
+            // --- SØVN & APPETIT ---
+            { id: 'act_sleep_ok', label: 'Søvn normal', category: 'Søvn', text: 'Søvn: Sover uforstyrret igennem natten, føler sig udhvilet.', isDefault: true, exclude: ['act_sleep_insom', 'act_sleep_broken', 'act_sleep_early'] },
+            { id: 'act_sleep_insom', label: 'Indsovningsbesvær', category: 'Søvn', text: 'Søvn: Angiver indsovningsbesvær.', exclude: ['act_sleep_ok'] },
+            { id: 'act_sleep_broken', label: 'Afbrudt søvn', category: 'Søvn', text: 'Søvn: Mange opvågninger.', exclude: ['act_sleep_ok'] },
+            { id: 'act_sleep_early', label: 'Tidlig opvågning', category: 'Søvn', text: 'Søvn: Vågner tidligt uden at kunne falde i søvn igen (terminal insomni).', exclude: ['act_sleep_ok'] },
+
+            { id: 'act_appetite_ok', label: 'Appetit normal', category: 'Appetit/Vægt', text: 'Appetit: Normal appetit og stabil vægt.', isDefault: true, exclude: ['act_appetite_low', 'act_appetite_high', 'act_weight_loss'] },
+            { id: 'act_appetite_low', label: 'Nedsat appetit', category: 'Appetit/Vægt', text: 'Appetit: Nedsat lyst til mad.', exclude: ['act_appetite_ok'] },
+            { id: 'act_weight_loss', label: 'Vægttab', category: 'Appetit/Vægt', text: 'Vægt: Angiver utilsigtet vægttab.', exclude: ['act_appetite_ok'] },
         ];
 
         // --- APP KOMPONENT ---
@@ -131,6 +245,7 @@
             const [generatedText, setGeneratedText] = useState('');
             const [isFullscreen, setIsFullscreen] = useState(false);
             const [notification, setNotification] = useState(null);
+            const [showSummary, setShowSummary] = useState(false); // Toggle state for summary
             
             // Initial load
             useEffect(() => {
@@ -143,14 +258,18 @@
 
             useEffect(() => {
                 generateText();
-            }, [selectedIds, activeSection]);
+            }, [selectedIds, activeSection, showSummary]);
 
             const toggleOption = (option) => {
                 const newSelection = new Set(selectedIds);
                 if (newSelection.has(option.id)) {
+                    // Hvis man fravælger en option, og det ikke er en default, skal vi ikke nødvendigvis gøre noget
+                    // Men hvis man fravælger en default, skal man måske vælge en anden? 
+                    // Simpel logik: Toggle on/off.
                     newSelection.delete(option.id);
                 } else {
                     newSelection.add(option.id);
+                    // Fjern ekskluderede
                     option.exclude?.forEach(exId => newSelection.delete(exId));
                 }
                 setSelectedIds(newSelection);
@@ -162,7 +281,6 @@
                 if (activeSection === 'somatic_obj') options = SOMATIC_OBJ_OPTIONS;
                 if (activeSection === 'somatic_act') options = SOMATIC_ACT_OPTIONS;
 
-                const categories = Array.from(new Set(options.map(o => o.category)));
                 const lines = [];
 
                 let header = "";
@@ -172,6 +290,19 @@
 
                 lines.push(header);
 
+                // --- RESUME FUNKTION ---
+                if (showSummary) {
+                    const findings = options.filter(o => selectedIds.has(o.id) && !o.isDefault);
+                    if (findings.length > 0) {
+                        const findingLabels = findings.map(f => f.summaryLabel || f.label).join(', ');
+                        lines.push(`OBS/FUND: ${findingLabels}`);
+                        lines.push("---"); // Separator
+                    }
+                }
+
+                // Group by category
+                const categories = Array.from(new Set(options.map(o => o.category)));
+                
                 categories.forEach(cat => {
                     const catOptions = options.filter(o => o.category === cat && selectedIds.has(o.id));
                     if (catOptions.length > 0) {
@@ -228,7 +359,7 @@
                 const categories = Array.from(new Set(dataSet.map(o => o.category)));
                 
                 return (
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-20">
                         {categories.map(cat => (
                             <div key={cat} className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-full">
                                 <div className="bg-slate-50 px-4 py-3 border-b border-slate-200 flex items-center justify-between">
@@ -295,6 +426,19 @@
                             </div>
                         </div>
                         <div className="flex items-center gap-4">
+                            
+                            {/* Toggle for Summary Mode */}
+                            <button 
+                                onClick={() => setShowSummary(!showSummary)}
+                                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border ${showSummary ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'}`}
+                                title="Vis opsummering af fund øverst i notatet"
+                            >
+                                {showSummary ? <ToggleRight className="w-5 h-5 text-emerald-400" /> : <ToggleLeft className="w-5 h-5 text-slate-400" />}
+                                <span>Vis fund øverst</span>
+                            </button>
+
+                            <div className="h-6 w-px bg-slate-200 mx-1"></div>
+
                             <button onClick={toggleFullscreen} className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors" title={isFullscreen ? "Afslut fuldskærm" : "Fuldskærm"}>
                                 {isFullscreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
                             </button>
@@ -342,7 +486,6 @@
                                 {activeSection === 'psych' && renderCardGrid(PSYCH_OPTIONS)}
                                 {activeSection === 'somatic_obj' && renderCardGrid(SOMATIC_OBJ_OPTIONS)}
                                 {activeSection === 'somatic_act' && renderCardGrid(SOMATIC_ACT_OPTIONS)}
-                                <div className="h-12"></div>
                             </div>
                         </main>
 
@@ -352,6 +495,7 @@
                                     <FileText className="h-4 w-4 text-slate-500" />
                                     <h3 className="font-semibold text-slate-700 text-sm uppercase tracking-wide">Resultat</h3>
                                 </div>
+                                {showSummary && <span className="text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-medium">Resume aktivt</span>}
                             </div>
                             <div className="flex-1 relative">
                                 <textarea 
