@@ -159,13 +159,13 @@
             { id: 'att_threat', label: 'Truende adfærd', category: 'Holdning & Samarbejde', text: 'Fremstår verbalt truende og grænseoverskridende.', exclude: ['att_coop'], smartMerge: { prefix: 'Fremstår ', item: 'verbalt truende og grænseoverskridende', suffix: '.' } },
             { id: 'att_aggress', label: 'Aggressiv', category: 'Holdning & Samarbejde', text: 'Fremstår fysisk aggressiv og udadreagerende.', exclude: ['att_coop'], smartMerge: { prefix: 'Fremstår ', item: 'fysisk aggressiv og udadreagerende', suffix: '.' } },
 
-            // --- ANGST & URO ---
-            { id: 'anx_none', label: 'Ingen angsttegn', category: 'Angst & Uro (Objektivt)', text: 'Ingen objektive tegn på angst eller uro.', isDefault: true, exclude: ['anx_motor', 'anx_sweat', 'anx_tremor', 'anx_hands', 'anx_hypervent'] },
-            { id: 'anx_motor', label: 'Motorisk urolig', category: 'Angst & Uro (Objektivt)', text: 'Fremstår motorisk urolig.', exclude: ['anx_none'], smartMerge: { prefix: 'Fremstår ', item: 'motorisk urolig', suffix: '.' } },
-            { id: 'anx_sweat', label: 'Svedende', category: 'Angst & Uro (Objektivt)', text: 'Fremstår svedende.', exclude: ['anx_none'], smartMerge: { prefix: 'Fremstår ', item: 'svedende', suffix: '.' } },
-            { id: 'anx_tremor', label: 'Rystende/Tremor', category: 'Angst & Uro (Objektivt)', text: 'Fremstår rystende.', exclude: ['anx_none'], smartMerge: { prefix: 'Fremstår ', item: 'rystende', suffix: '.' } },
-            { id: 'anx_hands', label: 'Piller v. hænder/tøj', category: 'Angst & Uro (Objektivt)', text: 'Sidder og piller ved hænder eller tøj.', exclude: ['anx_none'], smartMerge: { prefix: 'Sidder og ', item: 'piller ved hænder eller tøj', suffix: '.' } },
-            { id: 'anx_hypervent', label: 'Hyperventilerer', category: 'Angst & Uro (Objektivt)', text: 'Hyperventilerer.', exclude: ['anx_none'], smartMerge: { prefix: 'Observeres ', item: 'hyperventilerende', suffix: '.' } },
+            // --- ANGST (Objektivt) - RETTET ---
+            { id: 'anx_none', label: 'Ingen angsttegn', category: 'Angst (Objektivt)', text: 'Ingen objektive tegn på angst.', isDefault: true, exclude: ['anx_sweat', 'anx_tremor', 'anx_hands', 'anx_hypervent'] },
+            // Motorisk urolig fjernet herfra - dækkes af Psykomotorik (Agiteret)
+            { id: 'anx_sweat', label: 'Svedende', category: 'Angst (Objektivt)', text: 'Fremstår svedende.', exclude: ['anx_none'], smartMerge: { prefix: 'Fremstår ', item: 'svedende', suffix: '.' } },
+            { id: 'anx_tremor', label: 'Rystende/Tremor', category: 'Angst (Objektivt)', text: 'Fremstår rystende.', exclude: ['anx_none'], smartMerge: { prefix: 'Fremstår ', item: 'rystende', suffix: '.' } },
+            { id: 'anx_hands', label: 'Piller v. hænder/tøj', category: 'Angst (Objektivt)', text: 'Sidder og piller ved hænder eller tøj.', exclude: ['anx_none'], smartMerge: { prefix: 'Sidder og ', item: 'piller ved hænder eller tøj', suffix: '.' } },
+            { id: 'anx_hypervent', label: 'Hyperventilerer', category: 'Angst (Objektivt)', text: 'Hyperventilerer.', exclude: ['anx_none'], smartMerge: { prefix: 'Observeres ', item: 'hyperventilerende', suffix: '.' } },
 
             // --- KONTAKTFORM (UDVIDET) ---
             { id: 'contact_norm_form', label: 'Formel kontakt intakt', category: 'Kontakt', text: 'Formel kontakt er intakt.', isDefault: true, exclude: ['contact_form_bad', 'contact_distanc', 'contact_autistic', 'contact_narc', 'contact_appeal'] },
@@ -205,7 +205,7 @@
             { id: 'motor_agit', label: 'Agiteret (Øget)', category: 'Psykomotorik', text: 'Psykomotorisk agiteret.', exclude: ['motor_normal', 'motor_inhib', 'motor_catatonic'] },
             { id: 'motor_inhib', label: 'Hæmmet (Nedsat)', category: 'Psykomotorik', text: 'Psykomotorisk hæmmet.', exclude: ['motor_normal', 'motor_agit', 'motor_catatonic'] },
             { id: 'motor_catatonic', label: 'Katatoni', category: 'Psykomotorik', text: 'Præget af katatoni (stivnen).', exclude: ['motor_normal', 'motor_agit', 'motor_inhib'] },
-            { id: 'motor_restless', label: 'Indre uro', category: 'Psykomotorik', text: 'Angiver indre uro, men fremstår motorisk rolig.', exclude: ['motor_normal'] },
+            { id: 'motor_restless', label: 'Indre uro (fremstår rolig)', category: 'Psykomotorik', text: 'Angiver indre uro, men fremstår motorisk rolig.', exclude: ['motor_normal'] },
             
             // --- SPROG & TÆNKNING (FORM) ---
             { id: 'think_form_norm', label: 'Normal form/sprog', category: 'Sprog & Tænkning (Form)', text: 'Sproget er nuanceret. Talen er samlet og relevant.', isDefault: true, exclude: ['think_incoh', 'think_tang', 'think_circum', 'think_neologism', 'think_persev', 'think_flight'] },
@@ -345,13 +345,13 @@
             { id: 'act_gi_blood', label: 'Blod i afføring', category: 'Gastro-Intestinal', text: 'GI: Angiver blod i afføringen.', exclude: ['act_gi_ok'], smartMerge: { prefix: 'GI: Angiver ', item: 'blod i afføringen', suffix: '.' } },
             { id: 'act_gi_def_pain', label: 'Smerter v. afføring', category: 'Gastro-Intestinal', text: 'GI: Angiver smerter ved afføring.', exclude: ['act_gi_ok'], smartMerge: { prefix: 'GI: Angiver ', item: 'smerter ved afføring', suffix: '.' } },
             
-            // --- UPDATED URO SECTION ---
-            { id: 'act_uro_ok', label: 'Ingen URO klager', category: 'Urologisk', text: 'Uro: Ingen vandladningsgener (svie, hyppighed eller retention).', isDefault: true, exclude: ['act_uro_retention', 'act_uro_pain', 'act_uro_dysuria', 'act_uro_blood', 'act_uro_pollakisuria'] },
-            // Smart Merge Uro
-            { id: 'act_uro_retention', label: 'Retention', category: 'Urologisk', text: 'Uro: Oplever besvær med at lade vandet (retention).', exclude: ['act_uro_ok'], smartMerge: { prefix: 'Uro: Angiver ', item: 'retention', suffix: '.' } },
-            { id: 'act_uro_dysuria', label: 'Svie/Smerter', category: 'Urologisk', text: 'Uro: Angiver svie/smerter ved vandladning.', exclude: ['act_uro_ok'], smartMerge: { prefix: 'Uro: Angiver ', item: 'svie/smerter ved vandladning', suffix: '.' } },
-            { id: 'act_uro_blood', label: 'Blod i urin', category: 'Urologisk', text: 'Uro: Angiver synligt blod i urinen.', exclude: ['act_uro_ok'], smartMerge: { prefix: 'Uro: Angiver ', item: 'synligt blod i urinen', suffix: '.' } },
-            { id: 'act_uro_pollakisuria', label: 'Hyppig vandladning', category: 'Urologisk', text: 'Uro: Angiver hyppig vandladning.', exclude: ['act_uro_ok'], smartMerge: { prefix: 'Uro: Angiver ', item: 'hyppig vandladning', suffix: '.' } },
+            // --- UPDATED URO SECTION - RETTET PREFIX ---
+            { id: 'act_uro_ok', label: 'Ingen URO klager', category: 'Urologisk', text: 'Urologisk: Ingen vandladningsgener (svie, hyppighed eller retention).', isDefault: true, exclude: ['act_uro_retention', 'act_uro_pain', 'act_uro_dysuria', 'act_uro_blood', 'act_uro_pollakisuria'] },
+            // Smart Merge Uro - Changed 'Uro:' to 'Urologisk:' to avoid confusion
+            { id: 'act_uro_retention', label: 'Retention', category: 'Urologisk', text: 'Urologisk: Oplever besvær med at lade vandet (retention).', exclude: ['act_uro_ok'], smartMerge: { prefix: 'Urologisk: Angiver ', item: 'retention', suffix: '.' } },
+            { id: 'act_uro_dysuria', label: 'Svie/Smerter', category: 'Urologisk', text: 'Urologisk: Angiver svie/smerter ved vandladning.', exclude: ['act_uro_ok'], smartMerge: { prefix: 'Urologisk: Angiver ', item: 'svie/smerter ved vandladning', suffix: '.' } },
+            { id: 'act_uro_blood', label: 'Blod i urin', category: 'Urologisk', text: 'Urologisk: Angiver synligt blod i urinen.', exclude: ['act_uro_ok'], smartMerge: { prefix: 'Urologisk: Angiver ', item: 'synligt blod i urinen', suffix: '.' } },
+            { id: 'act_uro_pollakisuria', label: 'Hyppig vandladning', category: 'Urologisk', text: 'Urologisk: Angiver hyppig vandladning.', exclude: ['act_uro_ok'], smartMerge: { prefix: 'Urologisk: Angiver ', item: 'hyppig vandladning', suffix: '.' } },
             
             { id: 'act_musc_ok', label: 'Ingen smerter', category: 'Bevægeapparat', text: 'Bevægeapparat: Ingen aktuelle smerter eller bevægeindskrænkning.', isDefault: true, exclude: ['act_musc_back', 'act_musc_joint'] },
             
