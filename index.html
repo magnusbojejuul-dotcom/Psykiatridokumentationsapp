@@ -135,90 +135,96 @@
         const PSYCH_OPTIONS = [
             // --- BEVIDSTHED ---
             { id: 'orient_normal', label: 'Fuldt orienteret', category: 'Bevidsthed', text: 'Vågen, klar og orienteret i tid, sted og egne data.', isDefault: true, exclude: ['orient_confused', 'orient_delir', 'orient_sløv', 'orient_sopor', 'orient_cloud'] },
-            { id: 'orient_sløv', label: 'Somnolent/Sløv', category: 'Bevidsthed', text: 'Vågen, men fremstår somnolent og sløv i kontakten.', exclude: ['orient_normal', 'orient_confused', 'orient_delir', 'orient_sopor', 'orient_cloud'] },
+            { id: 'orient_sløv', label: 'Somnolent/Sløv', category: 'Bevidsthed', text: 'Somnolent og sløv i kontakten.', exclude: ['orient_normal', 'orient_confused', 'orient_delir', 'orient_sopor', 'orient_cloud'] },
             { id: 'orient_sopor', label: 'Sopor', category: 'Bevidsthed', text: 'Soporøs (dybt bevidsthedssvækket), men vækbar.', exclude: ['orient_normal', 'orient_confused', 'orient_delir', 'orient_sløv', 'orient_cloud'] },
-            { id: 'orient_confused', label: 'Konfus', category: 'Bevidsthed', text: 'Vågen, men fremstår konfus og desorienteret.', exclude: ['orient_normal', 'orient_delir', 'orient_sløv', 'orient_sopor', 'orient_cloud'] },
+            { id: 'orient_confused', label: 'Konfus', category: 'Bevidsthed', text: 'Konfus og desorienteret.', exclude: ['orient_normal', 'orient_delir', 'orient_sløv', 'orient_sopor', 'orient_cloud'] },
             { id: 'orient_cloud', label: 'Tågetilstand', category: 'Bevidsthed', text: 'Befinder sig i en tågetilstand med nedsat opfattelse af omverdenen.', exclude: ['orient_normal', 'orient_confused', 'orient_delir', 'orient_sløv', 'orient_sopor'] },
-            { id: 'orient_delir', label: 'Delirøs', category: 'Bevidsthed', text: 'Fremstår med svingende bevidsthedsniveau, opmærksomhedsforstyrrelse og usammenhængende tale, obs delir.', exclude: ['orient_normal', 'orient_confused', 'orient_sløv', 'orient_sopor', 'orient_cloud'] },
+            { id: 'orient_delir', label: 'Delirøs', category: 'Bevidsthed', text: 'Svingende bevidsthedsniveau, opmærksomhedsforstyrrelse og usammenhængende tale, obs delir.', exclude: ['orient_normal', 'orient_confused', 'orient_sløv', 'orient_sopor', 'orient_cloud'] },
             
             // --- ORIENTERING (NY SPECIFIKATION) ---
             { id: 'orient_auto_loss', label: 'Autopsykisk desorient.', category: 'Bevidsthed (Orientering)', text: 'Autopsykisk desorienteret (navn, data, civilstand).', exclude: ['orient_normal'] },
             { id: 'orient_allo_loss', label: 'Allopsykisk desorient.', category: 'Bevidsthed (Orientering)', text: 'Allopsykisk desorienteret (tid, sted, situation).', exclude: ['orient_normal'] },
 
-            // --- FREMTONING ---
+            // --- FREMTONING (Smart Merge Enabled) ---
             { id: 'appear_normal', label: 'Normal fremtoning', category: 'Fremtoning & Adfærd', text: 'Normal fremtoning, herunder soigneret og alderssvarende påklædning.', isDefault: true, exclude: ['appear_unkept', 'appear_bizarre_dress'] },
-            { id: 'appear_unkept', label: 'Usoigneret', category: 'Fremtoning & Adfærd', text: 'Fremstår usoigneret.', exclude: ['appear_normal'], smartMerge: { prefix: 'Fremstår ', item: 'usoigneret', suffix: '.' } },
-            { id: 'appear_bizarre_dress', label: 'Bizart påklædt', category: 'Fremtoning & Adfærd', text: 'Fremstår bizart eller uhensigtsmæssigt påklædt ift. årstiden.', exclude: ['appear_normal'], smartMerge: { prefix: 'Fremstår ', item: 'bizart påklædt', suffix: '.' } },
+            { id: 'appear_unkept', label: 'Usoigneret', category: 'Fremtoning & Adfærd', text: 'Usoigneret.', exclude: ['appear_normal'], smartMerge: { prefix: 'Fremstår ', item: 'usoigneret', suffix: '.' } },
+            { id: 'appear_bizarre_dress', label: 'Bizart påklædt', category: 'Fremtoning & Adfærd', text: 'Bizart eller uhensigtsmæssigt påklædt ift. årstiden.', exclude: ['appear_normal'], smartMerge: { prefix: 'Fremstår ', item: 'bizart eller uhensigtsmæssigt påklædt', suffix: '.' } },
             
-            // --- HOLDNING (NY KATEGORI) ---
+            // --- HOLDNING (Smart Merge Enabled: "Fremstår...") ---
             { id: 'att_coop', label: 'Samarbejdsvillig', category: 'Holdning & Samarbejde', text: 'Venlig og samarbejdsvillig i kontakten.', isDefault: true, exclude: ['att_guard', 'att_hostile', 'att_suspicious', 'att_ambivalent', 'att_aggress', 'att_threat'] },
-            { id: 'att_guard', label: 'Afvisende/Guarded', category: 'Holdning & Samarbejde', text: 'Fremstår afvisende og guarded.', exclude: ['att_coop'], smartMerge: { prefix: 'Fremstår ', item: 'afvisende og guarded', suffix: '.' } },
-            { id: 'att_suspicious', label: 'Mistænksom', category: 'Holdning & Samarbejde', text: 'Fremstår mistænksom.', exclude: ['att_coop'], smartMerge: { prefix: 'Fremstår ', item: 'mistænksom', suffix: '.' } },
-            { id: 'att_hostile', label: 'Fjendtlig', category: 'Holdning & Samarbejde', text: 'Fremstår fjendtlig.', exclude: ['att_coop'], smartMerge: { prefix: 'Fremstår ', item: 'fjendtlig', suffix: '.' } },
-            { id: 'att_ambivalent', label: 'Ambivalent', category: 'Holdning & Samarbejde', text: 'Fremstår ambivalent i kontakten.', exclude: ['att_coop'], smartMerge: { prefix: 'Fremstår ', item: 'ambivalent', suffix: '.' } },
-            { id: 'att_threat', label: 'Truende adfærd', category: 'Holdning & Samarbejde', text: 'Fremstår verbalt truende og grænseoverskridende.', exclude: ['att_coop'], smartMerge: { prefix: 'Fremstår ', item: 'verbalt truende og grænseoverskridende', suffix: '.' } },
-            { id: 'att_aggress', label: 'Aggressiv', category: 'Holdning & Samarbejde', text: 'Fremstår fysisk aggressiv og udadreagerende.', exclude: ['att_coop'], smartMerge: { prefix: 'Fremstår ', item: 'fysisk aggressiv og udadreagerende', suffix: '.' } },
+            { id: 'att_guard', label: 'Afvisende/Guarded', category: 'Holdning & Samarbejde', text: 'Guarded og afvisende.', exclude: ['att_coop'], smartMerge: { prefix: 'Fremstår ', item: 'guarded og afvisende', suffix: '.' } },
+            { id: 'att_suspicious', label: 'Mistænksom', category: 'Holdning & Samarbejde', text: 'Mistænksom.', exclude: ['att_coop'], smartMerge: { prefix: 'Fremstår ', item: 'mistænksom', suffix: '.' } },
+            { id: 'att_hostile', label: 'Fjendtlig', category: 'Holdning & Samarbejde', text: 'Fjendtlig.', exclude: ['att_coop'], smartMerge: { prefix: 'Fremstår ', item: 'fjendtlig', suffix: '.' } },
+            { id: 'att_ambivalent', label: 'Ambivalent', category: 'Holdning & Samarbejde', text: 'Ambivalent.', exclude: ['att_coop'], smartMerge: { prefix: 'Fremstår ', item: 'ambivalent', suffix: '.' } },
+            { id: 'att_threat', label: 'Truende adfærd', category: 'Holdning & Samarbejde', text: 'Verbalt truende.', exclude: ['att_coop'], smartMerge: { prefix: 'Fremstår ', item: 'verbalt truende og grænseoverskridende', suffix: '.' } },
+            { id: 'att_aggress', label: 'Aggressiv', category: 'Holdning & Samarbejde', text: 'Aggressiv.', exclude: ['att_coop'], smartMerge: { prefix: 'Fremstår ', item: 'fysisk aggressiv og udadreagerende', suffix: '.' } },
 
-            // --- ANGST (Objektivt) - RETTET ---
+            // --- ANGST (Objektivt) (Smart Merge Enabled: "Fremstår...") ---
             { id: 'anx_none', label: 'Ingen angsttegn', category: 'Angst (Objektivt)', text: 'Ingen objektive tegn på angst.', isDefault: true, exclude: ['anx_sweat', 'anx_tremor', 'anx_hands', 'anx_hypervent'] },
-            // Motorisk urolig fjernet herfra - dækkes af Psykomotorik (Agiteret)
-            { id: 'anx_sweat', label: 'Svedende', category: 'Angst (Objektivt)', text: 'Fremstår svedende.', exclude: ['anx_none'], smartMerge: { prefix: 'Fremstår ', item: 'svedende', suffix: '.' } },
-            { id: 'anx_tremor', label: 'Rystende/Tremor', category: 'Angst (Objektivt)', text: 'Fremstår rystende.', exclude: ['anx_none'], smartMerge: { prefix: 'Fremstår ', item: 'rystende', suffix: '.' } },
-            { id: 'anx_hands', label: 'Piller v. hænder/tøj', category: 'Angst (Objektivt)', text: 'Sidder og piller ved hænder eller tøj.', exclude: ['anx_none'], smartMerge: { prefix: 'Sidder og ', item: 'piller ved hænder eller tøj', suffix: '.' } },
-            { id: 'anx_hypervent', label: 'Hyperventilerer', category: 'Angst (Objektivt)', text: 'Hyperventilerer.', exclude: ['anx_none'], smartMerge: { prefix: 'Observeres ', item: 'hyperventilerende', suffix: '.' } },
+            { id: 'anx_sweat', label: 'Svedende', category: 'Angst (Objektivt)', text: 'Svedende.', exclude: ['anx_none'], smartMerge: { prefix: 'Fremstår ', item: 'synligt svedende', suffix: '.' } },
+            { id: 'anx_tremor', label: 'Rystende/Tremor', category: 'Angst (Objektivt)', text: 'Rystende.', exclude: ['anx_none'], smartMerge: { prefix: 'Fremstår ', item: 'rystende/tremorøs', suffix: '.' } },
+            { id: 'anx_hands', label: 'Piller v. hænder/tøj', category: 'Angst (Objektivt)', text: 'Piller v. hænder/tøj.', exclude: ['anx_none'], smartMerge: { prefix: 'Fremstår ', item: 'pillende ved hænder eller tøj', suffix: '.' } },
+            { id: 'anx_hypervent', label: 'Hyperventilerer', category: 'Angst (Objektivt)', text: 'Hyperventilerende.', exclude: ['anx_none'], smartMerge: { prefix: 'Fremstår ', item: 'hyperventilerende', suffix: '.' } },
 
-            // --- KONTAKTFORM (UDVIDET) ---
-            { id: 'contact_norm_form', label: 'Formel kontakt intakt', category: 'Kontakt', text: 'Formel kontakt er intakt.', isDefault: true, exclude: ['contact_form_bad', 'contact_distanc', 'contact_autistic', 'contact_narc', 'contact_appeal'] },
-            { id: 'contact_distanc', label: 'Distancerende', category: 'Kontakt', text: 'Formel kontakt er præget af distancering.', exclude: ['contact_norm_form'], smartMerge: { prefix: 'Formel kontakt er ', item: 'præget af distancering', suffix: '.' } },
-            { id: 'contact_form_bad', label: 'Afvigende formel', category: 'Kontakt', text: 'Formel kontakt er afvigende.', exclude: ['contact_norm_form'], smartMerge: { prefix: 'Formel kontakt er ', item: 'afvigende', suffix: '.' } },
-            { id: 'contact_appeal', label: 'Appellerende', category: 'Kontakt', text: 'Kontaktformen er præget af appel.', exclude: ['contact_norm_form'], smartMerge: { prefix: 'Kontaktformen er ', item: 'præget af appel', suffix: '.' } },
-            { id: 'contact_autistic', label: 'Autistisk præg', category: 'Kontakt', text: 'Kontakten er med autistisk præg (afskærmet).', exclude: ['contact_norm_form'], smartMerge: { prefix: 'Kontakten er ', item: 'præget af autistiske træk (afskærmet)', suffix: '.' } },
-            { id: 'contact_narc', label: 'Narcissistisk præg', category: 'Kontakt', text: 'Kontakten er med narcissistisk præg.', exclude: ['contact_norm_form'], smartMerge: { prefix: 'Kontakten er ', item: 'præget af narcissistiske træk', suffix: '.' } },
+            // --- FORMEL KONTAKT (Prefix: "Formel kontakt er ") ---
+            { id: 'c_form_norm', label: 'Intakt', category: 'Kontakt (Formel)', text: 'Formel kontakt er intakt.', isDefault: true, exclude: ['c_form_dist', 'c_form_div', 'c_form_regr'] },
+            { id: 'c_form_dist', label: 'Distancerende', category: 'Kontakt (Formel)', text: 'Distancerende.', exclude: ['c_form_norm'], smartMerge: { prefix: 'Formel kontakt er ', item: 'distancerende', suffix: '.' } },
+            { id: 'c_form_div', label: 'Afvigende', category: 'Kontakt (Formel)', text: 'Afvigende.', exclude: ['c_form_norm'], smartMerge: { prefix: 'Formel kontakt er ', item: 'afvigende', suffix: '.' } },
+            { id: 'c_form_regr', label: 'Regressiv', category: 'Kontakt (Formel)', text: 'Regressiv.', exclude: ['c_form_norm'], smartMerge: { prefix: 'Formel kontakt er ', item: 'regressiv', suffix: '.' } },
             
-            { id: 'contact_eye_norm', label: 'Øjenkontakt naturlig', category: 'Kontakt', text: 'Øjenkontakten er naturlig.', isDefault: true, exclude: ['contact_eye_avoid', 'contact_eye_stare'] },
-            { id: 'contact_eye_avoid', label: 'Undvigende øjne', category: 'Kontakt', text: 'Undvigende øjenkontakt.', exclude: ['contact_eye_norm'], smartMerge: { prefix: 'Øjenkontakten er ', item: 'undvigende', suffix: '.' } },
-            { id: 'contact_eye_stare', label: 'Stirrende', category: 'Kontakt', text: 'Stirrende øjenkontakt.', exclude: ['contact_eye_norm'], smartMerge: { prefix: 'Øjenkontakten er ', item: 'stirrende', suffix: '.' } },
+            // --- EMOTIONEL KONTAKT (Prefix: "Emotionel kontakt er ") ---
+            { id: 'c_emo_good', label: 'God/Naturlig', category: 'Kontakt (Emotionel)', text: 'God og naturlig emotionel kontakt.', isDefault: true, exclude: ['c_emo_flat', 'c_emo_reject', 'c_emo_appeal', 'c_emo_susp', 'c_emo_aut'] },
+            { id: 'c_emo_flat', label: 'Nedsat/Affladet', category: 'Kontakt (Emotionel)', text: 'Noget affladet.', exclude: ['c_emo_good'], smartMerge: { prefix: 'Emotionel kontakt er ', item: 'noget affladet', suffix: '.' } },
+            { id: 'c_emo_reject', label: 'Afvisende', category: 'Kontakt (Emotionel)', text: 'Afvisende.', exclude: ['c_emo_good'], smartMerge: { prefix: 'Emotionel kontakt er ', item: 'afvisende', suffix: '.' } },
+            { id: 'c_emo_appeal', label: 'Appellerende', category: 'Kontakt (Emotionel)', text: 'Appellerende.', exclude: ['c_emo_good'], smartMerge: { prefix: 'Emotionel kontakt er ', item: 'appellerende', suffix: '.' } },
+            { id: 'c_emo_susp', label: 'Mistænksom', category: 'Kontakt (Emotionel)', text: 'Præget af mistænksomhed.', exclude: ['c_emo_good'], smartMerge: { prefix: 'Emotionel kontakt er ', item: 'præget af mistænksomhed', suffix: '.' } },
+            { id: 'c_emo_aut', label: 'Autistisk præg', category: 'Kontakt (Emotionel)', text: 'Præget af autistisk afskærmning.', exclude: ['c_emo_good'], smartMerge: { prefix: 'Emotionel kontakt er ', item: 'præget af autistisk afskærmning', suffix: '.' } },
+            
+            // --- ØJENKONTAKT ---
+            { id: 'contact_eye_norm', label: 'Øjenkontakt naturlig', category: 'Kontakt (Øjne)', text: 'Øjenkontakten er naturlig.', isDefault: true, exclude: ['contact_eye_avoid', 'contact_eye_stare'] },
+            { id: 'contact_eye_avoid', label: 'Undvigende øjne', category: 'Kontakt (Øjne)', text: 'Undvigende øjenkontakt.', exclude: ['contact_eye_norm'], smartMerge: { prefix: 'Øjenkontakten er ', item: 'undvigende', suffix: '.' } },
+            { id: 'contact_eye_stare', label: 'Stirrende', category: 'Kontakt (Øjne)', text: 'Stirrende øjenkontakt.', exclude: ['contact_eye_norm'], smartMerge: { prefix: 'Øjenkontakten er ', item: 'stirrende', suffix: '.' } },
 
-            // --- AFFEKT / FØLELSER (NY KATEGORI) ---
+            // --- AFFEKT / FØLELSER (Prefix: "Affekten er ") ---
             { id: 'aff_adekvat', label: 'Adækvat affekt', category: 'Affekt (Følelser)', text: 'Affekten er adækvat og svinger relevant.', isDefault: true, exclude: ['aff_flat', 'aff_labil', 'aff_incong', 'aff_eksplo', 'aff_inkont', 'aff_eufor', 'aff_fatuid'] },
-            { id: 'aff_flat', label: 'Affladet/Følelsesflad', category: 'Affekt (Følelser)', text: 'Affekten fremstår affladet.', exclude: ['aff_adekvat'], smartMerge: { prefix: 'Affekten fremstår ', item: 'affladet', suffix: '.' } },
-            { id: 'aff_labil', label: 'Affektlabil', category: 'Affekt (Følelser)', text: 'Fremstår affektlabil.', exclude: ['aff_adekvat'], smartMerge: { prefix: 'Fremstår ', item: 'affektlabil', suffix: '.' } },
-            { id: 'aff_incong', label: 'Inkongruent', category: 'Affekt (Følelser)', text: 'Affekten er inkongruent (stemmer ikke overens med tankeindhold).', exclude: ['aff_adekvat'], smartMerge: { prefix: 'Affekten er ', item: 'inkongruent', suffix: '.' } },
-            { id: 'aff_eksplo', label: 'Affekteksplosiv', category: 'Affekt (Følelser)', text: 'Affekten er eksplosiv.', exclude: ['aff_adekvat'], smartMerge: { prefix: 'Affekten er ', item: 'eksplosiv', suffix: '.' } },
-            { id: 'aff_inkont', label: 'Affektinkontinens', category: 'Affekt (Følelser)', text: 'Udviser affektinkontinens.', exclude: ['aff_adekvat'], smartMerge: { prefix: 'Udviser ', item: 'affektinkontinens', suffix: '.' } },
-            { id: 'aff_eufor', label: 'Euforisk', category: 'Affekt (Følelser)', text: 'Affekten er euforisk.', exclude: ['aff_adekvat'], smartMerge: { prefix: 'Affekten er ', item: 'euforisk', suffix: '.' } },
-            { id: 'aff_fatuid', label: 'Fatuid (Tom)', category: 'Affekt (Følelser)', text: 'Affekten er fatuid (tom).', exclude: ['aff_adekvat'], smartMerge: { prefix: 'Affekten er ', item: 'fatuid', suffix: '.' } },
+            { id: 'aff_flat', label: 'Affladet/Følelsesflad', category: 'Affekt (Følelser)', text: 'Affladet.', exclude: ['aff_adekvat'], smartMerge: { prefix: 'Affekten er ', item: 'affladet', suffix: '.' } },
+            { id: 'aff_labil', label: 'Affektlabil', category: 'Affekt (Følelser)', text: 'Labil.', exclude: ['aff_adekvat'], smartMerge: { prefix: 'Affekten er ', item: 'labil', suffix: '.' } },
+            { id: 'aff_incong', label: 'Inkongruent', category: 'Affekt (Følelser)', text: 'Inkongruent.', exclude: ['aff_adekvat'], smartMerge: { prefix: 'Affekten er ', item: 'inkongruent', suffix: '.' } },
+            { id: 'aff_eksplo', label: 'Affekteksplosiv', category: 'Affekt (Følelser)', text: 'Eksplosiv.', exclude: ['aff_adekvat'], smartMerge: { prefix: 'Affekten er ', item: 'eksplosiv', suffix: '.' } },
+            { id: 'aff_inkont', label: 'Affektinkontinens', category: 'Affekt (Følelser)', text: 'Præget af inkontinens.', exclude: ['aff_adekvat'], smartMerge: { prefix: 'Affekten er ', item: 'præget af inkontinens', suffix: '.' } },
+            { id: 'aff_eufor', label: 'Euforisk', category: 'Affekt (Følelser)', text: 'Euforisk.', exclude: ['aff_adekvat'], smartMerge: { prefix: 'Affekten er ', item: 'euforisk', suffix: '.' } },
+            { id: 'aff_fatuid', label: 'Fatuid (Tom)', category: 'Affekt (Følelser)', text: 'Fatuid.', exclude: ['aff_adekvat'], smartMerge: { prefix: 'Affekten er ', item: 'fatuid', suffix: '.' } },
 
-            // --- STEMNINGSLEJE ---
+            // --- STEMNINGSLEJE (Prefix: "Fremstår ") ---
             { id: 'mood_neutral', label: 'Neutralt', category: 'Stemningsleje', text: 'Stemningslejet vurderes neutralt.', isDefault: true, exclude: ['mood_low_light', 'mood_low_severe', 'mood_high_hypo', 'mood_high_mania', 'mood_dys'] },
             { id: 'mood_low_light', label: 'Let sænket', category: 'Stemningsleje', text: 'Stemningslejet vurderes let sænket.', exclude: ['mood_neutral', 'mood_low_severe', 'mood_high_hypo', 'mood_high_mania'] },
             { id: 'mood_low_severe', label: 'Svært sænket', category: 'Stemningsleje', text: 'Stemningslejet vurderes svært sænket/depressivt.', exclude: ['mood_neutral', 'mood_low_light', 'mood_high_hypo', 'mood_high_mania'] },
             { id: 'mood_high_hypo', label: 'Løftet/Hypoman', category: 'Stemningsleje', text: 'Stemningslejet er løftet, præget af øget energi.', exclude: ['mood_neutral', 'mood_low_light', 'mood_low_severe', 'mood_high_mania'] },
             { id: 'mood_high_mania', label: 'Manisk', category: 'Stemningsleje', text: 'Stemningslejet er udtalt løftet (manisk).', exclude: ['mood_neutral', 'mood_low_light', 'mood_low_severe', 'mood_high_hypo'] },
             // Smart Merge Mood
-            { id: 'mood_dys', label: 'Dysforisk', category: 'Stemningsleje', text: 'Fremstår dysforisk.', summaryLabel: 'Dysfori', smartMerge: { prefix: 'Fremstår ', item: 'dysforisk', suffix: '.' } },
-            { id: 'mood_irritabel', label: 'Irritabel', category: 'Stemningsleje', text: 'Fremstår irritabel.', summaryLabel: 'Irritabilitet', smartMerge: { prefix: 'Fremstår ', item: 'irritabel', suffix: '.' } },
-            { id: 'mood_labile', label: 'Grådlabil', category: 'Stemningsleje', text: 'Fremstår grådlabil under samtalen.', summaryLabel: 'Grådlabil', smartMerge: { prefix: 'Fremstår ', item: 'grådlabil', suffix: '.' } },
+            { id: 'mood_dys', label: 'Dysforisk', category: 'Stemningsleje', text: 'Dysforisk.', summaryLabel: 'Dysfori', smartMerge: { prefix: 'Fremstår ', item: 'dysforisk', suffix: '.' } },
+            { id: 'mood_irritabel', label: 'Irritabel', category: 'Stemningsleje', text: 'Irritabel.', summaryLabel: 'Irritabilitet', smartMerge: { prefix: 'Fremstår ', item: 'irritabel', suffix: '.' } },
+            { id: 'mood_labile', label: 'Grådlabil', category: 'Stemningsleje', text: 'Grådlabil.', summaryLabel: 'Grådlabil', smartMerge: { prefix: 'Fremstår ', item: 'grådlabil', suffix: '.' } },
             
-            // --- PSYKO MOTORIK ---
+            // --- PSYKO MOTORIK (Prefix: "Psykomotorisk ") ---
             { id: 'motor_normal', label: 'Normal psykomotorik', category: 'Psykomotorik', text: 'Psykomotorisk normalt.', isDefault: true, exclude: ['motor_agit', 'motor_inhib', 'motor_restless', 'motor_catatonic'] },
-            { id: 'motor_agit', label: 'Agiteret (Øget)', category: 'Psykomotorik', text: 'Psykomotorisk agiteret.', exclude: ['motor_normal', 'motor_inhib', 'motor_catatonic'] },
-            { id: 'motor_inhib', label: 'Hæmmet (Nedsat)', category: 'Psykomotorik', text: 'Psykomotorisk hæmmet.', exclude: ['motor_normal', 'motor_agit', 'motor_catatonic'] },
-            { id: 'motor_catatonic', label: 'Katatoni', category: 'Psykomotorik', text: 'Præget af katatoni (stivnen).', exclude: ['motor_normal', 'motor_agit', 'motor_inhib'] },
-            { id: 'motor_restless', label: 'Indre uro (fremstår rolig)', category: 'Psykomotorik', text: 'Angiver indre uro, men fremstår motorisk rolig.', exclude: ['motor_normal'] },
+            { id: 'motor_agit', label: 'Agiteret (Øget)', category: 'Psykomotorik', text: 'Psykomotorisk agiteret.', exclude: ['motor_normal', 'motor_inhib', 'motor_catatonic'], smartMerge: { prefix: 'Psykomotorisk ', item: 'agiteret', suffix: '.' } },
+            { id: 'motor_inhib', label: 'Hæmmet (Nedsat)', category: 'Psykomotorik', text: 'Psykomotorisk hæmmet.', exclude: ['motor_normal', 'motor_agit', 'motor_catatonic'], smartMerge: { prefix: 'Psykomotorisk ', item: 'hæmmet', suffix: '.' } },
+            { id: 'motor_catatonic', label: 'Katatoni', category: 'Psykomotorik', text: 'Præget af katatoni.', exclude: ['motor_normal', 'motor_agit', 'motor_inhib'], smartMerge: { prefix: 'Psykomotorisk ', item: 'præget af katatoni', suffix: '.' } },
+            { id: 'motor_restless', label: 'Indre uro (fremstår rolig)', category: 'Psykomotorik', text: 'Indre uro, men motorisk rolig.', exclude: ['motor_normal'], smartMerge: { prefix: 'Angiver ', item: 'indre uro (fremstår rolig)', suffix: '.' } },
             
-            // --- SPROG & TÆNKNING (FORM) ---
+            // --- SPROG & TÆNKNING (FORM) (Prefix: "Tanken er " / "Der er ") ---
             { id: 'think_form_norm', label: 'Normal form/sprog', category: 'Sprog & Tænkning (Form)', text: 'Sproget er nuanceret. Talen er samlet og relevant.', isDefault: true, exclude: ['think_incoh', 'think_tang', 'think_circum', 'think_neologism', 'think_persev', 'think_flight'] },
-            { id: 'think_incoh', label: 'Inkohærent', category: 'Sprog & Tænkning (Form)', text: 'Tanken er springende og inkohærent.', exclude: ['think_form_norm'], smartMerge: { prefix: 'Tanken er ', item: 'springende og inkohærent', suffix: '.' } },
-            { id: 'think_tang', label: 'Tangential', category: 'Sprog & Tænkning (Form)', text: 'Svarer tangentielt og går uden om emnet.', exclude: ['think_form_norm'], smartMerge: { prefix: 'Tanken er præget af ', item: 'tangentialitet', suffix: '.' } },
-            { id: 'think_neologism', label: 'Neologismer', category: 'Sprog & Tænkning (Form)', text: 'Anvender neologismer (private ordkonstruktioner).', exclude: ['think_form_norm'], smartMerge: { prefix: 'Tanken er præget af ', item: 'neologismer', suffix: '.' } },
-            { id: 'think_persev', label: 'Perseveration', category: 'Sprog & Tænkning (Form)', text: 'Præget af perseveration (gentagelser).', exclude: ['think_form_norm'], smartMerge: { prefix: 'Tanken er præget af ', item: 'perseveration', suffix: '.' } },
-            { id: 'think_flight', label: 'Tankeflugt', category: 'Sprog & Tænkning (Form)', text: 'Præget af tankeflugt.', exclude: ['think_form_norm'], smartMerge: { prefix: 'Tanken er præget af ', item: 'tankeflugt', suffix: '.' } },
+            { id: 'think_incoh', label: 'Inkohærent', category: 'Sprog & Tænkning (Form)', text: 'Springende og inkohærent.', exclude: ['think_form_norm'], smartMerge: { prefix: 'Tanken er ', item: 'springende og inkohærent', suffix: '.' } },
+            { id: 'think_tang', label: 'Tangential', category: 'Sprog & Tænkning (Form)', text: 'Tangentiel.', exclude: ['think_form_norm'], smartMerge: { prefix: 'Tanken er ', item: 'tangentiel', suffix: '.' } },
+            { id: 'think_neologism', label: 'Neologismer', category: 'Sprog & Tænkning (Form)', text: 'Præget af neologismer.', exclude: ['think_form_norm'], smartMerge: { prefix: 'Tanken er ', item: 'præget af neologismer', suffix: '.' } },
+            { id: 'think_persev', label: 'Perseveration', category: 'Sprog & Tænkning (Form)', text: 'Præget af perseveration.', exclude: ['think_form_norm'], smartMerge: { prefix: 'Tanken er ', item: 'præget af perseveration', suffix: '.' } },
+            { id: 'think_flight', label: 'Tankeflugt', category: 'Sprog & Tænkning (Form)', text: 'Præget af tankeflugt.', exclude: ['think_form_norm'], smartMerge: { prefix: 'Tanken er ', item: 'præget af tankeflugt', suffix: '.' } },
 
             { id: 'think_speed_norm', label: 'Normalt tempo', category: 'Sprog & Tænkning (Tempo)', text: 'Normal talestrøm og tempo.', isDefault: true, exclude: ['think_press', 'think_latency', 'think_block'] },
-            { id: 'think_press', label: 'Talepres', category: 'Sprog & Tænkning (Tempo)', text: 'Der er talepres.', exclude: ['think_speed_norm', 'think_latency'] },
-            { id: 'think_latency', label: 'Latenstid', category: 'Sprog & Tænkning (Tempo)', text: 'Svarer relevant, men med betydelig latenstid.', exclude: ['think_speed_norm', 'think_press'] },
-            { id: 'think_block', label: 'Tankestop', category: 'Sprog & Tænkning (Tempo)', text: 'Oplever tankestop under samtalen.', exclude: ['think_speed_norm'] },
+            { id: 'think_press', label: 'Talepres', category: 'Sprog & Tænkning (Tempo)', text: 'Talepres.', exclude: ['think_speed_norm', 'think_latency'], smartMerge: { prefix: 'Der er ', item: 'talepres', suffix: '.' } },
+            { id: 'think_latency', label: 'Latenstid', category: 'Sprog & Tænkning (Tempo)', text: 'Latenstid.', exclude: ['think_speed_norm', 'think_press'], smartMerge: { prefix: 'Der er ', item: 'latenstid', suffix: '.' } },
+            { id: 'think_block', label: 'Tankestop', category: 'Sprog & Tænkning (Tempo)', text: 'Tankestop.', exclude: ['think_speed_norm'], smartMerge: { prefix: 'Der er ', item: 'tankestop', suffix: '.' } },
 
             // --- TÆNKNING (INDHOLD) ---
             { id: 'think_content_norm', label: 'Normalt indhold', category: 'Tænkning (Indhold)', text: 'Indholdsmæssigt relevant uden bizariteter eller neologismer.', isDefault: true, exclude: ['think_ruminate', 'think_quarrel'] },
@@ -262,7 +268,7 @@
         ];
 
         const SOMATIC_OBJ_OPTIONS = [
-            { id: 'gen_upavirket', label: 'Upåvirket', category: 'Almentilstand', text: 'Almentilstand upåvirket. Normal ernæringstilstand.', isDefault: true, exclude: ['gen_medtaget', 'gen_adipos', 'gen_emaciated'] },
+            { id: 'gen_upavirket', label: 'Upåvirket', category: 'Almentilstand', text: 'Upåvirket. Normal ernæringstilstand.', isDefault: true, exclude: ['gen_medtaget', 'gen_adipos', 'gen_emaciated'] },
             // Smart Merge General
             { id: 'gen_medtaget', label: 'Medtaget', category: 'Almentilstand', text: 'Fremstår medtaget.', exclude: ['gen_upavirket'], smartMerge: { prefix: 'Fremstår ', item: 'medtaget', suffix: '.' } },
             { id: 'gen_emaciated', label: 'Afmagret/Kakektisk', category: 'Almentilstand', text: 'Fremstår afmagret/kakektisk.', exclude: ['gen_upavirket', 'gen_adipos'], smartMerge: { prefix: 'Fremstår ', item: 'afmagret/kakektisk', suffix: '.' } },
@@ -273,18 +279,18 @@
             { id: 'cp_abnorm_c', label: 'St.c. uregelmæssig', category: 'Stethoscopia', text: 'St.c.: Uregelmæssig hjerteaktion (arytmi).', exclude: ['cp_normal'] },
             { id: 'cp_abnorm_p', label: 'St.p. bilyde', category: 'Stethoscopia', text: 'St.p.: Der høres bilyde (rhonchi/crepitatio).', exclude: ['cp_normal'] },
 
-            { id: 'cn_normal', label: 'Kranienerver II-XII normal', category: 'Neurologisk (Kranienerver)', text: 'Kranienerver: Intet abnormt påvist, systematisk undersøgt (II-XII). Pupiller egale med normal lysrefleks. Ingen nystagmus. Ingen facialisparese. Ingen tungedeviation.', isDefault: true, exclude: ['cn_pupil', 'cn_nystag', 'cn_facial', 'cn_other'] },
+            { id: 'cn_normal', label: 'Kranienerver II-XII normal', category: 'Neurologisk (Kranienerver)', text: 'Intet abnormt påvist, systematisk undersøgt (II-XII). Pupiller egale med normal lysrefleks. Ingen nystagmus. Ingen facialisparese. Ingen tungedeviation.', isDefault: true, exclude: ['cn_pupil', 'cn_nystag', 'cn_facial', 'cn_other'] },
             { id: 'cn_pupil', label: 'Pupilforhold afviger', category: 'Neurologisk (Kranienerver)', text: 'Pupiller: [Beskriv afvigelse, fx miosis/mydriasis].', exclude: ['cn_normal'] },
             // Smart Merge CN (Booleans)
             { id: 'cn_nystag', label: 'Nystagmus', category: 'Neurologisk (Kranienerver)', text: 'Der ses nystagmus.', exclude: ['cn_normal'], smartMerge: { prefix: 'Der ses ', item: 'nystagmus', suffix: '.' } },
             { id: 'cn_facial', label: 'Facialisparese', category: 'Neurologisk (Kranienerver)', text: 'Tegn på facialisparese (central/perifer).', exclude: ['cn_normal'], smartMerge: { prefix: 'Der ses ', item: 'facialisparese', suffix: '.' } },
 
-            { id: 'motor_sys_normal', label: 'Motorik/Kraft normal', category: 'Neurologisk (Motorik)', text: 'Motorisk system: Strakt arm- og bentest uden nedsynkning. Egal kraft (5/5) over de større led (OE+UE). Normal tonus.', isDefault: true, exclude: ['motor_weak_oe', 'motor_weak_ue', 'motor_tonus'] },
+            { id: 'motor_sys_normal', label: 'Motorik/Kraft normal', category: 'Neurologisk (Motorik)', text: 'Strakt arm- og bentest uden nedsynkning. Egal kraft (5/5) over de større led (OE+UE). Normal tonus.', isDefault: true, exclude: ['motor_weak_oe', 'motor_weak_ue', 'motor_tonus'] },
             // Smart Merge Motor
             { id: 'motor_weak_oe', label: 'Kraftnedsættelse OE', category: 'Neurologisk (Motorik)', text: 'Nedsat kraft i overekstremiteter.', exclude: ['motor_sys_normal'], smartMerge: { prefix: 'Nedsat kraft i ', item: 'overekstremiteter', suffix: '.' } },
             { id: 'motor_weak_ue', label: 'Kraftnedsættelse UE', category: 'Neurologisk (Motorik)', text: 'Nedsat kraft i underekstremiteter.', exclude: ['motor_sys_normal'], smartMerge: { prefix: 'Nedsat kraft i ', item: 'underekstremiteter', suffix: '.' } },
             
-            { id: 'reflex_normal', label: 'Reflekser normale (Alle)', category: 'Neurologisk (Reflekser)', text: 'Reflekser: Normale og sidelige dybe senereflekser. Babinski negativ bilat.', isDefault: true, exclude: ['reflex_hyper', 'reflex_babinski', 'reflex_biceps', 'reflex_triceps', 'reflex_brachiorad', 'reflex_patellar', 'reflex_achilles', 'reflex_babinski_neg'] },
+            { id: 'reflex_normal', label: 'Reflekser normale (Alle)', category: 'Neurologisk (Reflekser)', text: 'Normale og sidelige dybe senereflekser. Babinski negativ bilat.', isDefault: true, exclude: ['reflex_hyper', 'reflex_babinski', 'reflex_biceps', 'reflex_triceps', 'reflex_brachiorad', 'reflex_patellar', 'reflex_achilles', 'reflex_babinski_neg'] },
             
             // SMART MERGE REFLEKSER
             { id: 'reflex_biceps', label: 'Biceps (Normal)', category: 'Neurologisk (Reflekser)', text: 'Biceps: bilat. normal.', isDefault: false, exclude: ['reflex_normal'], smartMerge: { prefix: 'Reflekser: ', item: 'biceps', suffix: ' findes bilat. normale.' } },
@@ -298,15 +304,15 @@
             { id: 'reflex_hyper', label: 'Hyperrefleksi', category: 'Neurologisk (Reflekser)', text: 'Livlige/Hyperaktive reflekser.', exclude: ['reflex_normal'], smartMerge: { prefix: 'Der findes ', item: 'livlige/hyperaktive reflekser', suffix: '.' } },
             { id: 'reflex_babinski', label: 'Babinski Positiv', category: 'Neurologisk (Reflekser)', text: 'Babinski positiv (extensivt tå-respons).', exclude: ['reflex_normal'], smartMerge: { prefix: 'Der findes ', item: 'positiv Babinski (extensivt tå-respons)', suffix: '.' } },
 
-            { id: 'coord_normal', label: 'Koordination normal', category: 'Neurologisk (Cerebellart)', text: 'Cerebellart: Normal koordination ved finger-næse forsøg og knæ-hæl forsøg. Ingen ataksi.', isDefault: true, exclude: ['coord_ataxia', 'coord_romberg'] },
+            { id: 'coord_normal', label: 'Koordination normal', category: 'Neurologisk (Cerebellart)', text: 'Normal koordination ved finger-næse forsøg og knæ-hæl forsøg. Ingen ataksi.', isDefault: true, exclude: ['coord_ataxia', 'coord_romberg'] },
             // Smart Merge Cerebellar
             { id: 'coord_ataxia', label: 'Ataksi/Usikker FNF', category: 'Neurologisk (Cerebellart)', text: 'Usikkerhed ved finger-næse forsøg (ataksi).', exclude: ['coord_normal'], smartMerge: { prefix: 'Der findes ', item: 'ataksi', suffix: '.' } },
             { id: 'coord_romberg', label: 'Romberg Positiv', category: 'Neurologisk (Cerebellart)', text: 'Rombergs test positiv (faldtendens ved lukkede øjne).', exclude: ['coord_normal'], smartMerge: { prefix: 'Der findes ', item: 'positiv Romberg', suffix: '.' } },
             
-            { id: 'gait_normal', label: 'Gang/Stand normal', category: 'Neurologisk (Gang)', text: 'Gang og stand: Sikker gang, vending og stand. Linegang upåfaldende.', isDefault: true, exclude: ['gait_unsure', 'gait_broad'] },
+            { id: 'gait_normal', label: 'Gang/Stand normal', category: 'Neurologisk (Gang)', text: 'Sikker gang, vending og stand. Linegang upåfaldende.', isDefault: true, exclude: ['gait_unsure', 'gait_broad'] },
             { id: 'gait_unsure', label: 'Usikker gang', category: 'Neurologisk (Gang)', text: 'Gangen er usikker/bredsporet.', exclude: ['gait_normal'] },
 
-            { id: 'eps_none', label: 'Ingen EPS', category: 'Neurologisk (EPS)', text: 'Ekstrapyramidale system: Ingen bradykinesi, rigiditet eller ufrivillige bevægelser. Ingen hvile- eller intentionstremor.', isDefault: true, exclude: ['eps_rigid', 'eps_tremor', 'eps_dyskinesia', 'eps_aca'] },
+            { id: 'eps_none', label: 'Ingen EPS', category: 'Neurologisk (EPS)', text: 'Ingen bradykinesi, rigiditet eller ufrivillige bevægelser. Ingen hvile- eller intentionstremor.', isDefault: true, exclude: ['eps_rigid', 'eps_tremor', 'eps_dyskinesia', 'eps_aca'] },
             // Smart Merge EPS
             { id: 'eps_rigid', label: 'Rigiditet', category: 'Neurologisk (EPS)', text: 'Der findes rigiditet ved passiv bevægelse.', exclude: ['eps_none'], smartMerge: { prefix: 'Der observeres ', item: 'rigiditet', suffix: '.' } },
             { id: 'eps_tremor', label: 'Tremor', category: 'Neurologisk (EPS)', text: 'Der observeres tremor (hvile/intention).', exclude: ['eps_none'], smartMerge: { prefix: 'Der observeres ', item: 'tremor', suffix: '.' } },
