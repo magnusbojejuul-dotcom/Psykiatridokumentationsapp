@@ -68,24 +68,36 @@
         const DEP_ACC_IDS = ['dep_acc_conf', 'dep_acc_guilt', 'dep_acc_sui', 'dep_acc_conc', 'dep_acc_agit', 'dep_acc_sleep', 'dep_acc_app'];
 
         const ACTUAL_PSYCH_OPTIONS = [
-            { id: 'ap_reason', label: 'Søger hjælp fordi...', category: 'Henvendelse & Problem', text: 'Pt. søger hjælp nu, fordi...', isDefault: true },
-            { id: 'ap_hard', label: 'Svært at håndtere', category: 'Henvendelse & Problem', text: 'Pt. har svært ved at håndtere...', isDefault: true },
-            { id: 'ap_main', label: 'Fylder mest', category: 'Henvendelse & Problem', text: 'Det, der fylder mest lige nu, er... (i aftagende rækkefølge)', isDefault: true },
-            { id: 'ap_onset', label: 'Symptomstart', category: 'Forløb & Historik', text: 'Symptomerne startede for... siden og har udviklet sig...', isDefault: true },
+            // --- HENVENDELSE & PROBLEM (Opdateret med Smart Merge muligheder) ---
+            { id: 'ap_reason', label: 'Søger hjælp fordi... (Fritekst)', category: 'Henvendelse & Problem', text: 'Pt. søger hjælp nu, fordi...', isDefault: true },
+            { id: 'ap_prob_depress', label: 'Depressive symptomer', category: 'Henvendelse & Problem', text: 'Depressive symptomer.', smartMerge: { prefix: 'Henvender sig primært grundet ', item: 'depressive symptomer', suffix: '.' } },
+            { id: 'ap_prob_anxiety', label: 'Angst/Uro', category: 'Henvendelse & Problem', text: 'Angst og uro.', smartMerge: { prefix: 'Henvender sig primært grundet ', item: 'angst og uro', suffix: '.' } },
+            { id: 'ap_prob_suicid', label: 'Selvmordstanker', category: 'Henvendelse & Problem', text: 'Selvmordstanker.', smartMerge: { prefix: 'Henvender sig primært grundet ', item: 'selvmordstanker', suffix: '.' } },
+            { id: 'ap_prob_hallu', label: 'Hallucinationer', category: 'Henvendelse & Problem', text: 'Oplevelser af hallucinationer.', smartMerge: { prefix: 'Henvender sig primært grundet ', item: 'oplevelser af hallucinationer', suffix: '.' } },
+            { id: 'ap_prob_sleep', label: 'Søvnproblemer', category: 'Henvendelse & Problem', text: 'Søvnproblemer.', smartMerge: { prefix: 'Henvender sig primært grundet ', item: 'søvnproblemer', suffix: '.' } },
             
-            // --- UPDATED FORLØB & HISTORIK (Smart Merge added) ---
-            { id: 'ap_sim_yes', label: 'Har oplevet før', category: 'Forløb & Historik', text: 'Pt. har oplevet lignende symptomer før.', exclude: ['ap_sim_no'], smartMerge: { prefix: 'Pt. ', item: 'har oplevet lignende symptomer før', suffix: '.' } },
+            { id: 'ap_hard', label: 'Svært at håndtere (Fritekst)', category: 'Henvendelse & Problem', text: 'Pt. har svært ved at håndtere...', isDefault: true },
+            { id: 'ap_main', label: 'Fylder mest (Fritekst)', category: 'Henvendelse & Problem', text: 'Det, der fylder mest lige nu, er... (i aftagende rækkefølge)', isDefault: true },
+            
+            { id: 'ap_onset', label: 'Symptomstart (Fritekst)', category: 'Forløb & Historik', text: 'Symptomerne startede for... siden og har udviklet sig...', isDefault: true },
+            
+            // --- UPDATED FORLØB & HISTORIK (Smart Merge Improved for better flow) ---
+            // Før var prefix "Pt.", hvilket gav "Pt. har X, har Y, har Z". Nu er prefix "Pt. har ", hvilket giver "Pt. har X, Y og Z".
+            { id: 'ap_sim_yes', label: 'Har oplevet før', category: 'Forløb & Historik', text: 'Pt. har oplevet lignende symptomer før.', exclude: ['ap_sim_no'], smartMerge: { prefix: 'Pt. har ', item: 'tidligere oplevet lignende symptomer', suffix: '.' } },
             { id: 'ap_sim_no', label: 'Aldrig oplevet før', category: 'Forløb & Historik', text: 'Pt. har ikke oplevet lignende symptomer før.', isDefault: true, exclude: ['ap_sim_yes'] },
-            { id: 'ap_diag_yes', label: 'Tidl. diagnose', category: 'Forløb & Historik', text: 'Pt. har tidligere fået en diagnose.', exclude: ['ap_diag_no'], smartMerge: { prefix: 'Pt. ', item: 'har tidligere fået en diagnose', suffix: '.' } },
+            { id: 'ap_diag_yes', label: 'Tidl. diagnose', category: 'Forløb & Historik', text: 'Pt. har tidligere fået en diagnose.', exclude: ['ap_diag_no'], smartMerge: { prefix: 'Pt. har ', item: 'tidligere fået en diagnose', suffix: '.' } },
             { id: 'ap_diag_no', label: 'Ingen tidl. diagnose', category: 'Forløb & Historik', text: 'Pt. har ikke tidligere fået en diagnose.', isDefault: true, exclude: ['ap_diag_yes'] },
-            { id: 'ap_treat_yes', label: 'Tidl. behandling', category: 'Forløb & Historik', text: 'Pt. har tidligere modtaget behandling for dette.', exclude: ['ap_treat_no'], smartMerge: { prefix: 'Pt. ', item: 'har tidligere modtaget behandling for dette', suffix: '.' } },
+            { id: 'ap_treat_yes', label: 'Tidl. behandling', category: 'Forløb & Historik', text: 'Pt. har tidligere modtaget behandling for dette.', exclude: ['ap_treat_no'], smartMerge: { prefix: 'Pt. har ', item: 'tidligere modtaget behandling for dette', suffix: '.' } },
             { id: 'ap_treat_no', label: 'Ingen tidl. beh.', category: 'Forløb & Historik', text: 'Pt. har ikke tidligere modtaget behandling for dette.', isDefault: true, exclude: ['ap_treat_yes'] },
             
             { id: 'ap_tried', label: 'Afprøvet (medicin/terapi)', category: 'Forløb & Historik', text: 'Pt. har prøvet... (medicin, terapi, psykoedukation, livsstilsændringer), hvilket har...', isDefault: true },
-            { id: 'ap_worse', label: 'Tilstand forværret', category: 'Udvikling & Faktorer', text: 'Tilstanden er blevet værre.', exclude: ['ap_unchanged', 'ap_better'] },
-            { id: 'ap_unchanged', label: 'Tilstand uændret', category: 'Udvikling & Faktorer', text: 'Tilstanden er uændret.', isDefault: true, exclude: ['ap_worse', 'ap_better'] },
-            { id: 'ap_better', label: 'Tilstand bedret', category: 'Udvikling & Faktorer', text: 'Tilstanden er blevet bedre.', exclude: ['ap_worse', 'ap_unchanged'] },
-            { id: 'ap_new_symp_yes', label: 'Nye symptomer', category: 'Udvikling & Faktorer', text: 'Der er kommet nye symptomer til.', exclude: ['ap_new_symp_no'] },
+            
+            // --- UPDATED UDVIKLING & FAKTORER (Smart Merge added to status) ---
+            { id: 'ap_worse', label: 'Tilstand forværret', category: 'Udvikling & Faktorer', text: 'Tilstanden er blevet værre.', exclude: ['ap_unchanged', 'ap_better'], smartMerge: { prefix: 'Tilstanden er ', item: 'forværret', suffix: '.' } },
+            { id: 'ap_unchanged', label: 'Tilstand uændret', category: 'Udvikling & Faktorer', text: 'Tilstanden er uændret.', isDefault: true, exclude: ['ap_worse', 'ap_better'], smartMerge: { prefix: 'Tilstanden er ', item: 'uændret', suffix: '.' } },
+            { id: 'ap_better', label: 'Tilstand bedret', category: 'Udvikling & Faktorer', text: 'Tilstanden er blevet bedre.', exclude: ['ap_worse', 'ap_unchanged'], smartMerge: { prefix: 'Tilstanden er ', item: 'bedret', suffix: '.' } },
+            
+            { id: 'ap_new_symp_yes', label: 'Nye symptomer', category: 'Udvikling & Faktorer', text: 'Der er kommet nye symptomer til.', exclude: ['ap_new_symp_no'], smartMerge: { prefix: 'Der er ', item: 'tilkommet nye symptomer', suffix: '.' } },
             { id: 'ap_new_symp_no', label: 'Ingen nye symptomer', category: 'Udvikling & Faktorer', text: 'Der er ikke kommet nye symptomer til.', isDefault: true, exclude: ['ap_new_symp_yes'] },
             { id: 'ap_modifying', label: 'Forværres/Bedres af...', category: 'Udvikling & Faktorer', text: 'Det bliver værre af... og bedre af...', isDefault: true },
             
