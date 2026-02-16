@@ -423,19 +423,20 @@
             { id: 'motor_weak_oe', label: 'Kraftnedsættelse OE', category: 'Neurologisk (Motorik)', text: 'Nedsat kraft i overekstremiteter.', exclude: ['motor_sys_normal'], smartMerge: { prefix: 'Nedsat kraft i ', item: 'overekstremiteter', suffix: '.' } },
             { id: 'motor_weak_ue', label: 'Kraftnedsættelse UE', category: 'Neurologisk (Motorik)', text: 'Nedsat kraft i underekstremiteter.', exclude: ['motor_sys_normal'], smartMerge: { prefix: 'Nedsat kraft i ', item: 'underekstremiteter', suffix: '.' } },
             
-            { id: 'reflex_normal', label: 'Reflekser normale (Alle)', category: 'Neurologisk (Reflekser)', text: 'Normale og sidelige dybe senereflekser. Babinski negativ bilat.', isDefault: true, exclude: ['reflex_hyper', 'reflex_babinski', 'reflex_biceps', 'reflex_triceps', 'reflex_brachiorad', 'reflex_patellar', 'reflex_achilles', 'reflex_babinski_neg'] },
+            { id: 'reflex_normal', label: 'Reflekser normale (Alle)', category: 'Neurologisk (Reflekser)', text: 'Normale og sidelige dybe senereflekser. Babinski negativ bilat.', isDefault: true, exclude: ['reflex_hyper', 'reflex_babinski', 'reflex_biceps', 'reflex_triceps', 'reflex_brachiorad', 'reflex_patellar', 'reflex_achilles', 'reflex_babinski_neg', 'reflex_patho_other'] },
             
             // SMART MERGE REFLEKSER
-            { id: 'reflex_biceps', label: 'Biceps (Normal)', category: 'Neurologisk (Reflekser)', text: 'Biceps: bilat. normal.', isDefault: false, exclude: ['reflex_normal'], smartMerge: { prefix: '', item: 'biceps', suffix: ' findes bilat. normale.' } },
-            { id: 'reflex_triceps', label: 'Triceps (Normal)', category: 'Neurologisk (Reflekser)', text: 'Triceps: bilat. normal.', isDefault: false, exclude: ['reflex_normal'], smartMerge: { prefix: '', item: 'triceps', suffix: ' findes bilat. normale.' } },
-            { id: 'reflex_brachiorad', label: 'Brachioradialis (Normal)', category: 'Neurologisk (Reflekser)', text: 'Brachioradialis: bilat. normal.', isDefault: false, exclude: ['reflex_normal'], smartMerge: { prefix: '', item: 'brachioradialis', suffix: ' findes bilat. normale.' } },
-            { id: 'reflex_patellar', label: 'Patellar (Normal)', category: 'Neurologisk (Reflekser)', text: 'Patellar: bilat. normal.', isDefault: false, exclude: ['reflex_normal'], smartMerge: { prefix: '', item: 'patellar', suffix: ' findes bilat. normale.' } },
-            { id: 'reflex_achilles', label: 'Achilles (Normal)', category: 'Neurologisk (Reflekser)', text: 'Achilles: bilat. normal.', isDefault: false, exclude: ['reflex_normal'], smartMerge: { prefix: '', item: 'achilles', suffix: ' findes bilat. normale.' } },
-            { id: 'reflex_babinski_neg', label: 'Babinski Neg.', category: 'Neurologisk (Reflekser)', text: 'Babinski: Negativ.', isDefault: false, exclude: ['reflex_normal'] },
+            { id: 'reflex_biceps', label: 'Biceps (Normal)', category: 'Neurologisk (Reflekser)', text: 'Biceps: bilat. normal.', isDefault: false, isNormal: true, exclude: ['reflex_normal'], smartMerge: { prefix: '', item: 'biceps', suffix: ' findes bilat. normale.' } },
+            { id: 'reflex_triceps', label: 'Triceps (Normal)', category: 'Neurologisk (Reflekser)', text: 'Triceps: bilat. normal.', isDefault: false, isNormal: true, exclude: ['reflex_normal'], smartMerge: { prefix: '', item: 'triceps', suffix: ' findes bilat. normale.' } },
+            { id: 'reflex_brachiorad', label: 'Brachioradialis (Normal)', category: 'Neurologisk (Reflekser)', text: 'Brachioradialis: bilat. normal.', isDefault: false, isNormal: true, exclude: ['reflex_normal'], smartMerge: { prefix: '', item: 'brachioradialis', suffix: ' findes bilat. normale.' } },
+            { id: 'reflex_patellar', label: 'Patellar (Normal)', category: 'Neurologisk (Reflekser)', text: 'Patellar: bilat. normal.', isDefault: false, isNormal: true, exclude: ['reflex_normal'], smartMerge: { prefix: '', item: 'patellar', suffix: ' findes bilat. normale.' } },
+            { id: 'reflex_achilles', label: 'Achilles (Normal)', category: 'Neurologisk (Reflekser)', text: 'Achilles: bilat. normal.', isDefault: false, isNormal: true, exclude: ['reflex_normal'], smartMerge: { prefix: '', item: 'achilles', suffix: ' findes bilat. normale.' } },
+            { id: 'reflex_babinski_neg', label: 'Babinski Neg.', category: 'Neurologisk (Reflekser)', text: 'Babinski: Negativ.', isDefault: false, isNormal: true, exclude: ['reflex_normal'] },
             
             // Smart Merge Pathological Reflexes
             { id: 'reflex_hyper', label: 'Hyperrefleksi', category: 'Neurologisk (Reflekser)', text: 'Livlige/Hyperaktive reflekser.', exclude: ['reflex_normal'], smartMerge: { prefix: 'Der findes ', item: 'livlige/hyperaktive reflekser', suffix: '.' } },
             { id: 'reflex_babinski', label: 'Babinski Positiv', category: 'Neurologisk (Reflekser)', text: 'Babinski positiv (extensivt tå-respons).', exclude: ['reflex_normal'], smartMerge: { prefix: 'Der findes ', item: 'positiv Babinski (extensivt tå-respons)', suffix: '.' } },
+            { id: 'reflex_patho_other', label: 'Andet patologisk (Beskriv)', category: 'Neurologisk (Reflekser)', text: 'Patologiske refleksfund.', exclude: ['reflex_normal'], smartMerge: { prefix: 'Der findes ', item: 'patologiske refleksfund', suffix: '.' } },
 
             { id: 'coord_normal', label: 'Koordination normal', category: 'Neurologisk (Cerebellart)', text: 'Normal koordination ved finger-næse forsøg og knæ-hæl forsøg. Ingen ataksi.', isDefault: true, exclude: ['coord_ataxia', 'coord_romberg'] },
             // Smart Merge Cerebellar
@@ -489,7 +490,146 @@
                 generateText();
             }, [selectedIds, activeSection, showSummary, optionDetails, timelineText]);
 
+            const formatList = (items) => {
+                if (items.length === 0) return '';
+                if (items.length === 1) return items[0];
+                const last = items.pop();
+                return items.join(', ') + ' og ' + last;
+            };
+
+            const formatWithDetail = (text, detail) => {
+                if (!detail || detail.trim() === '') return text;
+                
+                let base = text.trim();
+                // Sikr at grundteksten slutter med punktum
+                if (!base.endsWith('.')) base += '.';
+                
+                let d = detail.trim();
+                // Start uddybning med stort bogstav
+                if (d.length > 0) d = d.charAt(0).toUpperCase() + d.slice(1);
+                // Sikr at uddybning slutter med punktum
+                if (!d.endsWith('.')) d += '.';
+                
+                return `${base} ${d}`;
+            };
+            
+            const capitalize = (s) => {
+                if (!s) return '';
+                return s.charAt(0).toUpperCase() + s.slice(1);
+            };
+
+            // HELPER TO GENERATE CATEGORY STRING
+            const getCategoryText = (categoryOptions, idsSet, detailsMap) => {
+                const lines = [];
+                const smartMergeGroups = {}; 
+                const standardOptions = [];
+                
+                categoryOptions.forEach(opt => {
+                    const detail = detailsMap[opt.id];
+                    if (idsSet.has(opt.id)) {
+                        if (opt.smartMerge && !opt.isDefault) {
+                            const key = JSON.stringify({ p: opt.smartMerge.prefix, s: opt.smartMerge.suffix });
+                            if (!smartMergeGroups[key]) smartMergeGroups[key] = [];
+                            
+                            let itemText = opt.smartMerge.item;
+                            if (detail && detail.trim() !== '') {
+                                // Formater uddybning: Punktum + Mellemrum + Stort bogstav
+                                const d = detail.trim().charAt(0).toUpperCase() + detail.trim().slice(1);
+                                itemText += `. ${d}`;
+                            }
+                            smartMergeGroups[key].push(itemText);
+                        } else {
+                            standardOptions.push({ ...opt, detail });
+                        }
+                    }
+                });
+
+                Object.keys(smartMergeGroups).forEach(key => {
+                    const { p, s } = JSON.parse(key);
+                    const items = smartMergeGroups[key];
+                    if (items.length > 0) {
+                        const mergedText = `${p}${formatList(items)}${s}`;
+                        lines.push(capitalize(mergedText));
+                    }
+                });
+
+                standardOptions.forEach(opt => {
+                     lines.push(formatWithDetail(opt.text, opt.detail));
+                });
+                
+                return lines.join(' ');
+            };
+
             const toggleOption = (option) => {
+                // If in manual mode, perform Smart Replace Logic
+                if (manualEditMode) {
+                    const cat = option.category;
+                    const allOptions = [...ACTUAL_PSYCH_OPTIONS, ...PSYCH_OPTIONS, ...SOMATIC_ACT_OPTIONS, ...SOMATIC_OBJ_OPTIONS];
+                    const catOptions = allOptions.filter(o => o.category === cat);
+                    
+                    // 1. Calculate PREVIOUS text (Current State)
+                    const prevText = getCategoryText(catOptions, selectedIds, optionDetails);
+                    // The generator adds "Category: " prefix, we must respect that pattern
+                    const prevFullLine = `${cat}: ${prevText}`;
+                    
+                    // 2. Calculate NEXT State
+                    const nextIds = new Set(selectedIds);
+                    if (nextIds.has(option.id)) {
+                        nextIds.delete(option.id);
+                    } else {
+                        nextIds.add(option.id);
+                        option.exclude?.forEach(id => nextIds.delete(id));
+                    }
+                    
+                    const nextText = getCategoryText(catOptions, nextIds, optionDetails);
+                    const nextFullLine = `${cat}: ${nextText}`;
+                    
+                    let newGeneratedText = generatedText;
+                    let handled = false;
+
+                    // A. If previous text was empty/non-existent in generated text (New category entry), just append
+                    if (!prevText || (!newGeneratedText.includes(prevFullLine) && !newGeneratedText.includes(prevText))) {
+                        // Only append if we actually have something to add and we are adding (nextIds has option)
+                        if (nextText && nextIds.has(option.id)) { 
+                             newGeneratedText = newGeneratedText.trim() + "\n" + nextFullLine;
+                             handled = true;
+                        }
+                    } 
+                    // B. Try to find and replace the FULL LINE (safest)
+                    else if (newGeneratedText.includes(prevFullLine)) {
+                         newGeneratedText = newGeneratedText.replace(prevFullLine, nextFullLine);
+                         handled = true;
+                    }
+                    // C. Try to find just the content (User might have deleted category label)
+                    else if (newGeneratedText.includes(prevText)) {
+                        newGeneratedText = newGeneratedText.replace(prevText, nextText);
+                        handled = true;
+                    }
+                    
+                    // D. Fallback: If not handled (text edited beyond recognition) and ADDING
+                    if (!handled && nextIds.has(option.id)) {
+                        let textToAdd = option.text;
+                        if (option.smartMerge) {
+                             // Construct simple sentence if adding as standalone
+                             const p = option.smartMerge.prefix || '';
+                             const s = option.smartMerge.suffix || '.';
+                             let i = option.smartMerge.item;
+                             if (!p) i = capitalize(i);
+                             textToAdd = `${p}${i}${s}`;
+                        }
+                        const detail = optionDetails[option.id];
+                        if (detail) textToAdd = formatWithDetail(textToAdd, detail);
+
+                        newGeneratedText = newGeneratedText.trim() + "\n" + textToAdd;
+                    }
+
+                    setGeneratedText(newGeneratedText);
+                    setLastAutoGeneratedText(newGeneratedText);
+                    setSelectedIds(nextIds);
+                    return;
+                }
+
+                // Normal Auto Mode Logic
                 const isSelected = selectedIds.has(option.id);
                 const newSelection = new Set(selectedIds);
                 
@@ -501,43 +641,6 @@
                 }
                 
                 setSelectedIds(newSelection);
-
-                // SMART UPDATE FOR MANUAL MODE (APPEND ONLY)
-                if (manualEditMode) {
-                    // Only append if we are selecting (not deselecting)
-                    if (!isSelected) {
-                        let textToAdd = option.text;
-                        
-                        if (option.smartMerge) {
-                            // Construct standalone sentence for append
-                            const prefix = option.smartMerge.prefix || '';
-                            const suffix = option.smartMerge.suffix || '.';
-                            const item = option.smartMerge.item;
-                            // Capitalize if it looks like a sentence start or if we just want the item
-                            // If user requested "No headers", we might want a simpler format.
-                            // But usually a full sentence is best for appending.
-                            let sentence = prefix + item + suffix;
-                            
-                            if (!prefix || prefix.trim() === '') {
-                                sentence = item.charAt(0).toUpperCase() + item.slice(1) + suffix;
-                            } else if (prefix) {
-                                sentence = prefix.charAt(0).toUpperCase() + prefix.slice(1) + item + suffix;
-                            }
-                            textToAdd = sentence;
-                        }
-                        
-                        // Handle detail if present (unlikely on immediate toggle, but good practice)
-                        const detail = optionDetails[option.id];
-                        if (detail) {
-                            textToAdd = textToAdd.replace(/\.$/, '') + ` (${detail}).`;
-                        }
-
-                        // Append with newline
-                        const textUpdate = generatedText.trim() + "\n" + textToAdd;
-                        setGeneratedText(textUpdate);
-                        setLastAutoGeneratedText(textUpdate); // Sync so this append isn't seen as a NEW manual edit
-                    }
-                }
             };
             
             // Helper for setting normal status
@@ -596,11 +699,49 @@
             };
             
             const clearAll = () => {
-                setSelectedIds(new Set());
-                setOptionDetails({});
-                setTimelineText(''); // Clear timeline too
-                setManualEditMode(false); // Reset manual mode on clear
-                setNotification({ message: 'Alle felter ryddet', type: 'success' });
+                let optionsToClear = [];
+                let shouldClearTimeline = false;
+                let sectionName = '';
+
+                if (activeSection === 'psych_actual') {
+                    optionsToClear = ACTUAL_PSYCH_OPTIONS;
+                    shouldClearTimeline = true;
+                    sectionName = 'Aktuelt Psykisk';
+                } else if (activeSection === 'psych') {
+                    optionsToClear = PSYCH_OPTIONS;
+                    sectionName = 'Objektivt Psykisk';
+                } else if (activeSection === 'somatic_act') {
+                    optionsToClear = SOMATIC_ACT_OPTIONS;
+                    sectionName = 'Aktuelt Somatisk';
+                } else if (activeSection === 'somatic_obj') {
+                    optionsToClear = SOMATIC_OBJ_OPTIONS;
+                    sectionName = 'Somatisk Vurdering';
+                } else if (activeSection === 'full_note') {
+                    // Hvis man står på "Samlet notat", giver det mening at "Ryd alt" rydder alt
+                    setSelectedIds(new Set());
+                    setOptionDetails({});
+                    setTimelineText('');
+                    setManualEditMode(false);
+                    setNotification({ message: 'Hele notatet er ryddet', type: 'success' });
+                    setTimeout(() => setNotification(null), 3000);
+                    return;
+                }
+
+                const newSet = new Set(selectedIds);
+                const newDetails = { ...optionDetails };
+                
+                optionsToClear.forEach(o => {
+                    newSet.delete(o.id);
+                    delete newDetails[o.id];
+                });
+                
+                if (shouldClearTimeline) setTimelineText('');
+                
+                setSelectedIds(newSet);
+                setOptionDetails(newDetails);
+                setManualEditMode(false); // Genaktiver auto-generering
+                
+                setNotification({ message: `${sectionName} er ryddet`, type: 'success' });
                 setTimeout(() => setNotification(null), 3000);
             };
             
@@ -619,19 +760,6 @@
                 }
             };
 
-            const formatList = (items) => {
-                if (items.length === 0) return '';
-                if (items.length === 1) return items[0];
-                const last = items.pop();
-                return items.join(', ') + ' og ' + last;
-            };
-
-            const formatWithDetail = (text, detail) => {
-                if (!detail || detail.trim() === '') return text;
-                const cleanText = text.replace(/\.$/, '');
-                return `${cleanText} (${detail}).`;
-            };
-
             const calculateDepressionSeverity = (selectedSet) => {
                 const coreCount = DEP_CORE_IDS.filter(id => selectedSet.has(id)).length;
                 const accCount = DEP_ACC_IDS.filter(id => selectedSet.has(id)).length;
@@ -643,11 +771,6 @@
                 return null;
             };
             
-            const capitalize = (s) => {
-                if (!s) return '';
-                return s.charAt(0).toUpperCase() + s.slice(1);
-            };
-
             const processCategoryOptions = (categoryOptions, categoryName) => {
                 const lines = [];
                 const smartMergeGroups = {}; 
@@ -662,7 +785,9 @@
                         
                         let itemText = opt.smartMerge.item;
                         if (detail && detail.trim() !== '') {
-                            itemText += ` (${detail})`;
+                            // Formater uddybning: Punktum + Mellemrum + Stort bogstav
+                            const d = detail.trim().charAt(0).toUpperCase() + detail.trim().slice(1);
+                            itemText += `. ${d}`;
                         }
                         smartMergeGroups[key].push(itemText);
                     } else {
@@ -869,14 +994,14 @@
                                 <div key={cat} className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-full">
                                     <div className="bg-slate-50 px-4 py-3 border-b border-slate-200 flex items-center justify-between">
                                         <h3 className="font-semibold text-slate-700 text-sm uppercase tracking-wide">{cat}</h3>
-                                        {dataSet.filter(o => o.category === cat && !o.isDefault && selectedIds.has(o.id)).length > 0 && (
+                                        {dataSet.filter(o => o.category === cat && !o.isDefault && !o.isNormal && selectedIds.has(o.id)).length > 0 && (
                                             <AlertCircle className="w-4 h-4 text-red-500" />
                                         )}
                                     </div>
                                     <div className="p-4 flex flex-col gap-2">
                                         {dataSet.filter(o => o.category === cat).map(option => {
                                             const isSelected = selectedIds.has(option.id);
-                                            const isPathology = !option.isDefault;
+                                            const isPathology = !option.isDefault && !option.isNormal;
                                             
                                             let btnClass = "w-full text-left px-3 py-2.5 text-sm rounded-lg border transition-all duration-200 flex items-center justify-between group ";
                                             
@@ -957,10 +1082,10 @@
                                 type="button"
                                 onClick={clearAll}
                                 className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors bg-white text-red-600 border border-red-200 hover:bg-red-50 hover:border-red-300 cursor-pointer"
-                                title="Fjern alle markeringer (Tomt resultat)"
+                                title="Fjern alle markeringer i den aktive sektion"
                             >
                                 <Trash2 className="w-5 h-5" />
-                                <span>Ryd alt</span>
+                                <span>{activeSection === 'full_note' ? 'Ryd Alt' : 'Ryd Sektion'}</span>
                             </button>
 
                             {/* Toggle for Summary Mode */}
