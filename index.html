@@ -69,6 +69,7 @@
         const ChevronRight = ({ className }) => <Icon className={className}><path d="m9 18 6-6-6-6"/></Icon>;
         const ChevronDown = ({ className }) => <Icon className={className}><path d="m6 9 6 6 6-6"/></Icon>;
         const Layout = ({ className }) => <Icon className={className}><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></Icon>;
+        const Repeat = ({ className }) => <Icon className={className}><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></Icon>;
 
 
         // --- DEPRESSION LOGIC & DATA ---
@@ -480,6 +481,7 @@
             // --- NEW: DIET DAYS STATE ---
             const [dietDays, setDietDays] = useState([]);
             const [activeDietDayId, setActiveDietDayId] = useState(null); // Which day is currently expanded?
+            const [isUniformDiet, setIsUniformDiet] = useState(false); // New: Toggle for uniform diet
 
             // SAFE MODE LOGIC
             const [manualEditMode, setManualEditMode] = useState(false);
@@ -497,10 +499,12 @@
 
             useEffect(() => {
                 generateText();
-            }, [selectedIds, activeSection, showSummary, optionDetails, timelineText, dietDays]);
+            }, [selectedIds, activeSection, showSummary, optionDetails, timelineText, dietDays, isUniformDiet]);
             
             // --- DIET FUNCTIONS ---
             const addDietDay = () => {
+                if (isUniformDiet) return; // Prevent adding days if uniform diet is active
+                
                 const newId = Date.now();
                 const newDay = {
                     id: newId,
@@ -554,6 +558,25 @@
                     return newDays;
                 });
                 setNotification({ message: 'Måltider kopieret fra forrige dag', type: 'success' });
+                setTimeout(() => setNotification(null), 3000);
+            };
+
+            const toggleUniform = () => {
+                const newState = !isUniformDiet;
+                setIsUniformDiet(newState);
+                
+                if (newState) {
+                     setNotification({ message: 'Tilstand aktiveret: Spiser det samme hver dag', type: 'success' });
+                     // If no days exist, add one automatically
+                     if (dietDays.length === 0) {
+                         addDietDay();
+                     } else {
+                         // Ensure Day 1 is active view
+                         setActiveDietDayId(dietDays[0].id);
+                     }
+                } else {
+                     setNotification({ message: 'Tilstand deaktiveret: Individuelle dage', type: 'success' });
+                }
                 setTimeout(() => setNotification(null), 3000);
             };
 
@@ -795,12 +818,14 @@
                     optionsToClear = ANOREXIA_OPTIONS;
                     sectionName = 'Anoreksia Nervosa';
                     setDietDays([]); // Clear diet days also
+                    setIsUniformDiet(false);
                 } else if (activeSection === 'full_note') {
                     // Hvis man står på "Samlet notat", giver det mening at "Ryd alt" rydder alt
                     setSelectedIds(new Set());
                     setOptionDetails({});
                     setTimelineText('');
                     setDietDays([]);
+                    setIsUniformDiet(false);
                     setManualEditMode(false);
                     setNotification({ message: 'Hele notatet er ryddet', type: 'success' });
                     setTimeout(() => setNotification(null), 3000);
@@ -966,18 +991,35 @@
 
                     // Insert Diet Days if this is diagnosis_anorexia
                     if (sec.id === 'diagnosis_anorexia' && dietDays.length > 0) {
-                        sectionLines.push("Kostanamnese (eksempler fra sidste 14 dage):");
-                        dietDays.forEach(day => {
-                            sectionLines.push(`${day.label}:`);
-                            if (day.meals.morgen) sectionLines.push(`- Morgen: ${day.meals.morgen}`);
-                            if (day.meals.formiddag) sectionLines.push(`- Før frokost: ${day.meals.formiddag}`);
-                            if (day.meals.frokost) sectionLines.push(`- Frokost: ${day.meals.frokost}`);
-                            if (day.meals.eftermiddag) sectionLines.push(`- Eftermiddag: ${day.meals.eftermiddag}`);
-                            if (day.meals.aften) sectionLines.push(`- Aften: ${day.meals.aften}`);
-                            if (day.meals.sen_aften) sectionLines.push(`- Efter aften: ${day.meals.sen_aften}`);
-                            if (day.meals.vaeske) sectionLines.push(`- Væske: ${day.meals.vaeske}`);
-                            sectionLines.push(""); // Empty line after day
-                        });
+                        
+                        if (isUniformDiet) {
+                             // UNIFORM DIET LOGIC - USE ONLY DAY 1
+                             const day = dietDays[0];
+                             if (day) {
+                                sectionLines.push("Kostanamnese: Patienten angiver at spise det samme hver dag. Nedenstående er repræsentativt for det daglige indtag:");
+                                if (day.meals.morgen) sectionLines.push(`- Morgen: ${day.meals.morgen}`);
+                                if (day.meals.formiddag) sectionLines.push(`- Før frokost: ${day.meals.formiddag}`);
+                                if (day.meals.frokost) sectionLines.push(`- Frokost: ${day.meals.frokost}`);
+                                if (day.meals.eftermiddag) sectionLines.push(`- Eftermiddag: ${day.meals.eftermiddag}`);
+                                if (day.meals.aften) sectionLines.push(`- Aften: ${day.meals.aften}`);
+                                if (day.meals.sen_aften) sectionLines.push(`- Efter aften: ${day.meals.sen_aften}`);
+                                if (day.meals.vaeske) sectionLines.push(`- Væske: ${day.meals.vaeske}`);
+                             }
+                        } else {
+                            // NORMAL LOGIC - LIST ALL DAYS
+                            sectionLines.push("Kostanamnese (eksempler fra sidste 14 dage):");
+                            dietDays.forEach(day => {
+                                sectionLines.push(`${day.label}:`);
+                                if (day.meals.morgen) sectionLines.push(`- Morgen: ${day.meals.morgen}`);
+                                if (day.meals.formiddag) sectionLines.push(`- Før frokost: ${day.meals.formiddag}`);
+                                if (day.meals.frokost) sectionLines.push(`- Frokost: ${day.meals.frokost}`);
+                                if (day.meals.eftermiddag) sectionLines.push(`- Eftermiddag: ${day.meals.eftermiddag}`);
+                                if (day.meals.aften) sectionLines.push(`- Aften: ${day.meals.aften}`);
+                                if (day.meals.sen_aften) sectionLines.push(`- Efter aften: ${day.meals.sen_aften}`);
+                                if (day.meals.vaeske) sectionLines.push(`- Væske: ${day.meals.vaeske}`);
+                                sectionLines.push(""); // Empty line after day
+                            });
+                        }
                     }
 
                     const categories = Array.from(new Set(sec.options.map(o => o.category)));
@@ -1042,6 +1084,7 @@
                 if (activeSection === 'diagnosis_anorexia' || activeSection === 'full_note') {
                      setDietDays([]);
                      setActiveDietDayId(null);
+                     setIsUniformDiet(false);
                 }
 
                 setSelectedIds(newSet);
@@ -1105,37 +1148,75 @@
                                                 <Layout className="w-4 h-4" />
                                                 Kostregistrering (14 dage)
                                             </h3>
-                                            <p className="text-xs text-slate-500 mt-1">Vælg en dag i listen til venstre for at redigere.</p>
+                                            <p className="text-xs text-slate-500 mt-1">
+                                                {isUniformDiet ? 'Ensartet kost registreret. Rediger Dag 1 for at ændre.' : 'Vælg en dag i listen til venstre for at redigere.'}
+                                            </p>
                                         </div>
-                                        <button 
-                                            onClick={addDietDay}
-                                            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors shadow-sm"
-                                        >
-                                            <Plus size={16} />
-                                            Tilføj Dag
-                                        </button>
+                                        <div className="flex gap-3">
+                                            <button 
+                                                onClick={toggleUniform}
+                                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm ${
+                                                    isUniformDiet 
+                                                    ? 'bg-amber-100 text-amber-900 border border-amber-300 ring-1 ring-amber-300' 
+                                                    : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                                                }`}
+                                                title="Klik her hvis patienten spiser det samme hver dag. Dette låser input til Dag 1."
+                                            >
+                                                <Repeat size={16} />
+                                                Spiser det samme hver dag
+                                            </button>
+                                            <button 
+                                                onClick={addDietDay}
+                                                disabled={isUniformDiet}
+                                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm ${
+                                                    isUniformDiet
+                                                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                                                    : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                                                }`}
+                                            >
+                                                <Plus size={16} />
+                                                Tilføj Dag
+                                            </button>
+                                        </div>
                                     </div>
                                     
                                     {/* MASTER-DETAIL LAYOUT */}
-                                    <div className="flex flex-col md:flex-row h-[550px] bg-white border border-slate-200 rounded-xl overflow-hidden">
+                                    <div className="flex flex-col md:flex-row h-[550px] bg-white border border-slate-200 rounded-xl overflow-hidden relative">
                                         
+                                        {/* UNIFORM DIET OVERLAY FOR LEFT COLUMN */}
+                                        {isUniformDiet && (
+                                            <div className="absolute top-0 left-0 bottom-0 w-1/3 z-10 bg-slate-50/60 backdrop-blur-[1px] flex flex-col items-center justify-center p-4 border-r border-slate-200 text-center">
+                                                 <div className="bg-amber-50 p-4 rounded-xl border border-amber-200 shadow-sm">
+                                                     <Repeat className="w-8 h-8 text-amber-500 mx-auto mb-2" />
+                                                     <h4 className="font-bold text-amber-900 text-sm">Ensartet Kost</h4>
+                                                     <p className="text-xs text-amber-700 mt-1">
+                                                        Input er låst til <strong>Dag 1</strong>, da kosten er angivet som værende ens hver dag.
+                                                     </p>
+                                                 </div>
+                                            </div>
+                                        )}
+
                                         {/* LEFT COLUMN: LIST */}
                                         <div className="w-full md:w-1/3 border-r border-slate-200 bg-slate-50 flex flex-col">
-                                             <div className="p-3 bg-slate-100 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase">
-                                                Dage ({dietDays.length})
+                                             <div className="p-3 bg-slate-100 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase flex justify-between items-center">
+                                                <span>Dage ({dietDays.length})</span>
                                              </div>
                                              <div className="overflow-y-auto flex-1 p-2 space-y-1">
                                                 {dietDays.length === 0 ? (
                                                     <div className="text-center py-10 text-slate-400 text-sm italic px-4">
-                                                        Ingen dage tilføjet. <br/>Tryk på "Tilføj Dag".
+                                                        Ingen dage tilføjet. <br/>
+                                                        {isUniformDiet ? 'Systemet tilføjer automatisk en dag...' : 'Tryk på "Tilføj Dag".'}
                                                     </div>
                                                 ) : (
                                                     dietDays.map((day, index) => {
                                                         const isActive = activeDietDayId === day.id;
+                                                        // Hide other days visually if uniform is active, only show Day 1
+                                                        if (isUniformDiet && index > 0) return null;
+
                                                         return (
                                                             <div 
                                                                 key={day.id}
-                                                                onClick={() => setActiveDietDayId(day.id)} // Just switch, don't toggle off to ensure view stays consistent
+                                                                onClick={() => setActiveDietDayId(day.id)} 
                                                                 className={`w-full text-left px-3 py-3 rounded-lg flex items-center justify-between cursor-pointer transition-all border ${
                                                                     isActive 
                                                                     ? 'bg-white border-indigo-200 shadow-sm ring-1 ring-indigo-50' 
@@ -1145,7 +1226,9 @@
                                                                 <div className="flex items-center gap-3">
                                                                     <div className={`w-1.5 h-8 rounded-full ${isActive ? 'bg-indigo-500' : 'bg-slate-300'}`}></div>
                                                                     <div>
-                                                                        <div className={`text-sm font-semibold ${isActive ? 'text-indigo-700' : 'text-slate-600'}`}>{day.label}</div>
+                                                                        <div className={`text-sm font-semibold ${isActive ? 'text-indigo-700' : 'text-slate-600'}`}>
+                                                                            {isUniformDiet ? 'Standard Dag (Dag 1)' : day.label}
+                                                                        </div>
                                                                         <div className="text-[10px] text-slate-400">
                                                                             {Object.values(day.meals).filter(v => v).length} måltider
                                                                         </div>
@@ -1153,13 +1236,15 @@
                                                                 </div>
                                                                 
                                                                 <div className="flex items-center gap-1">
-                                                                    <button 
-                                                                        onClick={(e) => { e.stopPropagation(); removeDietDay(day.id); }} 
-                                                                        className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
-                                                                        title="Slet dag"
-                                                                    >
-                                                                        <Trash2 size={14}/>
-                                                                    </button>
+                                                                    {!isUniformDiet && (
+                                                                        <button 
+                                                                            onClick={(e) => { e.stopPropagation(); removeDietDay(day.id); }} 
+                                                                            className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                                                                            title="Slet dag"
+                                                                        >
+                                                                            <Trash2 size={14}/>
+                                                                        </button>
+                                                                    )}
                                                                     {isActive && <ChevronRight className="w-4 h-4 text-indigo-400" />}
                                                                 </div>
                                                             </div>
@@ -1183,8 +1268,9 @@
                                                                     value={activeDay.label} 
                                                                     onChange={(e) => updateDietDay(activeDay.id, 'label', e.target.value)}
                                                                     placeholder="Navngiv dag..."
+                                                                    disabled={isUniformDiet}
                                                                 />
-                                                                {index > 0 && (
+                                                                {!isUniformDiet && index > 0 && (
                                                                      <button 
                                                                         onClick={() => copyPreviousDay(activeDay.id)}
                                                                         className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition-colors"
@@ -1215,7 +1301,9 @@
                                                         <Layout className="w-8 h-8 text-slate-300" />
                                                     </div>
                                                     <p className="font-medium text-slate-500">Ingen dag valgt</p>
-                                                    <p className="text-xs mt-1 max-w-xs">Vælg en dag fra listen til venstre for at redigere måltiderne, eller tilføj en ny dag.</p>
+                                                    <p className="text-xs mt-1 max-w-xs">
+                                                        {isUniformDiet ? 'Systemfejl: Dag 1 mangler. Prøv at slå funktionen fra og til igen.' : 'Vælg en dag fra listen til venstre for at redigere måltiderne, eller tilføj en ny dag.'}
+                                                    </p>
                                                 </div>
                                             )}
                                         </div>
