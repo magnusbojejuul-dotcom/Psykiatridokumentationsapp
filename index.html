@@ -176,15 +176,24 @@
             { id: 'ap_ctrl_some', label: 'Nogen kontrol', category: 'Symptomtryk & Mestring', text: 'Har nogen følelse af kontrol over symptomerne.', exclude: ['ap_ctrl_good', 'ap_ctrl_little', 'ap_ctrl_none'] },
             { id: 'ap_ctrl_little', label: 'Lidt kontrol', category: 'Symptomtryk & Mestring', text: 'Har lidt følelse af kontrol over symptomerne.', exclude: ['ap_ctrl_good', 'ap_ctrl_some', 'ap_ctrl_none'] },
             { id: 'ap_ctrl_none', label: 'Ingen kontrol', category: 'Symptomtryk & Mestring', text: 'Har ingen følelse af kontrol over symptomerne.', exclude: ['ap_ctrl_good', 'ap_ctrl_some', 'ap_ctrl_little'] },
-            { id: 'ap_risk_yes', label: 'Skadetanker (Ja)', category: 'Risiko & Oplevelser', text: 'Har haft tanker om at skade sig selv eller andre.', exclude: ['ap_risk_no'] },
-            { id: 'ap_risk_no', label: 'Ingen skadetanker', category: 'Risiko & Oplevelser', text: 'Har ikke haft tanker om at skade sig selv eller andre.', isDefault: true, exclude: ['ap_risk_yes'] },
-            { id: 'ap_psych_no', label: 'Ingen psykose-tegn', category: 'Risiko & Oplevelser', text: 'Oplever ikke mærkelige eller ubehagelige tanker, sanser ting, som andre ikke gør, eller føler sig påvirket af noget udefrakommende.', isDefault: true, exclude: ['ap_psych_gen', 'ap_psych_audit', 'ap_psych_vis', 'ap_psych_para', 'ap_psych_thought', 'ap_psych_control'] },
-            { id: 'ap_psych_gen', label: 'Psykotiske oplevelser (Generelt)', category: 'Risiko & Oplevelser', text: 'Oplever mærkelige eller ubehagelige tanker og sanseoplevelser.', exclude: ['ap_psych_no'] },
-            { id: 'ap_psych_audit', label: 'Hørehallucinationer', category: 'Risiko & Oplevelser', text: 'Beskriver hørehallucinationer (stemmer/lyde).', exclude: ['ap_psych_no'], smartMerge: { prefix: 'Patienten beskriver ', item: 'hørehallucinationer', suffix: '.' } },
-            { id: 'ap_psych_vis', label: 'Synshallucinationer', category: 'Risiko & Oplevelser', text: 'Beskriver synshallucinationer.', exclude: ['ap_psych_no'], smartMerge: { prefix: 'Patienten beskriver ', item: 'synshallucinationer', suffix: '.' } },
-            { id: 'ap_psych_para', label: 'Paranoia/Forfølgelse', category: 'Risiko & Oplevelser', text: 'Føler sig forfulgt eller overvåget.', exclude: ['ap_psych_no'], smartMerge: { prefix: 'Patienten beskriver ', item: 'oplevelser af forfølgelse eller overvågning', suffix: '.' } },
-            { id: 'ap_psych_thought', label: 'Tankeinterferens', category: 'Risiko & Oplevelser', text: 'Oplever tankepåvirkning (indsættelse/fratagelse/hørlighed).', exclude: ['ap_psych_no'], smartMerge: { prefix: 'Patienten beskriver ', item: 'tankeinterferens (indsættelse/fratagelse/hørlighed)', suffix: '.' } },
-            { id: 'ap_psych_control', label: 'Styringsoplevelser', category: 'Risiko & Oplevelser', text: 'Føler sig styret af udefrakommende kræfter.', exclude: ['ap_psych_no'], smartMerge: { prefix: 'Patienten beskriver ', item: 'styringsoplevelser', suffix: '.' } },
+            
+            // --- OPDELT SEKTION START ---
+            
+            // NY SEKTION 1: SELVSKADE & RISIKO
+            { id: 'ap_risk_yes', label: 'Skadetanker (Ja)', category: 'Selvskade & Risiko', text: 'Har haft tanker om at skade sig selv eller andre.', exclude: ['ap_risk_no'], hasInput: true, inputPlaceholder: 'Uddyb evt. konkrete tanker/planer' },
+            { id: 'ap_risk_no', label: 'Ingen skadetanker', category: 'Selvskade & Risiko', text: 'Har ikke haft tanker om at skade sig selv eller andre.', isDefault: true, exclude: ['ap_risk_yes'] },
+
+            // NY SEKTION 2: PSYKOTISKE SYMPTOMER
+            { id: 'ap_psych_no', label: 'Ingen psykose-tegn', category: 'Psykotiske Symptomer', text: 'Oplever ikke mærkelige eller ubehagelige tanker, sanser ting, som andre ikke gør, eller føler sig påvirket af noget udefrakommende.', isDefault: true, exclude: ['ap_psych_gen', 'ap_psych_audit', 'ap_psych_vis', 'ap_psych_para', 'ap_psych_thought', 'ap_psych_control'] },
+            { id: 'ap_psych_gen', label: 'Psykotiske oplevelser (Generelt)', category: 'Psykotiske Symptomer', text: 'Oplever mærkelige eller ubehagelige tanker og sanseoplevelser.', exclude: ['ap_psych_no'] },
+            { id: 'ap_psych_audit', label: 'Hørehallucinationer', category: 'Psykotiske Symptomer', text: 'Beskriver hørehallucinationer (stemmer/lyde).', exclude: ['ap_psych_no'], smartMerge: { prefix: 'Patienten beskriver ', item: 'hørehallucinationer', suffix: '.' } },
+            { id: 'ap_psych_vis', label: 'Synshallucinationer', category: 'Psykotiske Symptomer', text: 'Beskriver synshallucinationer.', exclude: ['ap_psych_no'], smartMerge: { prefix: 'Patienten beskriver ', item: 'synshallucinationer', suffix: '.' } },
+            { id: 'ap_psych_para', label: 'Paranoia/Forfølgelse', category: 'Psykotiske Symptomer', text: 'Føler sig forfulgt eller overvåget.', exclude: ['ap_psych_no'], smartMerge: { prefix: 'Patienten beskriver ', item: 'oplevelser af forfølgelse eller overvågning', suffix: '.' } },
+            { id: 'ap_psych_thought', label: 'Tankeinterferens', category: 'Psykotiske Symptomer', text: 'Oplever tankepåvirkning (indsættelse/fratagelse/hørlighed).', exclude: ['ap_psych_no'], smartMerge: { prefix: 'Patienten beskriver ', item: 'tankeinterferens (indsættelse/fratagelse/hørlighed)', suffix: '.' } },
+            { id: 'ap_psych_control', label: 'Styringsoplevelser', category: 'Psykotiske Symptomer', text: 'Føler sig styret af udefrakommende kræfter.', exclude: ['ap_psych_no'], smartMerge: { prefix: 'Patienten beskriver ', item: 'styringsoplevelser', suffix: '.' } },
+
+            // --- OPDELT SEKTION SLUT ---
+
             { id: 'ap_mot_yes', label: 'Motiveret', category: 'Motivation & Ønsker', text: 'Er motiveret for behandling.', isDefault: true, exclude: ['ap_mot_no'] },
             { id: 'ap_mot_no', label: 'Ikke motiveret', category: 'Motivation & Ønsker', text: 'Er ikke motiveret for behandling.', exclude: ['ap_mot_yes'] },
             { id: 'ap_help_yes', label: 'Ønsker hjælp', category: 'Motivation & Ønsker', text: 'Ønsker hjælp til...', isDefault: true, exclude: ['ap_help_no'] },
