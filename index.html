@@ -93,16 +93,16 @@
 
         // --- ANOREKSIA NERVOSA OPTIONS ---
         const ANOREXIA_OPTIONS = [
-            { id: 'an_cal_count', label: 'Tæller kalorier', category: 'Spiseadfærd & Mønstre', text: 'Der tælles kalorier.' },
-            { id: 'an_meals_skipped', label: 'Springes måltider over?', category: 'Spiseadfærd & Mønstre', text: 'Der springes måltider over.', hasInput: true, inputPlaceholder: 'Hvilke?' },
-            { id: 'an_fluid_meal', label: 'Væske til måltid', category: 'Spiseadfærd & Mønstre', text: 'Der drikkes væske til hvert måltid.' },
+            { id: 'an_cal_count', label: 'Tæller kalorier', category: 'Spiseadfærd & Mønstre', text: 'Der tælles kalorier.', smartMerge: { prefix: 'Der ', item: 'tælles kalorier', suffix: '.' } },
+            { id: 'an_meals_skipped', label: 'Springes måltider over?', category: 'Spiseadfærd & Mønstre', text: 'Der springes måltider over.', hasInput: true, inputPlaceholder: 'Hvilke?', detailInParens: true, smartMerge: { prefix: 'Der ', item: 'springes måltider over', suffix: '.' } },
+            { id: 'an_fluid_meal', label: 'Væske til måltid', category: 'Spiseadfærd & Mønstre', text: 'Der drikkes væske til hvert måltid.', smartMerge: { prefix: 'Der ', item: 'drikkes væske til hvert måltid', suffix: '.' } },
             { id: 'an_fluid_type', label: 'Hvad drikkes?', category: 'Spiseadfærd & Mønstre', text: 'Væsketype:', hasInput: true, inputPlaceholder: 'Vand, sodavand, etc...' },
 
-            { id: 'an_comp_lax', label: 'Afføringsmiddel', category: 'Kompenserende Adfærd', text: 'Benytter afføringsmidler.' },
-            { id: 'an_comp_vomit', label: 'Opkast', category: 'Kompenserende Adfærd', text: 'Benytter provokeret opkast.' },
-            { id: 'an_comp_exercise', label: 'Motion', category: 'Kompenserende Adfærd', text: 'Benytter overdreven motion.' },
-            { id: 'an_comp_diuretic', label: 'Vanddrivende', category: 'Kompenserende Adfærd', text: 'Benytter vanddrivende midler.' },
-            { id: 'an_comp_meds', label: 'Slankemedicin', category: 'Kompenserende Adfærd', text: 'Benytter slankemedicin.' },
+            { id: 'an_comp_lax', label: 'Afføringsmiddel', category: 'Kompenserende Adfærd', text: 'Benytter afføringsmidler.', smartMerge: { prefix: 'Af kompenserende adfærd benyttes ', item: 'afføringsmidler', suffix: '.' } },
+            { id: 'an_comp_vomit', label: 'Opkast', category: 'Kompenserende Adfærd', text: 'Benytter provokeret opkast.', smartMerge: { prefix: 'Af kompenserende adfærd benyttes ', item: 'provokeret opkast', suffix: '.' } },
+            { id: 'an_comp_exercise', label: 'Motion', category: 'Kompenserende Adfærd', text: 'Benytter overdreven motion.', smartMerge: { prefix: 'Af kompenserende adfærd benyttes ', item: 'overdreven motion', suffix: '.' } },
+            { id: 'an_comp_diuretic', label: 'Vanddrivende', category: 'Kompenserende Adfærd', text: 'Benytter vanddrivende midler.', smartMerge: { prefix: 'Af kompenserende adfærd benyttes ', item: 'vanddrivende midler', suffix: '.' } },
+            { id: 'an_comp_meds', label: 'Slankemedicin', category: 'Kompenserende Adfærd', text: 'Benytter slankemedicin.', smartMerge: { prefix: 'Af kompenserende adfærd benyttes ', item: 'slankemedicin', suffix: '.' } },
             { id: 'an_comp_prevent', label: 'Hvis forhindret?', category: 'Kompenserende Adfærd', text: 'Ved forhindring af kompenserende adfærd ses:', hasInput: true, inputPlaceholder: 'Angst, uro, etc...' },
         ];
 
@@ -397,12 +397,14 @@
             { id: 'cp_abnorm_p', label: 'St.p. bilyde', category: 'Stethoscopia', text: 'St.p.: Der høres bilyde (rhonchi/crepitatio).', exclude: ['cp_normal'] },
             
             // --- ABDOMEN ---
-            { id: 'abd_normal', label: 'Abdomen normal', category: 'Abdomen', text: 'Abdomen blød og uøm. Ingen udfyldninger. Normale tarmlyde.', isDefault: true, exclude: ['abd_tender', 'abd_guard', 'abd_mass', 'abd_sounds_missing', 'abd_sounds_hyper'] },
-            { id: 'abd_tender', label: 'Ømhed', category: 'Abdomen', text: 'Ømhed ved palpation.', exclude: ['abd_normal'], smartMerge: { prefix: 'Der findes ', item: 'ømhed ved palpation', suffix: '.' } },
-            { id: 'abd_guard', label: 'Værn/Slipømhed', category: 'Abdomen', text: 'Værn og slipømhed.', exclude: ['abd_normal'], smartMerge: { prefix: 'Der findes ', item: 'værn og slipømhed', suffix: '.' } },
-            { id: 'abd_mass', label: 'Udfyldninger', category: 'Abdomen', text: 'Udfyldning.', exclude: ['abd_normal'], smartMerge: { prefix: 'Der palperes ', item: 'udfyldning', suffix: '.' } },
-            { id: 'abd_sounds_missing', label: 'Manglende tarmlyde', category: 'Abdomen', text: 'Manglende tarmlyde.', exclude: ['abd_normal'], smartMerge: { prefix: 'Der høres ', item: 'manglende tarmlyde', suffix: '.' } },
-            { id: 'abd_sounds_hyper', label: 'Hyperaktive tarmlyde', category: 'Abdomen', text: 'Hyperaktive tarmlyde.', exclude: ['abd_normal'], smartMerge: { prefix: 'Der høres ', item: 'hyperaktive tarmlyde', suffix: '.' } },
+            { id: 'abd_normal', label: 'Abdomen normal', category: 'Abdomen & Nyreloger', text: 'Abdomen blød og uøm. Ingen udfyldninger. Normale tarmlyde. Ingen flankeømhed.', isDefault: true, exclude: ['abd_tender', 'abd_guard', 'abd_mass', 'abd_sounds_missing', 'abd_sounds_hyper', 'abd_flank_tender'] },
+            { id: 'abd_tender', label: 'Ømhed', category: 'Abdomen & Nyreloger', text: 'Ømhed ved palpation.', exclude: ['abd_normal'], smartMerge: { prefix: 'Der findes ', item: 'ømhed ved palpation', suffix: '.' } },
+            { id: 'abd_guard', label: 'Værn/Slipømhed', category: 'Abdomen & Nyreloger', text: 'Værn og slipømhed.', exclude: ['abd_normal'], smartMerge: { prefix: 'Der findes ', item: 'værn og slipømhed', suffix: '.' } },
+            { id: 'abd_mass', label: 'Udfyldninger', category: 'Abdomen & Nyreloger', text: 'Udfyldning.', exclude: ['abd_normal'], smartMerge: { prefix: 'Der palperes ', item: 'udfyldning', suffix: '.' } },
+            { id: 'abd_sounds_missing', label: 'Manglende tarmlyde', category: 'Abdomen & Nyreloger', text: 'Manglende tarmlyde.', exclude: ['abd_normal'], smartMerge: { prefix: 'Der høres ', item: 'manglende tarmlyde', suffix: '.' } },
+            { id: 'abd_sounds_hyper', label: 'Hyperaktive tarmlyde', category: 'Abdomen & Nyreloger', text: 'Hyperaktive tarmlyde.', exclude: ['abd_normal'], smartMerge: { prefix: 'Der høres ', item: 'hyperaktive tarmlyde', suffix: '.' } },
+            // NY: Flankeømhed
+            { id: 'abd_flank_tender', label: 'Flankeømhed', category: 'Abdomen & Nyreloger', text: 'Der er bankeømhed svarende til nyrelogerne.', exclude: ['abd_normal'], smartMerge: { prefix: 'Der er ', item: 'bankeømhed svarende til nyrelogerne', suffix: '.' } },
 
 
             // --- CRANIAL NERVES ---
@@ -631,9 +633,13 @@
                             
                             let itemText = opt.smartMerge.item;
                             if (detail && detail.trim() !== '') {
-                                // Formater uddybning: Punktum + Mellemrum + Stort bogstav
-                                const d = detail.trim().charAt(0).toUpperCase() + detail.trim().slice(1);
-                                itemText += `. ${d}`;
+                                if (opt.detailInParens) {
+                                    itemText += ` (${detail.trim()})`;
+                                } else {
+                                    // Formater uddybning: Punktum + Mellemrum + Stort bogstav
+                                    const d = detail.trim().charAt(0).toUpperCase() + detail.trim().slice(1);
+                                    itemText += `. ${d}`;
+                                }
                             }
                             smartMergeGroups[key].push(itemText);
                         } else {
@@ -890,9 +896,13 @@
                         
                         let itemText = opt.smartMerge.item;
                         if (detail && detail.trim() !== '') {
-                            // Formater uddybning: Punktum + Mellemrum + Stort bogstav
-                            const d = detail.trim().charAt(0).toUpperCase() + detail.trim().slice(1);
-                            itemText += `. ${d}`;
+                            if (opt.detailInParens) {
+                                itemText += ` (${detail.trim()})`;
+                            } else {
+                                // Formater uddybning: Punktum + Mellemrum + Stort bogstav
+                                const d = detail.trim().charAt(0).toUpperCase() + detail.trim().slice(1);
+                                itemText += `. ${d}`;
+                            }
                         }
                         smartMergeGroups[key].push(itemText);
                     } else {
@@ -1483,7 +1493,7 @@
                                             {activeSection === 'psych' && 'Klinisk vurdering (Psykisk)'}
                                             {activeSection === 'somatic_obj' && 'Somatisk Vurdering'}
                                             {activeSection === 'somatic_act' && 'Somatisk Anamnese'}
-                                            {activeSection === 'diagnosis_anorexia' && 'Anoreksia Nervosa (F50.0) (Hovedemne)'}
+                                            {activeSection === 'diagnosis_anorexia' && 'Anoreksia Nervosa (F50.0)'}
                                             {activeSection === 'full_note' && 'Samlet Journalnotat (Oversigt)'}
                                         </h2>
                                         <p className="text-sm text-slate-500 mt-1">
