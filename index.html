@@ -57,6 +57,8 @@
         const Trash2 = ({ className }) => <Icon className={className}><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></Icon>;
         const Star = ({ className }) => <Icon className={className}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></Icon>;
         const PenLine = ({ className }) => <Icon className={className}><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></Icon>;
+        const Cookie = ({ className }) => <Icon className={className}><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/><path d="M8.5 8.5v.01"/><path d="M16 15.5v.01"/><path d="M12 12v.01"/><path d="M11 17v.01"/><path d="M7 14v.01"/></Icon>;
+        const Plus = ({ className }) => <Icon className={className}><path d="M5 12h14"/><path d="M12 5v14"/></Icon>;
 
 
         // --- DEPRESSION LOGIC & DATA ---
@@ -80,6 +82,26 @@
             'motor_sys_normal', 'reflex_normal', 'coord_normal', 'gait_normal', 
             'eps_none', 'skin_normal'
         ];
+
+        // --- NEW: ANOREKSIA NERVOSA OPTIONS ---
+        // Bemærk: Måltiderne håndteres nu separat via "dietDays" state
+        const ANOREXIA_OPTIONS = [
+            // --- GENERELLE MØNSTRE ---
+            { id: 'an_cal_count', label: 'Tæller kalorier', category: 'Spiseadfærd & Mønstre', text: 'Der tælles kalorier.' },
+            { id: 'an_meals_skipped', label: 'Springes måltider over?', category: 'Spiseadfærd & Mønstre', text: 'Der springes måltider over.', hasInput: true, inputPlaceholder: 'Hvilke?' },
+            { id: 'an_fluid_meal', label: 'Væske til måltid', category: 'Spiseadfærd & Mønstre', text: 'Der drikkes væske til hvert måltid.' },
+            { id: 'an_fluid_type', label: 'Hvad drikkes?', category: 'Spiseadfærd & Mønstre', text: 'Væsketype:', hasInput: true, inputPlaceholder: 'Vand, sodavand, etc...' },
+
+            // --- KOMPENSERENDE ADFÆRD ---
+            { id: 'an_comp_lax', label: 'Afføringsmiddel', category: 'Kompenserende Adfærd', text: 'Benytter afføringsmidler.' },
+            { id: 'an_comp_vomit', label: 'Opkast', category: 'Kompenserende Adfærd', text: 'Benytter provokeret opkast.' },
+            { id: 'an_comp_exercise', label: 'Motion', category: 'Kompenserende Adfærd', text: 'Benytter overdreven motion.' },
+            { id: 'an_comp_diuretic', label: 'Vanddrivende', category: 'Kompenserende Adfærd', text: 'Benytter vanddrivende midler.' },
+            { id: 'an_comp_meds', label: 'Slankemedicin', category: 'Kompenserende Adfærd', text: 'Benytter slankemedicin.' },
+            
+            { id: 'an_comp_prevent', label: 'Hvis forhindret?', category: 'Kompenserende Adfærd', text: 'Ved forhindring af kompenserende adfærd ses:', hasInput: true, inputPlaceholder: 'Angst, uro, etc...' },
+        ];
+
 
         const ACTUAL_PSYCH_OPTIONS = [
             // --- HENVENDELSE & PROBLEM ---
@@ -459,6 +481,44 @@
             { id: 'skin_cut_old', label: 'Gamle ar', category: 'Hud/Traumer', text: 'Gamle ar efter selvskade (scars).', exclude: ['skin_normal'], smartMerge: { prefix: 'Der ses ', item: 'gamle ar', suffix: '.' } },
             { id: 'skin_inject', label: 'Injektionsmærker', category: 'Hud/Traumer', text: 'Injektionsmærker i lysken/albuebøjning.', exclude: ['skin_normal'], smartMerge: { prefix: 'Der ses ', item: 'injektionsmærker', suffix: '.' } },
         ];
+        
+        // --- DIET INPUT COMPONENT ---
+        const Input = ({ label, value, onChange }) => (
+            <div className="flex flex-col gap-0.5">
+                <label className="text-[10px] uppercase font-bold text-slate-400">{label}</label>
+                <input 
+                    className="text-xs p-1.5 rounded border border-slate-200 focus:outline-none focus:border-indigo-400 focus:bg-white bg-slate-50 transition-colors w-full"
+                    placeholder="..."
+                    value={value}
+                    onChange={(e) => onChange(e.target.value)}
+                />
+            </div>
+        );
+
+        const DietDayCard = ({ day, onChange, onDelete }) => (
+            <div className="min-w-[280px] w-full md:w-[280px] bg-white border border-slate-200 rounded-xl p-4 flex flex-col gap-3 shadow-sm hover:shadow-md transition-shadow relative group">
+                <div className="flex justify-between items-center pb-2 border-b border-slate-100">
+                    <input 
+                        className="font-semibold text-slate-700 bg-transparent border-none focus:ring-0 p-0 w-40 text-sm focus:text-indigo-600 transition-colors" 
+                        value={day.label} 
+                        onChange={(e) => onChange(day.id, 'label', e.target.value)}
+                        placeholder="Navngiv dag..."
+                    />
+                    <button onClick={() => onDelete(day.id)} className="text-slate-300 hover:text-red-500 transition-colors" title="Slet dag">
+                        <Trash2 size={16}/>
+                    </button>
+                </div>
+                <div className="space-y-3">
+                    <Input label="Morgenmad" value={day.meals.morgen} onChange={v => onChange(day.id, 'morgen', v)} />
+                    <Input label="Før frokost" value={day.meals.formiddag} onChange={v => onChange(day.id, 'formiddag', v)} />
+                    <Input label="Frokost" value={day.meals.frokost} onChange={v => onChange(day.id, 'frokost', v)} />
+                    <Input label="Eftermiddag" value={day.meals.eftermiddag} onChange={v => onChange(day.id, 'eftermiddag', v)} />
+                    <Input label="Aften" value={day.meals.aften} onChange={v => onChange(day.id, 'aften', v)} />
+                    <Input label="Efter aften" value={day.meals.sen_aften} onChange={v => onChange(day.id, 'sen_aften', v)} />
+                    <Input label="Væske" value={day.meals.vaeske} onChange={v => onChange(day.id, 'vaeske', v)} />
+                </div>
+            </div>
+        );
 
 
         // --- APP KOMPONENT ---
@@ -472,6 +532,9 @@
             const [showSummary, setShowSummary] = useState(false);
             const [timelineText, setTimelineText] = useState(''); // New: Timeline text
             
+            // --- NEW: DIET DAYS STATE ---
+            const [dietDays, setDietDays] = useState([]);
+
             // SAFE MODE LOGIC
             const [manualEditMode, setManualEditMode] = useState(false);
             const [lastAutoGeneratedText, setLastAutoGeneratedText] = useState('');
@@ -479,7 +542,7 @@
             // Initial load
             useEffect(() => {
                 const defaults = new Set();
-                [...PSYCH_OPTIONS, ...SOMATIC_OBJ_OPTIONS, ...SOMATIC_ACT_OPTIONS, ...ACTUAL_PSYCH_OPTIONS].forEach(opt => {
+                [...PSYCH_OPTIONS, ...SOMATIC_OBJ_OPTIONS, ...SOMATIC_ACT_OPTIONS, ...ACTUAL_PSYCH_OPTIONS, ...ANOREXIA_OPTIONS].forEach(opt => {
                     if (opt.isDefault) defaults.add(opt.id);
                 });
                 setSelectedIds(defaults);
@@ -488,7 +551,41 @@
 
             useEffect(() => {
                 generateText();
-            }, [selectedIds, activeSection, showSummary, optionDetails, timelineText]);
+            }, [selectedIds, activeSection, showSummary, optionDetails, timelineText, dietDays]);
+            
+            // --- DIET FUNCTIONS ---
+            const addDietDay = () => {
+                const newId = Date.now();
+                const newDay = {
+                    id: newId,
+                    label: `Dag ${dietDays.length + 1}`,
+                    meals: {
+                        morgen: '',
+                        formiddag: '',
+                        frokost: '',
+                        eftermiddag: '',
+                        aften: '',
+                        sen_aften: '',
+                        vaeske: ''
+                    }
+                };
+                setDietDays([...dietDays, newDay]);
+            };
+
+            const updateDietDay = (id, field, value) => {
+                setDietDays(prevDays => prevDays.map(day => {
+                    if (day.id === id) {
+                        if (field === 'label') return { ...day, label: value };
+                        return { ...day, meals: { ...day.meals, [field]: value } };
+                    }
+                    return day;
+                }));
+            };
+
+            const removeDietDay = (id) => {
+                setDietDays(prevDays => prevDays.filter(day => day.id !== id));
+            };
+
 
             const formatList = (items) => {
                 if (items.length === 0) return '';
@@ -501,8 +598,15 @@
                 if (!detail || detail.trim() === '') return text;
                 
                 let base = text.trim();
-                // Sikr at grundteksten slutter med punktum
-                if (!base.endsWith('.')) base += '.';
+                
+                // Håndtering af punktum vs kolon
+                // Hvis teksten slutter med ':', skal vi ikke tvinge et punktum ind før teksten
+                if (base.endsWith(':')) {
+                    // Do nothing - detail kommer direkte efter
+                } else if (!base.endsWith('.')) {
+                    // Ellers tilføj punktum for at afslutte sætningen før uddybningen
+                    base += '.';
+                }
                 
                 let d = detail.trim();
                 // Start uddybning med stort bogstav
@@ -564,7 +668,7 @@
                 // If in manual mode, perform Smart Replace Logic
                 if (manualEditMode) {
                     const cat = option.category;
-                    const allOptions = [...ACTUAL_PSYCH_OPTIONS, ...PSYCH_OPTIONS, ...SOMATIC_ACT_OPTIONS, ...SOMATIC_OBJ_OPTIONS];
+                    const allOptions = [...ACTUAL_PSYCH_OPTIONS, ...PSYCH_OPTIONS, ...SOMATIC_ACT_OPTIONS, ...SOMATIC_OBJ_OPTIONS, ...ANOREXIA_OPTIONS];
                     const catOptions = allOptions.filter(o => o.category === cat);
                     
                     // 1. Calculate PREVIOUS text (Current State)
@@ -716,11 +820,16 @@
                 } else if (activeSection === 'somatic_obj') {
                     optionsToClear = SOMATIC_OBJ_OPTIONS;
                     sectionName = 'Somatisk Vurdering';
+                } else if (activeSection === 'diagnosis_anorexia') {
+                    optionsToClear = ANOREXIA_OPTIONS;
+                    sectionName = 'Anoreksia Nervosa';
+                    setDietDays([]); // Clear diet days also
                 } else if (activeSection === 'full_note') {
                     // Hvis man står på "Samlet notat", giver det mening at "Ryd alt" rydder alt
                     setSelectedIds(new Set());
                     setOptionDetails({});
                     setTimelineText('');
+                    setDietDays([]);
                     setManualEditMode(false);
                     setNotification({ message: 'Hele notatet er ryddet', type: 'success' });
                     setTimeout(() => setNotification(null), 3000);
@@ -837,7 +946,8 @@
                     { id: 'psych_actual', title: 'AKTUELT PSYKISK', options: ACTUAL_PSYCH_OPTIONS },
                     { id: 'psych', title: 'OBJEKTIVT PSYKISK', options: PSYCH_OPTIONS },
                     { id: 'somatic_act', title: 'AKTUELT SOMATISK', options: SOMATIC_ACT_OPTIONS },
-                    { id: 'somatic_obj', title: 'SOMATISK VURDERING', options: SOMATIC_OBJ_OPTIONS }
+                    { id: 'somatic_obj', title: 'SOMATISK VURDERING', options: SOMATIC_OBJ_OPTIONS },
+                    { id: 'diagnosis_anorexia', title: 'ANOREKSIA NERVOSA (F50.0)', options: ANOREXIA_OPTIONS }
                 ];
 
                 let sectionsToRender = [];
@@ -883,6 +993,22 @@
                          sectionLines.push(`Sygdomsdebut & Udløsende faktorer: ${timelineText}`);
                     }
 
+                    // Insert Diet Days if this is diagnosis_anorexia
+                    if (sec.id === 'diagnosis_anorexia' && dietDays.length > 0) {
+                        sectionLines.push("Kostanamnese (eksempler fra sidste 14 dage):");
+                        dietDays.forEach(day => {
+                            sectionLines.push(`${day.label}:`);
+                            if (day.meals.morgen) sectionLines.push(`- Morgen: ${day.meals.morgen}`);
+                            if (day.meals.formiddag) sectionLines.push(`- Før frokost: ${day.meals.formiddag}`);
+                            if (day.meals.frokost) sectionLines.push(`- Frokost: ${day.meals.frokost}`);
+                            if (day.meals.eftermiddag) sectionLines.push(`- Eftermiddag: ${day.meals.eftermiddag}`);
+                            if (day.meals.aften) sectionLines.push(`- Aften: ${day.meals.aften}`);
+                            if (day.meals.sen_aften) sectionLines.push(`- Efter aften: ${day.meals.sen_aften}`);
+                            if (day.meals.vaeske) sectionLines.push(`- Væske: ${day.meals.vaeske}`);
+                            sectionLines.push(""); // Empty line after day
+                        });
+                    }
+
                     const categories = Array.from(new Set(sec.options.map(o => o.category)));
 
                     categories.forEach(cat => {
@@ -920,8 +1046,9 @@
                 else if (activeSection === 'psych') currentOptions = PSYCH_OPTIONS;
                 else if (activeSection === 'somatic_obj') currentOptions = SOMATIC_OBJ_OPTIONS;
                 else if (activeSection === 'somatic_act') currentOptions = SOMATIC_ACT_OPTIONS;
+                else if (activeSection === 'diagnosis_anorexia') currentOptions = ANOREXIA_OPTIONS;
                 else if (activeSection === 'full_note') {
-                   currentOptions = [...ACTUAL_PSYCH_OPTIONS, ...PSYCH_OPTIONS, ...SOMATIC_ACT_OPTIONS, ...SOMATIC_OBJ_OPTIONS];
+                   currentOptions = [...ACTUAL_PSYCH_OPTIONS, ...PSYCH_OPTIONS, ...SOMATIC_ACT_OPTIONS, ...SOMATIC_OBJ_OPTIONS, ...ANOREXIA_OPTIONS];
                 }
                 
                 const newSet = new Set(selectedIds);
@@ -936,6 +1063,10 @@
                 // Keep timeline text unless explicitly cleared? Let's clear it if resetting psych_actual
                 if (activeSection === 'psych_actual' || activeSection === 'full_note') {
                      setTimelineText('');
+                }
+                
+                if (activeSection === 'diagnosis_anorexia' || activeSection === 'full_note') {
+                     setDietDays([]);
                 }
 
                 setSelectedIds(newSet);
@@ -989,6 +1120,45 @@
                              </div>
                         )}
 
+                        {/* --- NEW DIET DAYS SECTION FOR ANOREXIA --- */}
+                        {activeSection === 'diagnosis_anorexia' && (
+                            <div className="mb-8">
+                                <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 shadow-inner">
+                                    <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-4">
+                                        <div>
+                                            <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wide">Kostregistrering (14 dage)</h3>
+                                            <p className="text-xs text-slate-500 mt-1">Tilføj dage for at beskrive specifikke måltider og væskeindtag.</p>
+                                        </div>
+                                        <button 
+                                            onClick={addDietDay}
+                                            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors shadow-sm"
+                                        >
+                                            <Plus size={16} />
+                                            Tilføj Dag
+                                        </button>
+                                    </div>
+                                    
+                                    {dietDays.length === 0 ? (
+                                        <div className="text-center py-8 text-slate-400 border-2 border-dashed border-slate-200 rounded-lg">
+                                            Ingen dage tilføjet endnu. Tryk på "Tilføj Dag" for at starte.
+                                        </div>
+                                    ) : (
+                                        <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar snap-x">
+                                            {dietDays.map((day, index) => (
+                                                <div key={day.id} className="snap-center">
+                                                    <DietDayCard 
+                                                        day={day} 
+                                                        onChange={updateDietDay} 
+                                                        onDelete={removeDietDay} 
+                                                    />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
                         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                             {categories.map(cat => (
                                 <div key={cat} className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-full">
@@ -1025,12 +1195,13 @@
                                                             <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
                                                         )}
                                                     </button>
-                                                    {/* Fritekstfelt kun for patologiske fund der er valgt */}
-                                                    {isSelected && isPathology && (
+                                                    
+                                                    {/* INPUT FELT: Vises hvis valgt, OG hvis det enten er patologisk ELLER har input flag (hasInput) */}
+                                                    {isSelected && (isPathology || option.hasInput) && (
                                                         <div className="mt-1 mb-1 ml-1 pl-2 border-l-2 border-slate-200">
                                                             <input 
                                                                 type="text" 
-                                                                placeholder="Uddybning..." 
+                                                                placeholder={option.inputPlaceholder || "Uddybning..."} 
                                                                 className="w-full text-xs p-1.5 bg-slate-50 border border-slate-200 rounded focus:outline-none focus:border-indigo-400 focus:bg-white transition-colors"
                                                                 value={optionDetails[option.id] || ''}
                                                                 onChange={(e) => handleDetailChange(option.id, e.target.value)}
@@ -1126,6 +1297,16 @@
                                     <Stethoscope className={`h-5 w-5 ${activeSection === 'somatic_obj' ? 'text-indigo-600' : 'text-slate-400'}`} />
                                     <span className="font-medium">Somatisk Vurdering</span>
                                 </button>
+                                
+                                <div className="h-px bg-slate-200 my-2"></div>
+                                <div className="px-3 py-1">
+                                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Diagnose-specifikke</span>
+                                </div>
+                                <button onClick={() => setActiveSection('diagnosis_anorexia')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${activeSection === 'diagnosis_anorexia' ? 'bg-white text-indigo-700 shadow ring-1 ring-slate-200' : 'text-slate-600 hover:bg-slate-100'}`}>
+                                    <Cookie className={`h-5 w-5 ${activeSection === 'diagnosis_anorexia' ? 'text-indigo-600' : 'text-slate-400'}`} />
+                                    <span className="font-medium">Anoreksia Nervosa</span>
+                                </button>
+
                                 <div className="h-px bg-slate-200 my-2"></div>
                                 <button onClick={() => setActiveSection('full_note')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${activeSection === 'full_note' ? 'bg-slate-800 text-white shadow ring-1 ring-slate-900' : 'text-slate-700 bg-slate-200 hover:bg-slate-300'}`}>
                                     <Layers className={`h-5 w-5 ${activeSection === 'full_note' ? 'text-emerald-400' : 'text-slate-600'}`} />
@@ -1148,6 +1329,7 @@
                                             {activeSection === 'psych' && 'Klinisk vurdering (Psykisk)'}
                                             {activeSection === 'somatic_obj' && 'Somatisk Vurdering'}
                                             {activeSection === 'somatic_act' && 'Somatisk Anamnese'}
+                                            {activeSection === 'diagnosis_anorexia' && 'Anoreksia Nervosa (F50.0) (Hovedemne)'}
                                             {activeSection === 'full_note' && 'Samlet Journalnotat (Oversigt)'}
                                         </h2>
                                         <p className="text-sm text-slate-500 mt-1">
@@ -1174,6 +1356,7 @@
                                 {activeSection === 'psych' && renderCardGrid(PSYCH_OPTIONS)}
                                 {activeSection === 'somatic_act' && renderCardGrid(SOMATIC_ACT_OPTIONS)}
                                 {activeSection === 'somatic_obj' && renderCardGrid(SOMATIC_OBJ_OPTIONS)}
+                                {activeSection === 'diagnosis_anorexia' && renderCardGrid(ANOREXIA_OPTIONS)}
                                 {activeSection === 'full_note' && (
                                     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-10 flex flex-col items-center justify-center text-center h-96">
                                         <Layers className="h-16 w-16 text-slate-200 mb-4" />
