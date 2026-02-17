@@ -24,6 +24,12 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+        /* Smooth transitions for width changes */
+        .transition-width {
+            transition-property: width, min-width, flex-basis;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 300ms;
+        }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-900 font-sans overflow-hidden">
@@ -45,6 +51,7 @@
         const FileText = ({ className }) => <Icon className={className}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></Icon>;
         const RotateCcw = ({ className }) => <Icon className={className}><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></Icon>;
         const Clipboard = ({ className }) => <Icon className={className}><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></Icon>;
+        const Copy = ({ className }) => <Icon className={className}><rect width="13" height="13" x="9" y="9" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></Icon>;
         const Maximize = ({ className }) => <Icon className={className}><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></Icon>;
         const Minimize = ({ className }) => <Icon className={className}><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></Icon>;
         const CheckCircle2 = ({ className }) => <Icon className={className}><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></Icon>;
@@ -59,16 +66,15 @@
         const PenLine = ({ className }) => <Icon className={className}><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></Icon>;
         const Cookie = ({ className }) => <Icon className={className}><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/><path d="M8.5 8.5v.01"/><path d="M16 15.5v.01"/><path d="M12 12v.01"/><path d="M11 17v.01"/><path d="M7 14v.01"/></Icon>;
         const Plus = ({ className }) => <Icon className={className}><path d="M5 12h14"/><path d="M12 5v14"/></Icon>;
+        const ChevronRight = ({ className }) => <Icon className={className}><path d="m9 18 6-6-6-6"/></Icon>;
+        const ChevronDown = ({ className }) => <Icon className={className}><path d="m6 9 6 6 6-6"/></Icon>;
 
 
         // --- DEPRESSION LOGIC & DATA ---
-        
-        // Kernesymptomer
+        // (Data definitions unchanged for brevity - they are included in full implementation)
         const DEP_CORE_IDS = ['dep_core_mood', 'dep_core_interest', 'dep_core_energy'];
-        // Ledsagesymptomer
         const DEP_ACC_IDS = ['dep_acc_conf', 'dep_acc_guilt', 'dep_acc_sui', 'dep_acc_conc', 'dep_acc_agit', 'dep_acc_sleep', 'dep_acc_app'];
 
-        // DEFINE NORMAL STATES FOR "ONE CLICK"
         const PSYCH_NORMAL_IDS = [
             'orient_normal', 'appear_normal', 'att_coop', 'anx_none', 
             'c_form_norm', 'c_emo_good', 'contact_eye_norm', 'aff_adekvat', 
@@ -83,61 +89,44 @@
             'eps_none', 'skin_normal'
         ];
 
-        // --- NEW: ANOREKSIA NERVOSA OPTIONS ---
-        // Bemærk: Måltiderne håndteres nu separat via "dietDays" state
+        // --- ANOREKSIA NERVOSA OPTIONS ---
         const ANOREXIA_OPTIONS = [
-            // --- GENERELLE MØNSTRE ---
             { id: 'an_cal_count', label: 'Tæller kalorier', category: 'Spiseadfærd & Mønstre', text: 'Der tælles kalorier.' },
             { id: 'an_meals_skipped', label: 'Springes måltider over?', category: 'Spiseadfærd & Mønstre', text: 'Der springes måltider over.', hasInput: true, inputPlaceholder: 'Hvilke?' },
             { id: 'an_fluid_meal', label: 'Væske til måltid', category: 'Spiseadfærd & Mønstre', text: 'Der drikkes væske til hvert måltid.' },
             { id: 'an_fluid_type', label: 'Hvad drikkes?', category: 'Spiseadfærd & Mønstre', text: 'Væsketype:', hasInput: true, inputPlaceholder: 'Vand, sodavand, etc...' },
 
-            // --- KOMPENSERENDE ADFÆRD ---
             { id: 'an_comp_lax', label: 'Afføringsmiddel', category: 'Kompenserende Adfærd', text: 'Benytter afføringsmidler.' },
             { id: 'an_comp_vomit', label: 'Opkast', category: 'Kompenserende Adfærd', text: 'Benytter provokeret opkast.' },
             { id: 'an_comp_exercise', label: 'Motion', category: 'Kompenserende Adfærd', text: 'Benytter overdreven motion.' },
             { id: 'an_comp_diuretic', label: 'Vanddrivende', category: 'Kompenserende Adfærd', text: 'Benytter vanddrivende midler.' },
             { id: 'an_comp_meds', label: 'Slankemedicin', category: 'Kompenserende Adfærd', text: 'Benytter slankemedicin.' },
-            
             { id: 'an_comp_prevent', label: 'Hvis forhindret?', category: 'Kompenserende Adfærd', text: 'Ved forhindring af kompenserende adfærd ses:', hasInput: true, inputPlaceholder: 'Angst, uro, etc...' },
         ];
 
 
         const ACTUAL_PSYCH_OPTIONS = [
-            // --- HENVENDELSE & PROBLEM ---
-            // VARIATION: "Henvendelsen drejer sig om..."
             { id: 'ap_reason', label: 'Søger hjælp fordi... (Fritekst)', category: 'Henvendelse & Problem', text: 'Pt. søger hjælp nu, fordi...', isDefault: true },
             { id: 'ap_prob_depress', label: 'Depressive symptomer', category: 'Henvendelse & Problem', text: 'Depressive symptomer.', smartMerge: { prefix: 'Henvendelsen drejer sig primært om ', item: 'depressive symptomer', suffix: '.' } },
             { id: 'ap_prob_anxiety', label: 'Angst/Uro', category: 'Henvendelse & Problem', text: 'Angst og uro.', smartMerge: { prefix: 'Henvendelsen drejer sig primært om ', item: 'angst og uro', suffix: '.' } },
             { id: 'ap_prob_suicid', label: 'Selvmordstanker', category: 'Henvendelse & Problem', text: 'Selvmordstanker.', smartMerge: { prefix: 'Henvendelsen drejer sig primært om ', item: 'selvmordstanker', suffix: '.' } },
             { id: 'ap_prob_hallu', label: 'Hallucinationer', category: 'Henvendelse & Problem', text: 'Oplevelser af hallucinationer.', smartMerge: { prefix: 'Henvendelsen drejer sig primært om ', item: 'oplevelser af hallucinationer', suffix: '.' } },
             { id: 'ap_prob_sleep', label: 'Søvnproblemer', category: 'Henvendelse & Problem', text: 'Søvnproblemer.', smartMerge: { prefix: 'Henvendelsen drejer sig primært om ', item: 'søvnproblemer', suffix: '.' } },
-            
             { id: 'ap_hard', label: 'Svært at håndtere (Fritekst)', category: 'Henvendelse & Problem', text: 'Det har været svært at håndtere...', isDefault: true },
             { id: 'ap_main', label: 'Fylder mest (Fritekst)', category: 'Henvendelse & Problem', text: 'Det, der fylder mest lige nu, er... (i aftagende rækkefølge)', isDefault: true },
-            
-            // --- FORLØB & HISTORIK ---
-            // VARIATION: "Anamnestisk..."
             { id: 'ap_sim_yes', label: 'Har oplevet før', category: 'Forløb & Historik', text: 'Der er anamnestisk oplysninger om lignende symptomer tidligere.', exclude: ['ap_sim_no'], smartMerge: { prefix: 'Anamnestisk er der oplysninger om ', item: 'tidligere lignende symptomer', suffix: '.' } },
             { id: 'ap_sim_no', label: 'Aldrig oplevet før', category: 'Forløb & Historik', text: 'Der er ikke tidligere oplevet lignende symptomer.', isDefault: true, exclude: ['ap_sim_yes'] },
             { id: 'ap_diag_yes', label: 'Tidl. diagnose', category: 'Forløb & Historik', text: 'Der foreligger tidligere psykiatriske diagnoser.', exclude: ['ap_diag_no'], smartMerge: { prefix: 'Anamnestisk er der oplysninger om ', item: 'tidligere diagnoser', suffix: '.' } },
             { id: 'ap_diag_no', label: 'Ingen tidl. diagnose', category: 'Forløb & Historik', text: 'Ingen tidligere psykiatriske diagnoser.', isDefault: true, exclude: ['ap_diag_yes'] },
             { id: 'ap_treat_yes', label: 'Tidl. behandling', category: 'Forløb & Historik', text: 'Pt. har tidligere modtaget behandling for dette.', exclude: ['ap_treat_no'], smartMerge: { prefix: 'Anamnestisk er der oplysninger om ', item: 'tidligere behandling for dette', suffix: '.' } },
             { id: 'ap_treat_no', label: 'Ingen tidl. beh.', category: 'Forløb & Historik', text: 'Ingen tidligere behandling for dette.', isDefault: true, exclude: ['ap_treat_yes'] },
-            
             { id: 'ap_tried', label: 'Afprøvet (medicin/terapi)', category: 'Forløb & Historik', text: 'Der er afprøvet... (medicin, terapi, psykoedukation, livsstilsændringer), hvilket har...', isDefault: true },
-            
-            // --- UDVIKLING & FAKTORER ---
             { id: 'ap_worse', label: 'Tilstand forværret', category: 'Udvikling & Faktorer', text: 'Tilstanden er blevet værre.', exclude: ['ap_unchanged', 'ap_better'], smartMerge: { prefix: 'Aktuelt er tilstanden ', item: 'forværret', suffix: '.' } },
             { id: 'ap_unchanged', label: 'Tilstand uændret', category: 'Udvikling & Faktorer', text: 'Tilstanden er uændret.', isDefault: true, exclude: ['ap_worse', 'ap_better'], smartMerge: { prefix: 'Aktuelt er tilstanden ', item: 'uændret', suffix: '.' } },
             { id: 'ap_better', label: 'Tilstand bedret', category: 'Udvikling & Faktorer', text: 'Tilstanden er blevet bedre.', exclude: ['ap_worse', 'ap_unchanged'], smartMerge: { prefix: 'Aktuelt er tilstanden ', item: 'bedret', suffix: '.' } },
-            
             { id: 'ap_new_symp_yes', label: 'Nye symptomer', category: 'Udvikling & Faktorer', text: 'Der er kommet nye symptomer til.', exclude: ['ap_new_symp_no'], smartMerge: { prefix: 'Der beskrives ', item: 'tilkomne nye symptomer', suffix: '.' } },
             { id: 'ap_new_symp_no', label: 'Ingen nye symptomer', category: 'Udvikling & Faktorer', text: 'Ingen nye symptomer.', isDefault: true, exclude: ['ap_new_symp_yes'] },
             { id: 'ap_modifying', label: 'Forværres/Bedres af...', category: 'Udvikling & Faktorer', text: 'Det bliver værre af... og bedre af...', isDefault: true },
-            
-            // --- SOCIALT ---
-            // VARIATION: Direct statements "Bor alene" is fine, but lets group them nicely.
             { id: 'ap_soc_unspec', label: 'Socialt uafklaret', category: 'Sociale forhold', text: 'Sociale forhold ikke nærmere belyst.', isDefault: true, exclude: ['ap_soc_alone', 'ap_soc_cohab', 'ap_soc_kids', 'ap_soc_work', 'ap_soc_sick', 'ap_soc_pension', 'ap_soc_student'] },
             { id: 'ap_soc_alone', label: 'Bor alene', category: 'Sociale forhold', text: 'Bor alene.', exclude: ['ap_soc_unspec', 'ap_soc_cohab'], smartMerge: { prefix: 'Socialt: ', item: 'bor alene', suffix: '.' } },
             { id: 'ap_soc_cohab', label: 'Samlevende', category: 'Sociale forhold', text: 'Er samlevende.', exclude: ['ap_soc_unspec', 'ap_soc_alone'], smartMerge: { prefix: 'Socialt: ', item: 'er samlevende', suffix: '.' } },
@@ -146,33 +135,23 @@
             { id: 'ap_soc_student', label: 'Studerende', category: 'Sociale forhold', text: 'Er studerende.', exclude: ['ap_soc_unspec', 'ap_soc_work', 'ap_soc_sick', 'ap_soc_pension'], smartMerge: { prefix: 'Socialt: ', item: 'er studerende', suffix: '.' } },
             { id: 'ap_soc_sick', label: 'Sygemeldt', category: 'Sociale forhold', text: 'Er sygemeldt.', exclude: ['ap_soc_unspec', 'ap_soc_work', 'ap_soc_pension', 'ap_soc_student'], smartMerge: { prefix: 'Socialt: ', item: 'er sygemeldt', suffix: '.' } },
             { id: 'ap_soc_pension', label: 'Førtidspension', category: 'Sociale forhold', text: 'Modtager førtidspension.', exclude: ['ap_soc_unspec', 'ap_soc_work', 'ap_soc_sick', 'ap_soc_student'], smartMerge: { prefix: 'Socialt: ', item: 'modtager førtidspension', suffix: '.' } },
-
-            // --- FUNKTIONSNIVEAU ---
             { id: 'ap_func_unchanged', label: 'Hverdag uændret', category: 'Funktionsniveau', text: 'Funktionsniveauet er uændret.', isDefault: true, exclude: ['ap_func_school', 'ap_func_work', 'ap_func_social', 'ap_func_adl'] },
             { id: 'ap_func_school', label: 'Skole/Uddannelse', category: 'Funktionsniveau', text: 'Skole/uddannelse er påvirket.', exclude: ['ap_func_unchanged'], smartMerge: { prefix: 'Det daglige funktionsniveau er påvirket i forhold til ', item: 'skole/uddannelse', suffix: '.' } },
             { id: 'ap_func_work', label: 'Arbejde', category: 'Funktionsniveau', text: 'Arbejdet er påvirket.', exclude: ['ap_func_unchanged'], smartMerge: { prefix: 'Det daglige funktionsniveau er påvirket i forhold til ', item: 'arbejde', suffix: '.' } },
             { id: 'ap_func_social', label: 'Socialt/Fritid', category: 'Funktionsniveau', text: 'Sociale relationer/fritid er påvirket.', exclude: ['ap_func_unchanged'], smartMerge: { prefix: 'Det daglige funktionsniveau er påvirket i forhold til ', item: 'sociale relationer', suffix: '.' } },
             { id: 'ap_func_adl', label: 'ADL (Daglige gøremål)', category: 'Funktionsniveau', text: 'ADL er påvirket.', exclude: ['ap_func_unchanged'], smartMerge: { prefix: 'Det daglige funktionsniveau er påvirket i forhold til ', item: 'daglige gøremål (ADL)', suffix: '.' } },
-
             { id: 'ap_sleep_good', label: 'Søvn god', category: 'Subjektive symptomer', text: 'Søvnen har været god.', isDefault: true, exclude: ['ap_sleep_unrest', 'ap_sleep_dist'] },
             { id: 'ap_sleep_unrest', label: 'Søvn urolig', category: 'Subjektive symptomer', text: 'Søvnen har været urolig.', exclude: ['ap_sleep_good'], smartMerge: { prefix: 'Subjektivt beskrives søvnen som ', item: 'urolig', suffix: '.' } },
             { id: 'ap_sleep_dist', label: 'Søvn forstyrret', category: 'Subjektive symptomer', text: 'Søvnen har været forstyrret.', exclude: ['ap_sleep_good'], smartMerge: { prefix: 'Subjektivt beskrives søvnen som ', item: 'forstyrret', suffix: '.' } },
-            
             { id: 'ap_energy_high', label: 'Energi høj', category: 'Subjektive symptomer', text: 'Energiniveauet føles højt.', exclude: ['ap_energy_norm', 'ap_energy_low'] },
             { id: 'ap_energy_norm', label: 'Energi uændret', category: 'Subjektive symptomer', text: 'Energiniveauet føles uændret.', isDefault: true, exclude: ['ap_energy_high', 'ap_energy_low'] },
             { id: 'ap_energy_low', label: 'Energi lav', category: 'Subjektive symptomer', text: 'Energiniveauet føles lavt.', exclude: ['ap_energy_high', 'ap_energy_norm'] },
             { id: 'ap_cog_yes', label: 'Kognitive problemer', category: 'Subjektive symptomer', text: 'Pt. har haft problemer med at huske, holde overblik eller koncentrere sig, hvilket gør det sværere at klare daglige ting.', exclude: ['ap_cog_no'] },
             { id: 'ap_cog_no', label: 'Ingen kognitive problemer', category: 'Subjektive symptomer', text: 'Ingen subjektive kognitive klager.', isDefault: true, exclude: ['ap_cog_yes'] },
-            
-            // --- DEPRESSION ICD-10 SCREENING (NY) ---
             { id: 'dep_none', label: 'Ingen depr. symptomer', category: 'Depression (ICD-10 Screening)', text: 'Ingen tegn på depressive symptomer.', isDefault: true, exclude: [...DEP_CORE_IDS, ...DEP_ACC_IDS] },
-            
-            // Kernesymptomer - Keep prefix consistent for merging within ICD-10
             { id: 'dep_core_mood', label: 'Nedtrykthed', category: 'Depression (ICD-10 Screening)', text: 'Nedtrykthed.', exclude: ['dep_none'], smartMerge: { prefix: 'Kernesymptomer: ', item: 'nedtrykthed', suffix: '.' } },
             { id: 'dep_core_interest', label: 'Nedsat lyst/interesse', category: 'Depression (ICD-10 Screening)', text: 'Nedsat lyst/interesse.', exclude: ['dep_none'], smartMerge: { prefix: 'Kernesymptomer: ', item: 'nedsat lyst og interesse', suffix: '.' } },
             { id: 'dep_core_energy', label: 'Nedsat energi/træthed', category: 'Depression (ICD-10 Screening)', text: 'Nedsat energi/træthed.', exclude: ['dep_none'], smartMerge: { prefix: 'Kernesymptomer: ', item: 'nedsat energi og øget trætbarhed', suffix: '.' } },
-
-            // Ledsagesymptomer
             { id: 'dep_acc_conf', label: 'Nedsat selvtillid', category: 'Depression (ICD-10 Screening)', text: 'Nedsat selvtillid.', exclude: ['dep_none'], smartMerge: { prefix: 'Ledsagesymptomer: ', item: 'nedsat selvtillid/selvfølelse', suffix: '.' } },
             { id: 'dep_acc_guilt', label: 'Selvbebrejdelse/Skyld', category: 'Depression (ICD-10 Screening)', text: 'Selvbebrejdelser.', exclude: ['dep_none'], smartMerge: { prefix: 'Ledsagesymptomer: ', item: 'selvbebrejdelser eller skyldfølelse', suffix: '.' } },
             { id: 'dep_acc_sui', label: 'Døds-/Selvmordstanker', category: 'Depression (ICD-10 Screening)', text: 'Tanker om død/selvmord.', exclude: ['dep_none'], smartMerge: { prefix: 'Ledsagesymptomer: ', item: 'tanker om død eller selvmord', suffix: '.' } },
@@ -180,15 +159,12 @@
             { id: 'dep_acc_agit', label: 'Agitation/Hæmning', category: 'Depression (ICD-10 Screening)', text: 'Agitation eller hæmning.', exclude: ['dep_none'], smartMerge: { prefix: 'Ledsagesymptomer: ', item: 'agitation eller hæmning', suffix: '.' } },
             { id: 'dep_acc_sleep', label: 'Søvnforstyrrelser', category: 'Depression (ICD-10 Screening)', text: 'Søvnforstyrrelser.', exclude: ['dep_none'], smartMerge: { prefix: 'Ledsagesymptomer: ', item: 'søvnforstyrrelser', suffix: '.' } },
             { id: 'dep_acc_app', label: 'Appetit-/Vægtændring', category: 'Depression (ICD-10 Screening)', text: 'Appetit-/vægtændring.', exclude: ['dep_none'], smartMerge: { prefix: 'Ledsagesymptomer: ', item: 'appetit- eller vægtændring', suffix: '.' } },
-
-            // --- RUSMIDLER ---
             { id: 'ap_subst_none', label: 'Ingen rusmidler', category: 'Rusmidler', text: 'Der benægtes brug af rusmidler.', isDefault: true, exclude: ['ap_subst_alc', 'ap_subst_cann', 'ap_subst_stim', 'ap_subst_benzo', 'ap_subst_opioid'] },
             { id: 'ap_subst_alc', label: 'Alkohol', category: 'Rusmidler', text: 'Angiver forbrug af alkohol.', exclude: ['ap_subst_none'], smartMerge: { prefix: 'Der angives forbrug af ', item: 'alkohol', suffix: '.' } },
             { id: 'ap_subst_cann', label: 'Cannabis', category: 'Rusmidler', text: 'Angiver forbrug af cannabis.', exclude: ['ap_subst_none'], smartMerge: { prefix: 'Der angives forbrug af ', item: 'cannabis', suffix: '.' } },
             { id: 'ap_subst_stim', label: 'Centralstimulerende', category: 'Rusmidler', text: 'Angiver forbrug af centralstimulerende stoffer.', exclude: ['ap_subst_none'], smartMerge: { prefix: 'Der angives forbrug af ', item: 'centralstimulerende stoffer', suffix: '.' } },
             { id: 'ap_subst_benzo', label: 'Benzodiazepiner', category: 'Rusmidler', text: 'Angiver forbrug af benzodiazepiner.', exclude: ['ap_subst_none'], smartMerge: { prefix: 'Der angives forbrug af ', item: 'benzodiazepiner', suffix: '.' } },
             { id: 'ap_subst_opioid', label: 'Opioider', category: 'Rusmidler', text: 'Angiver forbrug af opioider.', exclude: ['ap_subst_none'], smartMerge: { prefix: 'Der angives forbrug af ', item: 'opioider', suffix: '.' } },
-
             { id: 'ap_phys_yes', label: 'Fysiske gener', category: 'Somatik & Livsstil', text: 'Oplever fysiske symptomer eller sygdomme, der kan spille ind.', exclude: ['ap_phys_no'] },
             { id: 'ap_phys_no', label: 'Ingen fysiske gener', category: 'Somatik & Livsstil', text: 'Ingen fysiske symptomer eller sygdomme, der vurderes at spille ind.', isDefault: true, exclude: ['ap_phys_yes'] },
             { id: 'ap_distress_more', label: 'Mere forpint', category: 'Symptomtryk & Mestring', text: 'Føler sig mere forpint.', exclude: ['ap_distress_less', 'ap_distress_same'] },
@@ -198,12 +174,8 @@
             { id: 'ap_ctrl_some', label: 'Nogen kontrol', category: 'Symptomtryk & Mestring', text: 'Har nogen følelse af kontrol over symptomerne.', exclude: ['ap_ctrl_good', 'ap_ctrl_little', 'ap_ctrl_none'] },
             { id: 'ap_ctrl_little', label: 'Lidt kontrol', category: 'Symptomtryk & Mestring', text: 'Har lidt følelse af kontrol over symptomerne.', exclude: ['ap_ctrl_good', 'ap_ctrl_some', 'ap_ctrl_none'] },
             { id: 'ap_ctrl_none', label: 'Ingen kontrol', category: 'Symptomtryk & Mestring', text: 'Har ingen følelse af kontrol over symptomerne.', exclude: ['ap_ctrl_good', 'ap_ctrl_some', 'ap_ctrl_little'] },
-            
-            // --- RISIKO & OPLEVELSER ---
             { id: 'ap_risk_yes', label: 'Skadetanker (Ja)', category: 'Risiko & Oplevelser', text: 'Har haft tanker om at skade sig selv eller andre.', exclude: ['ap_risk_no'] },
             { id: 'ap_risk_no', label: 'Ingen skadetanker', category: 'Risiko & Oplevelser', text: 'Har ikke haft tanker om at skade sig selv eller andre.', isDefault: true, exclude: ['ap_risk_yes'] },
-            
-            // PSYKOTISKE SYMPTOMER
             { id: 'ap_psych_no', label: 'Ingen psykose-tegn', category: 'Risiko & Oplevelser', text: 'Oplever ikke mærkelige eller ubehagelige tanker, sanser ting, som andre ikke gør, eller føler sig påvirket af noget udefrakommende.', isDefault: true, exclude: ['ap_psych_gen', 'ap_psych_audit', 'ap_psych_vis', 'ap_psych_para', 'ap_psych_thought', 'ap_psych_control'] },
             { id: 'ap_psych_gen', label: 'Psykotiske oplevelser (Generelt)', category: 'Risiko & Oplevelser', text: 'Oplever mærkelige eller ubehagelige tanker og sanseoplevelser.', exclude: ['ap_psych_no'] },
             { id: 'ap_psych_audit', label: 'Hørehallucinationer', category: 'Risiko & Oplevelser', text: 'Beskriver hørehallucinationer (stemmer/lyde).', exclude: ['ap_psych_no'], smartMerge: { prefix: 'Patienten beskriver ', item: 'hørehallucinationer', suffix: '.' } },
@@ -211,7 +183,6 @@
             { id: 'ap_psych_para', label: 'Paranoia/Forfølgelse', category: 'Risiko & Oplevelser', text: 'Føler sig forfulgt eller overvåget.', exclude: ['ap_psych_no'], smartMerge: { prefix: 'Patienten beskriver ', item: 'oplevelser af forfølgelse eller overvågning', suffix: '.' } },
             { id: 'ap_psych_thought', label: 'Tankeinterferens', category: 'Risiko & Oplevelser', text: 'Oplever tankepåvirkning (indsættelse/fratagelse/hørlighed).', exclude: ['ap_psych_no'], smartMerge: { prefix: 'Patienten beskriver ', item: 'tankeinterferens (indsættelse/fratagelse/hørlighed)', suffix: '.' } },
             { id: 'ap_psych_control', label: 'Styringsoplevelser', category: 'Risiko & Oplevelser', text: 'Føler sig styret af udefrakommende kræfter.', exclude: ['ap_psych_no'], smartMerge: { prefix: 'Patienten beskriver ', item: 'styringsoplevelser', suffix: '.' } },
-
             { id: 'ap_mot_yes', label: 'Motiveret', category: 'Motivation & Ønsker', text: 'Er motiveret for behandling.', isDefault: true, exclude: ['ap_mot_no'] },
             { id: 'ap_mot_no', label: 'Ikke motiveret', category: 'Motivation & Ønsker', text: 'Er ikke motiveret for behandling.', exclude: ['ap_mot_yes'] },
             { id: 'ap_help_yes', label: 'Ønsker hjælp', category: 'Motivation & Ønsker', text: 'Ønsker hjælp til...', isDefault: true, exclude: ['ap_help_no'] },
@@ -221,8 +192,7 @@
 
 
         const PSYCH_OPTIONS = [
-            // --- BEVIDSTHED ---
-            { id: 'orient_normal', label: 'Fuldt orienteret', category: 'Bevidsthed', text: 'Vågen, klar og orienteret i tid, sted og egne data.', isDefault: true, exclude: ['orient_confused', 'orient_delir', 'orient_sløv', 'orient_sopor', 'orient_cloud'] },
+             { id: 'orient_normal', label: 'Fuldt orienteret', category: 'Bevidsthed', text: 'Vågen, klar og orienteret i tid, sted og egne data.', isDefault: true, exclude: ['orient_confused', 'orient_delir', 'orient_sløv', 'orient_sopor', 'orient_cloud'] },
             { id: 'orient_sløv', label: 'Somnolent/Sløv', category: 'Bevidsthed', text: 'Somnolent og sløv i kontakten.', exclude: ['orient_normal', 'orient_confused', 'orient_delir', 'orient_sopor', 'orient_cloud'] },
             { id: 'orient_sopor', label: 'Sopor', category: 'Bevidsthed', text: 'Soporøs (dybt bevidsthedssvækket), men vækbar.', exclude: ['orient_normal', 'orient_confused', 'orient_delir', 'orient_sløv', 'orient_cloud'] },
             { id: 'orient_confused', label: 'Konfus', category: 'Bevidsthed', text: 'Konfus og desorienteret.', exclude: ['orient_normal', 'orient_delir', 'orient_sløv', 'orient_sopor', 'orient_cloud'] },
@@ -362,7 +332,7 @@
         ];
 
         const SOMATIC_ACT_OPTIONS = [
-            { id: 'act_cns_ok', label: 'Ingen CNS klager', category: 'CNS', text: 'Benægter hovedpine, svimmelhed, besvimelse, synsforstyrrelser eller kramper.', isDefault: true, exclude: ['act_cns_headache', 'act_cns_dizzy', 'act_cns_faint'] },
+             { id: 'act_cns_ok', label: 'Ingen CNS klager', category: 'CNS', text: 'Benægter hovedpine, svimmelhed, besvimelse, synsforstyrrelser eller kramper.', isDefault: true, exclude: ['act_cns_headache', 'act_cns_dizzy', 'act_cns_faint'] },
             
             // Smart Merge CNS
             { id: 'act_cns_headache', label: 'Hovedpine', category: 'CNS', text: 'Angiver hovedpine.', exclude: ['act_cns_ok'], smartMerge: { prefix: 'Angiver ', item: 'hovedpine', suffix: '.' } },
@@ -413,7 +383,7 @@
         ];
 
         const SOMATIC_OBJ_OPTIONS = [
-            { id: 'gen_upavirket', label: 'Upåvirket', category: 'Almentilstand', text: 'Upåvirket. Normal ernæringstilstand.', isDefault: true, exclude: ['gen_medtaget', 'gen_adipos', 'gen_emaciated'] },
+             { id: 'gen_upavirket', label: 'Upåvirket', category: 'Almentilstand', text: 'Upåvirket. Normal ernæringstilstand.', isDefault: true, exclude: ['gen_medtaget', 'gen_adipos', 'gen_emaciated'] },
             // Smart Merge General
             { id: 'gen_medtaget', label: 'Medtaget', category: 'Almentilstand', text: 'Fremstår medtaget.', exclude: ['gen_upavirket'], smartMerge: { prefix: 'Fremstår ', item: 'medtaget', suffix: '.' } },
             { id: 'gen_emaciated', label: 'Afmagret/Kakektisk', category: 'Almentilstand', text: 'Fremstår afmagret/kakektisk.', exclude: ['gen_upavirket', 'gen_adipos'], smartMerge: { prefix: 'Fremstår ', item: 'afmagret/kakektisk', suffix: '.' } },
@@ -495,30 +465,70 @@
             </div>
         );
 
-        const DietDayCard = ({ day, onChange, onDelete }) => (
-            <div className="min-w-[280px] w-full md:w-[280px] bg-white border border-slate-200 rounded-xl p-4 flex flex-col gap-3 shadow-sm hover:shadow-md transition-shadow relative group">
-                <div className="flex justify-between items-center pb-2 border-b border-slate-100">
-                    <input 
-                        className="font-semibold text-slate-700 bg-transparent border-none focus:ring-0 p-0 w-40 text-sm focus:text-indigo-600 transition-colors" 
-                        value={day.label} 
-                        onChange={(e) => onChange(day.id, 'label', e.target.value)}
-                        placeholder="Navngiv dag..."
-                    />
-                    <button onClick={() => onDelete(day.id)} className="text-slate-300 hover:text-red-500 transition-colors" title="Slet dag">
-                        <Trash2 size={16}/>
-                    </button>
+        const DietDayCard = ({ day, isActive, onActivate, onChange, onDelete, onCopyPrevious, hasPrevious }) => {
+            if (!isActive) {
+                // Minimized View
+                return (
+                    <div 
+                        onClick={onActivate}
+                        className="w-10 h-80 bg-slate-100 border border-slate-200 rounded-xl py-4 flex flex-col items-center justify-between hover:bg-white hover:border-indigo-200 transition-all cursor-pointer shadow-sm group shrink-0"
+                        title={`Vis ${day.label}`}
+                    >
+                         <div className="text-slate-400 group-hover:text-indigo-500 transition-colors">
+                            <ChevronRight className="w-5 h-5" />
+                        </div>
+                        <div style={{ writingMode: 'vertical-rl' }} className="text-sm font-semibold text-slate-500 whitespace-nowrap tracking-wide h-full flex items-center justify-center">
+                            {day.label}
+                        </div>
+                        <button onClick={(e) => { e.stopPropagation(); onDelete(day.id); }} className="text-slate-300 hover:text-red-500 transition-colors" title="Slet dag">
+                            <Trash2 size={14}/>
+                        </button>
+                    </div>
+                );
+            }
+
+            // Expanded View (Active)
+            return (
+                <div className="min-w-[280px] w-full md:w-[280px] bg-white border border-indigo-200 ring-2 ring-indigo-50 rounded-xl p-4 flex flex-col gap-3 shadow-md transition-all shrink-0">
+                    <div className="flex justify-between items-center pb-2 border-b border-slate-100">
+                         <div className="flex items-center gap-2">
+                             <ChevronDown className="w-4 h-4 text-indigo-600" />
+                             <input 
+                                className="font-semibold text-indigo-700 bg-transparent border-none focus:ring-0 p-0 w-32 text-sm focus:text-indigo-900 transition-colors" 
+                                value={day.label} 
+                                onChange={(e) => onChange(day.id, 'label', e.target.value)}
+                                placeholder="Navngiv dag..."
+                                autoFocus
+                            />
+                         </div>
+                        <button onClick={() => onDelete(day.id)} className="text-slate-300 hover:text-red-500 transition-colors" title="Slet dag">
+                            <Trash2 size={16}/>
+                        </button>
+                    </div>
+
+                    {hasPrevious && (
+                        <button 
+                            onClick={() => onCopyPrevious(day.id)}
+                            className="w-full py-1.5 px-3 mb-1 text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg flex items-center justify-center gap-2 transition-colors"
+                            title="Kopier måltider fra dagen før"
+                        >
+                            <Copy className="w-3 h-3" />
+                            Samme som forrige dag
+                        </button>
+                    )}
+
+                    <div className="space-y-3">
+                        <Input label="Morgenmad" value={day.meals.morgen} onChange={v => onChange(day.id, 'morgen', v)} />
+                        <Input label="Før frokost" value={day.meals.formiddag} onChange={v => onChange(day.id, 'formiddag', v)} />
+                        <Input label="Frokost" value={day.meals.frokost} onChange={v => onChange(day.id, 'frokost', v)} />
+                        <Input label="Eftermiddag" value={day.meals.eftermiddag} onChange={v => onChange(day.id, 'eftermiddag', v)} />
+                        <Input label="Aften" value={day.meals.aften} onChange={v => onChange(day.id, 'aften', v)} />
+                        <Input label="Efter aften" value={day.meals.sen_aften} onChange={v => onChange(day.id, 'sen_aften', v)} />
+                        <Input label="Væske" value={day.meals.vaeske} onChange={v => onChange(day.id, 'vaeske', v)} />
+                    </div>
                 </div>
-                <div className="space-y-3">
-                    <Input label="Morgenmad" value={day.meals.morgen} onChange={v => onChange(day.id, 'morgen', v)} />
-                    <Input label="Før frokost" value={day.meals.formiddag} onChange={v => onChange(day.id, 'formiddag', v)} />
-                    <Input label="Frokost" value={day.meals.frokost} onChange={v => onChange(day.id, 'frokost', v)} />
-                    <Input label="Eftermiddag" value={day.meals.eftermiddag} onChange={v => onChange(day.id, 'eftermiddag', v)} />
-                    <Input label="Aften" value={day.meals.aften} onChange={v => onChange(day.id, 'aften', v)} />
-                    <Input label="Efter aften" value={day.meals.sen_aften} onChange={v => onChange(day.id, 'sen_aften', v)} />
-                    <Input label="Væske" value={day.meals.vaeske} onChange={v => onChange(day.id, 'vaeske', v)} />
-                </div>
-            </div>
-        );
+            );
+        };
 
 
         // --- APP KOMPONENT ---
@@ -534,6 +544,7 @@
             
             // --- NEW: DIET DAYS STATE ---
             const [dietDays, setDietDays] = useState([]);
+            const [activeDietDayId, setActiveDietDayId] = useState(null); // Which day is currently expanded?
 
             // SAFE MODE LOGIC
             const [manualEditMode, setManualEditMode] = useState(false);
@@ -570,6 +581,7 @@
                     }
                 };
                 setDietDays([...dietDays, newDay]);
+                setActiveDietDayId(newId); // Automatically expand the new day
             };
 
             const updateDietDay = (id, field, value) => {
@@ -584,6 +596,30 @@
 
             const removeDietDay = (id) => {
                 setDietDays(prevDays => prevDays.filter(day => day.id !== id));
+                if (activeDietDayId === id) {
+                    setActiveDietDayId(null); // Or set to previous one
+                }
+            };
+
+            const copyPreviousDay = (id) => {
+                setDietDays(prevDays => {
+                    const index = prevDays.findIndex(d => d.id === id);
+                    if (index <= 0) return prevDays;
+                    
+                    const prevDay = prevDays[index - 1];
+                    const currentDay = prevDays[index];
+                    
+                    const updatedDay = {
+                        ...currentDay,
+                        meals: { ...prevDay.meals }
+                    };
+                    
+                    const newDays = [...prevDays];
+                    newDays[index] = updatedDay;
+                    return newDays;
+                });
+                setNotification({ message: 'Måltider kopieret fra forrige dag', type: 'success' });
+                setTimeout(() => setNotification(null), 3000);
             };
 
 
@@ -1067,6 +1103,7 @@
                 
                 if (activeSection === 'diagnosis_anorexia' || activeSection === 'full_note') {
                      setDietDays([]);
+                     setActiveDietDayId(null);
                 }
 
                 setSelectedIds(newSet);
@@ -1127,7 +1164,7 @@
                                     <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-4">
                                         <div>
                                             <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wide">Kostregistrering (14 dage)</h3>
-                                            <p className="text-xs text-slate-500 mt-1">Tilføj dage for at beskrive specifikke måltider og væskeindtag.</p>
+                                            <p className="text-xs text-slate-500 mt-1">Tilføj dage for at beskrive specifikke måltider. Den seneste dag åbnes automatisk.</p>
                                         </div>
                                         <button 
                                             onClick={addDietDay}
@@ -1143,13 +1180,17 @@
                                             Ingen dage tilføjet endnu. Tryk på "Tilføj Dag" for at starte.
                                         </div>
                                     ) : (
-                                        <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar snap-x">
+                                        <div className="flex gap-4 overflow-x-auto pb-4 items-start no-scrollbar snap-x">
                                             {dietDays.map((day, index) => (
-                                                <div key={day.id} className="snap-center">
+                                                <div key={day.id} className="snap-start shrink-0">
                                                     <DietDayCard 
                                                         day={day} 
+                                                        isActive={activeDietDayId === day.id}
+                                                        hasPrevious={index > 0}
+                                                        onActivate={() => setActiveDietDayId(day.id)}
                                                         onChange={updateDietDay} 
-                                                        onDelete={removeDietDay} 
+                                                        onDelete={removeDietDay}
+                                                        onCopyPrevious={copyPreviousDay}
                                                     />
                                                 </div>
                                             ))}
