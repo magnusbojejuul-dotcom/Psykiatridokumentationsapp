@@ -9,27 +9,16 @@
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     
-    <!-- Babel (til at forstå JSX i browseren) -->
+    <!-- Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        /* Skjul scrollbar for renere look men behold funktionalitet */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        /* Smooth transitions for width changes */
-        .transition-width {
-            transition-property: width, min-width, flex-basis;
-            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-            transition-duration: 300ms;
-        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .transition-width { transition-property: width, min-width, flex-basis; transition-duration: 300ms; }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-900 font-sans overflow-hidden">
@@ -44,7 +33,6 @@
                 {children}
             </svg>
         );
-
         const Activity = ({ className }) => <Icon className={className}><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></Icon>;
         const Brain = ({ className }) => <Icon className={className}><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></Icon>;
         const Stethoscope = ({ className }) => <Icon className={className}><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"/><circle cx="20" cy="10" r="2"/></Icon>;
@@ -71,12 +59,9 @@
         const Layout = ({ className }) => <Icon className={className}><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></Icon>;
         const Repeat = ({ className }) => <Icon className={className}><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></Icon>;
 
-
-        // --- DEPRESSION LOGIC & DATA ---
-        // (Data definitions unchanged for brevity - they are included in full implementation)
+        // --- DATA ---
         const DEP_CORE_IDS = ['dep_core_mood', 'dep_core_interest', 'dep_core_energy'];
         const DEP_ACC_IDS = ['dep_acc_conf', 'dep_acc_guilt', 'dep_acc_sui', 'dep_acc_conc', 'dep_acc_agit', 'dep_acc_sleep', 'dep_acc_app'];
-
         const PSYCH_NORMAL_IDS = [
             'orient_normal', 'appear_normal', 'att_coop', 'anx_none', 
             'c_form_norm', 'c_emo_good', 'contact_eye_norm', 'aff_adekvat', 
@@ -84,28 +69,44 @@
             'think_content_norm', 'psychosis_none', 'delusion_none', 'cog_normal', 
             'insight_good', 'sui_none'
         ];
-
         const SOMATIC_NORMAL_IDS = [
             'gen_upavirket', 'cp_normal', 'abd_normal', 'cn_normal', 
             'motor_sys_normal', 'reflex_normal', 'coord_normal', 'gait_normal', 
             'eps_none', 'skin_normal'
         ];
 
-        // --- ANOREKSIA NERVOSA OPTIONS ---
         const ANOREXIA_OPTIONS = [
             { id: 'an_cal_count', label: 'Tæller kalorier', category: 'Spiseadfærd & Mønstre', text: 'Der tælles kalorier.', smartMerge: { prefix: 'Der ', item: 'tælles kalorier', suffix: '.' } },
             { id: 'an_meals_skipped', label: 'Springes måltider over?', category: 'Spiseadfærd & Mønstre', text: 'Der springes måltider over.', hasInput: true, inputPlaceholder: 'Hvilke?', detailInParens: true, smartMerge: { prefix: 'Der ', item: 'springes måltider over', suffix: '.' } },
             { id: 'an_fluid_meal', label: 'Væske til måltid', category: 'Spiseadfærd & Mønstre', text: 'Der drikkes væske til hvert måltid.', smartMerge: { prefix: 'Der ', item: 'drikkes væske til hvert måltid', suffix: '.' } },
             { id: 'an_fluid_type', label: 'Hvad drikkes?', category: 'Spiseadfærd & Mønstre', text: 'Væsketype:', hasInput: true, inputPlaceholder: 'Vand, sodavand, etc...' },
-
             { id: 'an_comp_lax', label: 'Afføringsmiddel', category: 'Kompenserende Adfærd', text: 'Benytter afføringsmidler.', smartMerge: { prefix: 'Af kompenserende adfærd benyttes ', item: 'afføringsmidler', suffix: '.' } },
             { id: 'an_comp_vomit', label: 'Opkast', category: 'Kompenserende Adfærd', text: 'Benytter provokeret opkast.', smartMerge: { prefix: 'Af kompenserende adfærd benyttes ', item: 'provokeret opkast', suffix: '.' } },
             { id: 'an_comp_exercise', label: 'Motion', category: 'Kompenserende Adfærd', text: 'Benytter overdreven motion.', smartMerge: { prefix: 'Af kompenserende adfærd benyttes ', item: 'overdreven motion', suffix: '.' } },
             { id: 'an_comp_diuretic', label: 'Vanddrivende', category: 'Kompenserende Adfærd', text: 'Benytter vanddrivende midler.', smartMerge: { prefix: 'Af kompenserende adfærd benyttes ', item: 'vanddrivende midler', suffix: '.' } },
             { id: 'an_comp_meds', label: 'Slankemedicin', category: 'Kompenserende Adfærd', text: 'Benytter slankemedicin.', smartMerge: { prefix: 'Af kompenserende adfærd benyttes ', item: 'slankemedicin', suffix: '.' } },
             { id: 'an_comp_prevent', label: 'Hvis forhindret?', category: 'Kompenserende Adfærd', text: 'Ved forhindring af kompenserende adfærd ses:', hasInput: true, inputPlaceholder: 'Angst, uro, etc...' },
+            
+            // --- STANDARD ORDINATIONER ---
+            { 
+                id: 'an_ord_standard', 
+                label: 'Ingen aktuelle kosttilskud', 
+                category: 'Standard Ordinationer', 
+                text: 'Patienten får ikke kosttilskud. Der ordineres:\nMEDICIN:\nrp. Multivitamin x 1 dagl\nrp. Thiamin 300 mg x 1 dagl i 3 uger, gerne før første måltid.\nrp. Unikalk x 2 dagl' 
+            },
+            { 
+                id: 'an_ord_thiamin_chronic', 
+                label: 'Kronisk pt. (Thiamin)', 
+                category: 'Standard Ordinationer', 
+                text: 'Rp. Thiamin 300mg x1 dgl, gerne før første måltid' 
+            },
+            { 
+                id: 'an_ord_bcombin', 
+                label: 'B-combin tillæg', 
+                category: 'Standard Ordinationer', 
+                text: 'Rp. B-combin x3 dgl' 
+            },
         ];
-
 
         const ACTUAL_PSYCH_OPTIONS = [
             { id: 'ap_reason', label: 'Søger hjælp fordi... (Fritekst)', category: 'Henvendelse & Problem', text: 'Pt. søger hjælp nu, fordi...', isDefault: true },
@@ -167,8 +168,6 @@
             { id: 'ap_subst_stim', label: 'Centralstimulerende', category: 'Rusmidler', text: 'Angiver forbrug af centralstimulerende stoffer.', exclude: ['ap_subst_none'], smartMerge: { prefix: 'Der angives forbrug af ', item: 'centralstimulerende stoffer', suffix: '.' } },
             { id: 'ap_subst_benzo', label: 'Benzodiazepiner', category: 'Rusmidler', text: 'Angiver forbrug af benzodiazepiner.', exclude: ['ap_subst_none'], smartMerge: { prefix: 'Der angives forbrug af ', item: 'benzodiazepiner', suffix: '.' } },
             { id: 'ap_subst_opioid', label: 'Opioider', category: 'Rusmidler', text: 'Angiver forbrug af opioider.', exclude: ['ap_subst_none'], smartMerge: { prefix: 'Der angives forbrug af ', item: 'opioider', suffix: '.' } },
-            { id: 'ap_phys_yes', label: 'Fysiske gener', category: 'Somatik & Livsstil', text: 'Oplever fysiske symptomer eller sygdomme, der kan spille ind.', exclude: ['ap_phys_no'] },
-            { id: 'ap_phys_no', label: 'Ingen fysiske gener', category: 'Somatik & Livsstil', text: 'Ingen fysiske symptomer eller sygdomme, der vurderes at spille ind.', isDefault: true, exclude: ['ap_phys_yes'] },
             { id: 'ap_distress_more', label: 'Mere forpint', category: 'Symptomtryk & Mestring', text: 'Føler sig mere forpint.', exclude: ['ap_distress_less', 'ap_distress_same'] },
             { id: 'ap_distress_same', label: 'Uændret forpint', category: 'Symptomtryk & Mestring', text: 'Føler sig uændret forpint.', isDefault: true, exclude: ['ap_distress_less', 'ap_distress_more'] },
             { id: 'ap_distress_less', label: 'Mindre forpint', category: 'Symptomtryk & Mestring', text: 'Føler sig mindre forpint.', exclude: ['ap_distress_more', 'ap_distress_same'] },
@@ -177,13 +176,17 @@
             { id: 'ap_ctrl_little', label: 'Lidt kontrol', category: 'Symptomtryk & Mestring', text: 'Har lidt følelse af kontrol over symptomerne.', exclude: ['ap_ctrl_good', 'ap_ctrl_some', 'ap_ctrl_none'] },
             { id: 'ap_ctrl_none', label: 'Ingen kontrol', category: 'Symptomtryk & Mestring', text: 'Har ingen følelse af kontrol over symptomerne.', exclude: ['ap_ctrl_good', 'ap_ctrl_some', 'ap_ctrl_little'] },
             
-            // --- OPDELT SEKTION START ---
+            // --- SEKTION 1: SELVSKADE & RISIKO (OPDATERET STRUKTUR) ---
+            { id: 'ap_risk_none', label: 'Ingen selvskade/tanker', category: 'Selvskade & Risiko', text: 'Benægter aktuelle selvmordstanker, planer eller intentioner. Benægter ligeledes aktuel selvskade.', isDefault: true, exclude: ['ap_risk_thoughts', 'ap_risk_plans', 'ap_risk_sh_curr'] },
+            { id: 'ap_risk_thoughts', label: 'Selvmordstanker', category: 'Selvskade & Risiko', text: 'Tilkendegiver selvmordstanker.', exclude: ['ap_risk_none'], hasInput: true, inputPlaceholder: 'Karakter/Hyppighed' },
+            { id: 'ap_risk_plans', label: 'Konkrete planer', category: 'Selvskade & Risiko', text: 'Har konkrete planer om selvmord.', exclude: ['ap_risk_none'], hasInput: true, inputPlaceholder: 'Beskriv planer' },
+            { id: 'ap_risk_sh_curr', label: 'Aktuel selvskade', category: 'Selvskade & Risiko', text: 'Aktuel selvskadende adfærd.', exclude: ['ap_risk_none'], hasInput: true, inputPlaceholder: 'Metode/Hyppighed' },
             
-            // NY SEKTION 1: SELVSKADE & RISIKO
-            { id: 'ap_risk_yes', label: 'Skadetanker (Ja)', category: 'Selvskade & Risiko', text: 'Har haft tanker om at skade sig selv eller andre.', exclude: ['ap_risk_no'], hasInput: true, inputPlaceholder: 'Uddyb evt. konkrete tanker/planer' },
-            { id: 'ap_risk_no', label: 'Ingen skadetanker', category: 'Selvskade & Risiko', text: 'Har ikke haft tanker om at skade sig selv eller andre.', isDefault: true, exclude: ['ap_risk_yes'] },
+            // HISTORIK I SAMME SEKTION (Som anmodet)
+            { id: 'ap_risk_hist_sui', label: 'Tidl. selvmordsforsøg', category: 'Selvskade & Risiko', text: 'Tidligere selvmordsforsøg.', hasInput: true, inputPlaceholder: 'Hvornår? Metode? Antal?', smartMerge: { prefix: 'Anamnestisk er der oplysninger om ', item: 'tidligere selvmordsforsøg', suffix: '.' } },
+            { id: 'ap_risk_hist_sh', label: 'Tidl. selvskade', category: 'Selvskade & Risiko', text: 'Tidligere selvskadende adfærd.', hasInput: true, inputPlaceholder: 'Type? Periode?', smartMerge: { prefix: 'Anamnestisk er der oplysninger om ', item: 'tidligere selvskadende adfærd', suffix: '.' } },
 
-            // NY SEKTION 2: PSYKOTISKE SYMPTOMER
+            // --- SEKTION 2: PSYKOTISKE SYMPTOMER ---
             { id: 'ap_psych_no', label: 'Ingen psykose-tegn', category: 'Psykotiske Symptomer', text: 'Oplever ikke mærkelige eller ubehagelige tanker, sanser ting, som andre ikke gør, eller føler sig påvirket af noget udefrakommende.', isDefault: true, exclude: ['ap_psych_gen', 'ap_psych_audit', 'ap_psych_vis', 'ap_psych_para', 'ap_psych_thought', 'ap_psych_control'] },
             { id: 'ap_psych_gen', label: 'Psykotiske oplevelser (Generelt)', category: 'Psykotiske Symptomer', text: 'Oplever mærkelige eller ubehagelige tanker og sanseoplevelser.', exclude: ['ap_psych_no'] },
             { id: 'ap_psych_audit', label: 'Hørehallucinationer', category: 'Psykotiske Symptomer', text: 'Beskriver hørehallucinationer (stemmer/lyde).', exclude: ['ap_psych_no'], smartMerge: { prefix: 'Patienten beskriver ', item: 'hørehallucinationer', suffix: '.' } },
@@ -192,15 +195,12 @@
             { id: 'ap_psych_thought', label: 'Tankeinterferens', category: 'Psykotiske Symptomer', text: 'Oplever tankepåvirkning (indsættelse/fratagelse/hørlighed).', exclude: ['ap_psych_no'], smartMerge: { prefix: 'Patienten beskriver ', item: 'tankeinterferens (indsættelse/fratagelse/hørlighed)', suffix: '.' } },
             { id: 'ap_psych_control', label: 'Styringsoplevelser', category: 'Psykotiske Symptomer', text: 'Føler sig styret af udefrakommende kræfter.', exclude: ['ap_psych_no'], smartMerge: { prefix: 'Patienten beskriver ', item: 'styringsoplevelser', suffix: '.' } },
 
-            // --- OPDELT SEKTION SLUT ---
-
             { id: 'ap_mot_yes', label: 'Motiveret', category: 'Motivation & Ønsker', text: 'Er motiveret for behandling.', isDefault: true, exclude: ['ap_mot_no'] },
             { id: 'ap_mot_no', label: 'Ikke motiveret', category: 'Motivation & Ønsker', text: 'Er ikke motiveret for behandling.', exclude: ['ap_mot_yes'] },
             { id: 'ap_help_yes', label: 'Ønsker hjælp', category: 'Motivation & Ønsker', text: 'Ønsker hjælp til...', isDefault: true, exclude: ['ap_help_no'] },
             { id: 'ap_help_no', label: 'Ønsker ikke hjælp', category: 'Motivation & Ønsker', text: 'Ønsker ikke hjælp til...', exclude: ['ap_help_yes'] },
             { id: 'ap_plan', label: 'Behandlingsplan', category: 'Motivation & Ønsker', text: 'Vil gerne at... indgår i en kommende behandlingsplan.', isDefault: true },
         ];
-
 
         const PSYCH_OPTIONS = [
              { id: 'orient_normal', label: 'Fuldt orienteret', category: 'Bevidsthed', text: 'Vågen, klar og orienteret i tid, sted og egne data.', isDefault: true, exclude: ['orient_confused', 'orient_delir', 'orient_sløv', 'orient_sopor', 'orient_cloud'] },
@@ -209,18 +209,11 @@
             { id: 'orient_confused', label: 'Konfus', category: 'Bevidsthed', text: 'Konfus og desorienteret.', exclude: ['orient_normal', 'orient_delir', 'orient_sløv', 'orient_sopor', 'orient_cloud'] },
             { id: 'orient_cloud', label: 'Tågetilstand', category: 'Bevidsthed', text: 'Befinder sig i en tågetilstand med nedsat opfattelse af omverdenen.', exclude: ['orient_normal', 'orient_confused', 'orient_delir', 'orient_sløv', 'orient_sopor'] },
             { id: 'orient_delir', label: 'Delirøs', category: 'Bevidsthed', text: 'Svingende bevidsthedsniveau, opmærksomhedsforstyrrelse og usammenhængende tale, obs delir.', exclude: ['orient_normal', 'orient_confused', 'orient_sløv', 'orient_sopor', 'orient_cloud'] },
-            
-            // --- ORIENTERING (NY SPECIFIKATION) ---
             { id: 'orient_auto_loss', label: 'Autopsykisk desorient.', category: 'Bevidsthed (Orientering)', text: 'Autopsykisk desorienteret (navn, data, civilstand).', exclude: ['orient_normal'] },
             { id: 'orient_allo_loss', label: 'Allopsykisk desorient.', category: 'Bevidsthed (Orientering)', text: 'Allopsykisk desorienteret (tid, sted, situation).', exclude: ['orient_normal'] },
-
-            // --- FREMTONING (Smart Merge Enabled) ---
             { id: 'appear_normal', label: 'Normal fremtoning', category: 'Fremtoning & Adfærd', text: 'Normal fremtoning, herunder soigneret og alderssvarende påklædning.', isDefault: true, exclude: ['appear_unkept', 'appear_bizarre_dress'] },
             { id: 'appear_unkept', label: 'Usoigneret', category: 'Fremtoning & Adfærd', text: 'Usoigneret.', exclude: ['appear_normal'], smartMerge: { prefix: 'Fremtræden er ', item: 'usoigneret', suffix: '.' } },
             { id: 'appear_bizarre_dress', label: 'Bizart påklædt', category: 'Fremtoning & Adfærd', text: 'Bizart eller uhensigtsmæssigt påklædt ift. årstiden.', exclude: ['appear_normal'], smartMerge: { prefix: 'Fremtræden er ', item: 'bizart eller uhensigtsmæssigt påklædt', suffix: '.' } },
-            
-            // --- HOLDNING (Smart Merge Enabled) ---
-            // VARIATION: "Kontaktformen/Holdningen er..." instead of "Fremstår"
             { id: 'att_coop', label: 'Samarbejdsvillig', category: 'Holdning & Samarbejde', text: 'Venlig og samarbejdsvillig i kontakten.', isDefault: true, exclude: ['att_guard', 'att_hostile', 'att_suspicious', 'att_ambivalent', 'att_aggress', 'att_threat'] },
             { id: 'att_guard', label: 'Afvisende/Guarded', category: 'Holdning & Samarbejde', text: 'Guarded og afvisende.', exclude: ['att_coop'], smartMerge: { prefix: 'Holdningen er ', item: 'guarded og afvisende', suffix: '.' } },
             { id: 'att_suspicious', label: 'Mistænksom', category: 'Holdning & Samarbejde', text: 'Mistænksom.', exclude: ['att_coop'], smartMerge: { prefix: 'Holdningen er ', item: 'mistænksom', suffix: '.' } },
@@ -228,16 +221,11 @@
             { id: 'att_ambivalent', label: 'Ambivalent', category: 'Holdning & Samarbejde', text: 'Ambivalent.', exclude: ['att_coop'], smartMerge: { prefix: 'Holdningen er ', item: 'ambivalent', suffix: '.' } },
             { id: 'att_threat', label: 'Truende adfærd', category: 'Holdning & Samarbejde', text: 'Verbalt truende.', exclude: ['att_coop'], smartMerge: { prefix: 'Holdningen er ', item: 'verbalt truende og grænseoverskridende', suffix: '.' } },
             { id: 'att_aggress', label: 'Aggressiv', category: 'Holdning & Samarbejde', text: 'Aggressiv.', exclude: ['att_coop'], smartMerge: { prefix: 'Holdningen er ', item: 'fysisk aggressiv og udadreagerende', suffix: '.' } },
-
-            // --- ANGST (Objektivt) ---
-            // VARIATION: "Objektivt ses..."
             { id: 'anx_none', label: 'Ingen angsttegn', category: 'Angst (Objektivt)', text: 'Ingen objektive tegn på angst.', isDefault: true, exclude: ['anx_sweat', 'anx_tremor', 'anx_hands', 'anx_hypervent'] },
             { id: 'anx_sweat', label: 'Svedende', category: 'Angst (Objektivt)', text: 'Svedende.', exclude: ['anx_none'], smartMerge: { prefix: 'Objektivt ses patienten ', item: 'synligt svedende', suffix: '.' } },
             { id: 'anx_tremor', label: 'Rystende/Tremor', category: 'Angst (Objektivt)', text: 'Rystende.', exclude: ['anx_none'], smartMerge: { prefix: 'Objektivt ses patienten ', item: 'rystende/tremorøs', suffix: '.' } },
             { id: 'anx_hands', label: 'Piller v. hænder/tøj', category: 'Angst (Objektivt)', text: 'Piller v. hænder/tøj.', exclude: ['anx_none'], smartMerge: { prefix: 'Objektivt ses patienten ', item: 'pillende ved hænder eller tøj', suffix: '.' } },
             { id: 'anx_hypervent', label: 'Hyperventilerer', category: 'Angst (Objektivt)', text: 'Hyperventilerende.', exclude: ['anx_none'], smartMerge: { prefix: 'Objektivt ses patienten ', item: 'hyperventilerende', suffix: '.' } },
-
-            // --- FORMEL KONTAKT (Opdateret) ---
             { id: 'c_form_norm', label: 'Normal/Upåfaldende', category: 'Formel Kontakt', text: 'Den formelle kontakt er upåfaldende. Patienten svarer relevant på spørgsmål og overholder almindelige samværsregler.', isDefault: true, exclude: ['c_form_dist', 'c_form_div', 'c_form_regr', 'c_form_bound', 'c_form_crit', 'c_form_cling', 'c_form_facade'] },
             { id: 'c_form_dist', label: 'Afvisende/Reserveret', category: 'Formel Kontakt', text: 'Kontaktformen er distancerende.', exclude: ['c_form_norm'], smartMerge: { prefix: 'Kontaktformen er ', item: 'distancerende og reserveret', suffix: '.' } },
             { id: 'c_form_bound', label: 'Grænseoverskridende', category: 'Formel Kontakt', text: 'Kontaktformen er grænseoverskridende.', exclude: ['c_form_norm'], smartMerge: { prefix: 'Kontaktformen er ', item: 'grænseoverskridende', suffix: '.' } },
@@ -245,21 +233,15 @@
             { id: 'c_form_cling', label: 'Klæbende', category: 'Formel Kontakt', text: 'Kontaktformen er klæbende.', exclude: ['c_form_norm'], smartMerge: { prefix: 'Kontaktformen er ', item: 'klæbende', suffix: '.' } },
             { id: 'c_form_facade', label: 'Facadebærende', category: 'Formel Kontakt', text: 'Kontaktformen er facadebærende.', exclude: ['c_form_norm'], smartMerge: { prefix: 'Kontaktformen er ', item: 'facadebærende', suffix: '.' } },
             { id: 'c_form_regr', label: 'Regressiv', category: 'Formel Kontakt', text: 'Kontaktformen er regressiv.', exclude: ['c_form_norm'], smartMerge: { prefix: 'Kontaktformen er ', item: 'regressiv', suffix: '.' } },
-            
-            // --- EMOTIONEL KONTAKT ---
             { id: 'c_emo_good', label: 'God/Naturlig', category: 'Emotionel Kontakt', text: 'God og naturlig emotionel kontakt.', isDefault: true, exclude: ['c_emo_flat', 'c_emo_reject', 'c_emo_appeal', 'c_emo_susp', 'c_emo_aut'] },
             { id: 'c_emo_flat', label: 'Nedsat/Affladet', category: 'Emotionel Kontakt', text: 'Noget affladet.', exclude: ['c_emo_good'], smartMerge: { prefix: 'Emotionel kontakt er ', item: 'noget affladet', suffix: '.' } },
             { id: 'c_emo_reject', label: 'Afvisende', category: 'Emotionel Kontakt', text: 'Afvisende.', exclude: ['c_emo_good'], smartMerge: { prefix: 'Emotionel kontakt er ', item: 'afvisende', suffix: '.' } },
             { id: 'c_emo_appeal', label: 'Appellerende', category: 'Emotionel Kontakt', text: 'Kontakten er appellerende, idet patienten virker indtrængende og søger aktivt omsorg eller bekræftelse.', exclude: ['c_emo_good'], smartMerge: { prefix: 'Emotionel kontakt er ', item: 'appellerende og indtrængende hjælpsøgende', suffix: '.' } },
             { id: 'c_emo_susp', label: 'Mistænksom', category: 'Emotionel Kontakt', text: 'Præget af mistænksomhed.', exclude: ['c_emo_good'], smartMerge: { prefix: 'Emotionel kontakt er ', item: 'præget af mistænksomhed', suffix: '.' } },
             { id: 'c_emo_aut', label: 'Autistisk præg', category: 'Emotionel Kontakt', text: 'Præget af autistisk afskærmning.', exclude: ['c_emo_good'], smartMerge: { prefix: 'Emotionel kontakt er ', item: 'præget af autistisk afskærmning', suffix: '.' } },
-            
-            // --- ØJENKONTAKT ---
             { id: 'contact_eye_norm', label: 'Øjenkontakt naturlig', category: 'Kontakt (Øjne)', text: 'Øjenkontakten er naturlig.', isDefault: true, exclude: ['contact_eye_avoid', 'contact_eye_stare'] },
             { id: 'contact_eye_avoid', label: 'Undvigende øjne', category: 'Kontakt (Øjne)', text: 'Undvigende øjenkontakt.', exclude: ['contact_eye_norm'], smartMerge: { prefix: 'Øjenkontakten er ', item: 'undvigende', suffix: '.' } },
             { id: 'contact_eye_stare', label: 'Stirrende', category: 'Kontakt (Øjne)', text: 'Stirrende øjenkontakt.', exclude: ['contact_eye_norm'], smartMerge: { prefix: 'Øjenkontakten er ', item: 'stirrende', suffix: '.' } },
-
-            // --- AFFEKT / FØLELSER (Prefix: "Affekten er ") ---
             { id: 'aff_adekvat', label: 'Adækvat affekt', category: 'Affekt (Følelser)', text: 'Affekten er adækvat og svinger relevant.', isDefault: true, exclude: ['aff_flat', 'aff_labil', 'aff_incong', 'aff_eksplo', 'aff_inkont', 'aff_eufor', 'aff_fatuid'] },
             { id: 'aff_flat', label: 'Affladet/Følelsesflad', category: 'Affekt (Følelser)', text: 'Affladet.', exclude: ['aff_adekvat'], smartMerge: { prefix: 'Affekten er ', item: 'affladet', suffix: '.' } },
             { id: 'aff_labil', label: 'Affektlabil', category: 'Affekt (Følelser)', text: 'Labil.', exclude: ['aff_adekvat'], smartMerge: { prefix: 'Affekten er ', item: 'labil', suffix: '.' } },
@@ -268,72 +250,51 @@
             { id: 'aff_inkont', label: 'Affektinkontinens', category: 'Affekt (Følelser)', text: 'Præget af inkontinens.', exclude: ['aff_adekvat'], smartMerge: { prefix: 'Affekten er ', item: 'præget af inkontinens', suffix: '.' } },
             { id: 'aff_eufor', label: 'Euforisk', category: 'Affekt (Følelser)', text: 'Euforisk.', exclude: ['aff_adekvat'], smartMerge: { prefix: 'Affekten er ', item: 'euforisk', suffix: '.' } },
             { id: 'aff_fatuid', label: 'Fatuid (Tom)', category: 'Affekt (Følelser)', text: 'Fatuid.', exclude: ['aff_adekvat'], smartMerge: { prefix: 'Affekten er ', item: 'fatuid', suffix: '.' } },
-
-            // --- STEMNINGSLEJE ---
-            // VARIATION: "Stemningslejet vurderes" instead of "Fremstår"
             { id: 'mood_neutral', label: 'Neutralt', category: 'Stemningsleje', text: 'Stemningslejet vurderes neutralt.', isDefault: true, exclude: ['mood_low_light', 'mood_low_severe', 'mood_high_hypo', 'mood_high_mania', 'mood_dys'] },
             { id: 'mood_low_light', label: 'Let sænket', category: 'Stemningsleje', text: 'Stemningslejet vurderes let sænket.', exclude: ['mood_neutral', 'mood_low_severe', 'mood_high_hypo', 'mood_high_mania'] },
             { id: 'mood_low_severe', label: 'Svært sænket', category: 'Stemningsleje', text: 'Stemningslejet vurderes svært sænket/depressivt.', exclude: ['mood_neutral', 'mood_low_light', 'mood_high_hypo', 'mood_high_mania'] },
             { id: 'mood_high_hypo', label: 'Løftet/Hypoman', category: 'Stemningsleje', text: 'Stemningslejet er løftet, præget af øget energi.', exclude: ['mood_neutral', 'mood_low_light', 'mood_low_severe', 'mood_high_mania'] },
             { id: 'mood_high_mania', label: 'Manisk', category: 'Stemningsleje', text: 'Stemningslejet er udtalt løftet (manisk).', exclude: ['mood_neutral', 'mood_low_light', 'mood_low_severe', 'mood_high_hypo'] },
-            // Smart Merge Mood - "Patienten virker" instead of "Fremstår"
             { id: 'mood_dys', label: 'Dysforisk', category: 'Stemningsleje', text: 'Dysforisk.', summaryLabel: 'Dysfori', smartMerge: { prefix: 'Patienten virker ', item: 'dysforisk', suffix: '.' } },
             { id: 'mood_irritabel', label: 'Irritabel', category: 'Stemningsleje', text: 'Irritabel.', summaryLabel: 'Irritabilitet', smartMerge: { prefix: 'Patienten virker ', item: 'irritabel', suffix: '.' } },
             { id: 'mood_labile', label: 'Grådlabil', category: 'Stemningsleje', text: 'Grådlabil.', summaryLabel: 'Grådlabil', smartMerge: { prefix: 'Patienten virker ', item: 'grådlabil', suffix: '.' } },
-            
-            // --- PSYKO MOTORIK (Prefix: "Psykomotorisk ") ---
             { id: 'motor_normal', label: 'Normal psykomotorik', category: 'Psykomotorik', text: 'Psykomotorisk normalt.', isDefault: true, exclude: ['motor_agit', 'motor_inhib', 'motor_restless', 'motor_catatonic'] },
             { id: 'motor_agit', label: 'Agiteret (Øget)', category: 'Psykomotorik', text: 'Psykomotorisk agiteret.', exclude: ['motor_normal', 'motor_inhib', 'motor_catatonic'], smartMerge: { prefix: 'Psykomotorisk ', item: 'agiteret', suffix: '.' } },
             { id: 'motor_inhib', label: 'Hæmmet (Nedsat)', category: 'Psykomotorik', text: 'Psykomotorisk hæmmet.', exclude: ['motor_normal', 'motor_agit', 'motor_catatonic'], smartMerge: { prefix: 'Psykomotorisk ', item: 'hæmmet', suffix: '.' } },
             { id: 'motor_catatonic', label: 'Katatoni', category: 'Psykomotorik', text: 'Præget af katatoni.', exclude: ['motor_normal', 'motor_agit', 'motor_inhib'], smartMerge: { prefix: 'Psykomotorisk ', item: 'præget af katatoni', suffix: '.' } },
             { id: 'motor_restless', label: 'Indre uro (fremstår rolig)', category: 'Psykomotorik', text: 'Indre uro, men motorisk rolig.', exclude: ['motor_normal'], smartMerge: { prefix: 'Der angives ', item: 'indre uro (fremstår rolig)', suffix: '.' } },
-            
-            // --- SPROG & TÆNKNING (FORM) (Prefix: "Tanken er " / "Der er ") ---
             { id: 'think_form_norm', label: 'Normal form/sprog', category: 'Sprog & Tænkning (Form)', text: 'Sproget er nuanceret. Talen er samlet og relevant.', isDefault: true, exclude: ['think_incoh', 'think_tang', 'think_circum', 'think_neologism', 'think_persev', 'think_flight'] },
             { id: 'think_incoh', label: 'Inkohærent', category: 'Sprog & Tænkning (Form)', text: 'Springende og inkohærent.', exclude: ['think_form_norm'], smartMerge: { prefix: 'Tanken er ', item: 'springende og inkohærent', suffix: '.' } },
             { id: 'think_tang', label: 'Tangential', category: 'Sprog & Tænkning (Form)', text: 'Tangentiel.', exclude: ['think_form_norm'], smartMerge: { prefix: 'Tanken er ', item: 'tangentiel', suffix: '.' } },
             { id: 'think_neologism', label: 'Neologismer', category: 'Sprog & Tænkning (Form)', text: 'Præget af neologismer.', exclude: ['think_form_norm'], smartMerge: { prefix: 'Tanken er ', item: 'præget af neologismer', suffix: '.' } },
             { id: 'think_persev', label: 'Perseveration', category: 'Sprog & Tænkning (Form)', text: 'Præget af perseveration.', exclude: ['think_form_norm'], smartMerge: { prefix: 'Tanken er ', item: 'præget af perseveration', suffix: '.' } },
             { id: 'think_flight', label: 'Tankeflugt', category: 'Sprog & Tænkning (Form)', text: 'Præget af tankeflugt.', exclude: ['think_form_norm'], smartMerge: { prefix: 'Tanken er ', item: 'præget af tankeflugt', suffix: '.' } },
-
             { id: 'think_speed_norm', label: 'Normalt tempo', category: 'Sprog & Tænkning (Tempo)', text: 'Normal talestrøm og tempo.', isDefault: true, exclude: ['think_press', 'think_latency', 'think_block'] },
             { id: 'think_press', label: 'Talepres', category: 'Sprog & Tænkning (Tempo)', text: 'Talepres.', exclude: ['think_speed_norm', 'think_latency'], smartMerge: { prefix: 'Der er ', item: 'talepres', suffix: '.' } },
             { id: 'think_latency', label: 'Latenstid', category: 'Sprog & Tænkning (Tempo)', text: 'Latenstid.', exclude: ['think_speed_norm', 'think_press'], smartMerge: { prefix: 'Der er ', item: 'latenstid', suffix: '.' } },
             { id: 'think_block', label: 'Tankestop', category: 'Sprog & Tænkning (Tempo)', text: 'Tankestop.', exclude: ['think_speed_norm'], smartMerge: { prefix: 'Der er ', item: 'tankestop', suffix: '.' } },
-
-            // --- TÆNKNING (INDHOLD) ---
             { id: 'think_content_norm', label: 'Normalt indhold', category: 'Tænkning (Indhold)', text: 'Indholdsmæssigt relevant uden bizariteter eller neologismer.', isDefault: true, exclude: ['think_ruminate', 'think_quarrel'] },
             { id: 'think_ruminate', label: 'Ruminerende', category: 'Tænkning (Indhold)', text: 'Tankeindholdet er præget af depressive grublerier (ruminationer).', exclude: ['think_content_norm'], smartMerge: { prefix: 'Tankeindholdet er præget af ', item: 'depressive grublerier (ruminationer)', suffix: '.' } },
             { id: 'think_quarrel', label: 'Kværulerende', category: 'Tænkning (Indhold)', text: 'Tankeindholdet er præget af kværulans.', exclude: ['think_content_norm'], smartMerge: { prefix: 'Tankeindholdet er præget af ', item: 'kværulans', suffix: '.' } },
-
-            // --- PERCEPTION ---
             { id: 'psychosis_none', label: 'Ingen hallucinationer', category: 'Perception (Hallucinationer)', text: 'Ingen tegn på produktive psykotiske symptomer, herunder ingen hallucinationer.', isDefault: true, exclude: ['hallu_audit', 'hallu_visual', 'hallu_olfact'] },
             { id: 'hallu_audit', label: 'Hørehallucinationer', category: 'Perception (Hallucinationer)', text: 'Der er evidens for hørehallucinationer (stemmer/lyde).', exclude: ['psychosis_none'], smartMerge: { prefix: 'Der er evidens for ', item: 'hørehallucinationer', suffix: '.' } },
             { id: 'hallu_visual', label: 'Synshallucinationer', category: 'Perception (Hallucinationer)', text: 'Angiver synshallucinationer.', exclude: ['psychosis_none'], smartMerge: { prefix: 'Der er evidens for ', item: 'synshallucinationer', suffix: '.' } },
             { id: 'hallu_olfact', label: 'Lugt/Smag', category: 'Perception (Hallucinationer)', text: 'Angiver lugt- eller smagshallucinationer.', exclude: ['psychosis_none'], smartMerge: { prefix: 'Der er evidens for ', item: 'lugt-/smagshallucinationer', suffix: '.' } },
-
-            // --- VRANGFORESTILLINGER ---
             { id: 'delusion_none', label: 'Ingen vrangforestillinger', category: 'Indhold (Vrangforestillinger)', text: 'Ingen vrangforestillinger.', isDefault: true, exclude: ['delusion_para', 'delusion_megalo', 'delusion_depress', 'delusion_bizarre', 'delusion_control', 'delusion_hypo'] },
             { id: 'delusion_para', label: 'Paranoia (Persekutorisk)', category: 'Indhold (Vrangforestillinger)', text: 'Præget af paranoide (persekutoriske) vrangforestillinger.', exclude: ['delusion_none'], smartMerge: { prefix: 'Tankeindholdet er præget af ', item: 'paranoide (persekutoriske) vrangforestillinger', suffix: '.' } },
             { id: 'delusion_megalo', label: 'Storhed (Megaloman)', category: 'Indhold (Vrangforestillinger)', text: 'Giver udtryk for megalomane vrangforestillinger (storhedsvanvid).', exclude: ['delusion_none'], smartMerge: { prefix: 'Tankeindholdet er præget af ', item: 'megalomane vrangforestillinger', suffix: '.' } },
             { id: 'delusion_depress', label: 'Depressive/Skyld', category: 'Indhold (Vrangforestillinger)', text: 'Udviser depressive vrangforestillinger (ruin, skyld, fortabele).', exclude: ['delusion_none'], smartMerge: { prefix: 'Tankeindholdet er præget af ', item: 'depressive vrangforestillinger', suffix: '.' } },
             { id: 'delusion_hypo', label: 'Hypokondre', category: 'Indhold (Vrangforestillinger)', text: 'Udviser hypokondre vrangforestillinger.', exclude: ['delusion_none'], smartMerge: { prefix: 'Tankeindholdet er præget af ', item: 'hypokondre vrangforestillinger', suffix: '.' } },
             { id: 'delusion_control', label: 'Styring/Påvirkning', category: 'Indhold (Vrangforestillinger)', text: 'Oplever tankepåvirknings- eller styringsoplevelser.', exclude: ['delusion_none'], smartMerge: { prefix: 'Tankeindholdet er præget af ', item: 'tankepåvirknings-/styringsoplevelser', suffix: '.' } },
-            
-            // --- KOGNITION & HUKOMMELSE ---
             { id: 'cog_normal', label: 'Normal kognition', category: 'Kognition & Hukommelse', text: 'Kognitivt upåfaldende i samtalen. Intet tegn på hukommelsessvigt.', isDefault: true, exclude: ['cog_imp', 'cog_memory', 'cog_conc', 'cog_confab', 'cog_amnesia'] },
             { id: 'cog_imp', label: 'Kognitivt svækket', category: 'Kognition & Hukommelse', text: 'Virker generelt kognitivt svækket.', exclude: ['cog_normal'], smartMerge: { prefix: 'Der er tegn på ', item: 'generel kognitiv svækkelse', suffix: '.' } },
             { id: 'cog_memory', label: 'Hukommelsesbesvær', category: 'Kognition & Hukommelse', text: 'Udviser tegn på hukommelsesbesvær (indprentning/langtid).', exclude: ['cog_normal'], smartMerge: { prefix: 'Der er tegn på ', item: 'hukommelsesbesvær', suffix: '.' } },
             { id: 'cog_amnesia', label: 'Amnesi', category: 'Kognition & Hukommelse', text: 'Udviser tegn på amnesi (lakunær eller total).', exclude: ['cog_normal'], smartMerge: { prefix: 'Der er tegn på ', item: 'amnesi', suffix: '.' } },
             { id: 'cog_confab', label: 'Konfabulationer', category: 'Kognition & Hukommelse', text: 'Der ses konfabulationer (udfylder hukommelseshuller med fantasi).', exclude: ['cog_normal'], smartMerge: { prefix: 'Der ses ', item: 'konfabulationer', suffix: '.' } },
             { id: 'cog_conc', label: 'Koncentrationsbesvær', category: 'Kognition & Hukommelse', text: 'Præget af koncentrationsbesvær, svært ved at fastholde fokus.', exclude: ['cog_normal'], smartMerge: { prefix: 'Der er tegn på ', item: 'koncentrationsbesvær', suffix: '.' } },
-            
-            // --- INDSIGT ---
             { id: 'insight_good', label: 'God indsigt', category: 'Indsigt', text: 'Har relevant og god sygdomsindsigt.', isDefault: true, exclude: ['insight_none', 'insight_part'] },
             { id: 'insight_part', label: 'Partiel indsigt', category: 'Indsigt', text: 'Har partiel sygdomsindsigt, erkender symptomer men ikke behandlingsbehov.', exclude: ['insight_good', 'insight_none'] },
             { id: 'insight_none', label: 'Ingen indsigt', category: 'Indsigt', text: 'Ingen sygdomsindsigt.', exclude: ['insight_good', 'insight_part'] },
-            
-            // --- SUICIDALITET ---
             { id: 'sui_none', label: 'Ingen suicidalitet', category: 'Risikovurdering (Suic)', text: 'Ingen aktuelle tanker om død eller selvmord. Ingen selvmordsplaner eller -intentioner.', isDefault: true, exclude: ['sui_passive', 'sui_active_thoughts', 'sui_plans', 'sui_intent'] },
             { id: 'sui_passive', label: 'Passive dødstanker', category: 'Risikovurdering (Suic)', text: 'Angiver passive dødstanker/livsled ("kunne være rart ikke at vågne"), men ingen aktuelle planer eller intentioner.', exclude: ['sui_none', 'sui_active_thoughts'] },
             { id: 'sui_active_thoughts', label: 'Aktive selvmordstanker', category: 'Risikovurdering (Suic)', text: 'Tilkendegiver aktive selvmordstanker.', exclude: ['sui_none', 'sui_passive'] },
@@ -344,128 +305,85 @@
 
         const SOMATIC_ACT_OPTIONS = [
              { id: 'act_cns_ok', label: 'Ingen CNS klager', category: 'CNS', text: 'Benægter hovedpine, svimmelhed, besvimelse, synsforstyrrelser eller kramper.', isDefault: true, exclude: ['act_cns_headache', 'act_cns_dizzy', 'act_cns_faint'] },
-            
-            // Smart Merge CNS
             { id: 'act_cns_headache', label: 'Hovedpine', category: 'CNS', text: 'Angiver hovedpine.', exclude: ['act_cns_ok'], smartMerge: { prefix: 'Angiver ', item: 'hovedpine', suffix: '.' } },
             { id: 'act_cns_dizzy', label: 'Svimmelhed', category: 'CNS', text: 'Angiver svimmelhed (karakter: ).', exclude: ['act_cns_ok'], smartMerge: { prefix: 'Angiver ', item: 'svimmelhed (karakter: )', suffix: '.' } },
-            
             { id: 'act_cp_ok', label: 'Ingen CP klager', category: 'Cardio/Pulm', text: 'Ingen klager over brystsmerter, hjertebanken eller dyspnø.', isDefault: true, exclude: ['act_cp_pain', 'act_cp_palp', 'act_cp_dysp'] },
-            
-            // Smart Merge CP
             { id: 'act_cp_pain', label: 'Brystsmerter', category: 'Cardio/Pulm', text: 'Angiver brystsmerter.', exclude: ['act_cp_ok'], smartMerge: { prefix: 'Angiver ', item: 'brystsmerter', suffix: '.' } },
             { id: 'act_cp_palp', label: 'Hjertebanken', category: 'Cardio/Pulm', text: 'Angiver hjertebanken.', exclude: ['act_cp_ok'], smartMerge: { prefix: 'Angiver ', item: 'hjertebanken', suffix: '.' } },
             { id: 'act_cp_dysp', label: 'Dyspnø', category: 'Cardio/Pulm', text: 'Angiver dyspnø.', exclude: ['act_cp_ok'], smartMerge: { prefix: 'Angiver ', item: 'dyspnø', suffix: '.' } },
-            
-            // --- GI SECTION ---
             { id: 'act_gi_ok', label: 'Ingen GI klager', category: 'Gastro-Intestinal', text: 'Ingen kvalme, opkastninger eller ændring i afføringsmønster.', isDefault: true, exclude: ['act_gi_nausea', 'act_gi_obst', 'act_gi_dia', 'act_gi_pain', 'act_gi_blood', 'act_gi_def_pain'] },
-            
-            // Smart Merge GI
             { id: 'act_gi_nausea', label: 'Kvalme', category: 'Gastro-Intestinal', text: 'Angiver kvalme.', exclude: ['act_gi_ok'], smartMerge: { prefix: 'Angiver ', item: 'kvalme', suffix: '.' } },
             { id: 'act_gi_obst', label: 'Obstipation', category: 'Gastro-Intestinal', text: 'Angiver tendens til forstoppelse.', exclude: ['act_gi_ok'], smartMerge: { prefix: 'Angiver ', item: 'tendens til forstoppelse', suffix: '.' } },
             { id: 'act_gi_dia', label: 'Diarré', category: 'Gastro-Intestinal', text: 'Angiver diarré.', exclude: ['act_gi_ok'], smartMerge: { prefix: 'Angiver ', item: 'diarré', suffix: '.' } },
             { id: 'act_gi_pain', label: 'Mavesmerter', category: 'Gastro-Intestinal', text: 'Angiver mavesmerter.', exclude: ['act_gi_ok'], smartMerge: { prefix: 'Angiver ', item: 'mavesmerter', suffix: '.' } },
             { id: 'act_gi_blood', label: 'Blod i afføring', category: 'Gastro-Intestinal', text: 'Angiver blod i afføringen.', exclude: ['act_gi_ok'], smartMerge: { prefix: 'Angiver ', item: 'blod i afføringen', suffix: '.' } },
             { id: 'act_gi_def_pain', label: 'Smerter v. afføring', category: 'Gastro-Intestinal', text: 'Angiver smerter ved afføring.', exclude: ['act_gi_ok'], smartMerge: { prefix: 'Angiver ', item: 'smerter ved afføring', suffix: '.' } },
-            
-            // --- URO SECTION ---
             { id: 'act_uro_ok', label: 'Ingen URO klager', category: 'Urologisk', text: 'Ingen vandladningsgener (svie, hyppighed eller retention).', isDefault: true, exclude: ['act_uro_retention', 'act_uro_pain', 'act_uro_dysuria', 'act_uro_blood', 'act_uro_pollakisuria'] },
-            // Smart Merge Uro
             { id: 'act_uro_retention', label: 'Retention', category: 'Urologisk', text: 'Angiver besvær med at lade vandet (retention).', exclude: ['act_uro_ok'], smartMerge: { prefix: 'Angiver ', item: 'retention', suffix: '.' } },
             { id: 'act_uro_dysuria', label: 'Svie/Smerter', category: 'Urologisk', text: 'Angiver svie/smerter ved vandladning.', exclude: ['act_uro_ok'], smartMerge: { prefix: 'Angiver ', item: 'svie/smerter ved vandladning', suffix: '.' } },
             { id: 'act_uro_blood', label: 'Blod i urin', category: 'Urologisk', text: 'Angiver synligt blod i urinen.', exclude: ['act_uro_ok'], smartMerge: { prefix: 'Angiver ', item: 'synligt blod i urinen', suffix: '.' } },
             { id: 'act_uro_pollakisuria', label: 'Hyppig vandladning', category: 'Urologisk', text: 'Angiver hyppig vandladning.', exclude: ['act_uro_ok'], smartMerge: { prefix: 'Angiver ', item: 'hyppig vandladning', suffix: '.' } },
-            
             { id: 'act_musc_ok', label: 'Ingen smerter', category: 'Bevægeapparat', text: 'Ingen aktuelle smerter eller bevægeindskrænkning.', isDefault: true, exclude: ['act_musc_back', 'act_musc_joint'] },
-            
-            // Smart Merge Musk
             { id: 'act_musc_back', label: 'Rygsmerter', category: 'Bevægeapparat', text: 'Angiver rygsmerter.', exclude: ['act_musc_ok'], smartMerge: { prefix: 'Angiver ', item: 'rygsmerter', suffix: '.' } },
             { id: 'act_musc_joint', label: 'Ledsmerter', category: 'Bevægeapparat', text: 'Angiver ledsmerter.', exclude: ['act_musc_ok'], smartMerge: { prefix: 'Angiver ', item: 'ledsmerter', suffix: '.' } },
-
             { id: 'act_sleep_ok', label: 'Søvn normal', category: 'Søvn', text: 'Sover uforstyrret igennem natten, føler sig udhvilet.', isDefault: true, exclude: ['act_sleep_insom', 'act_sleep_broken', 'act_sleep_early'] },
-            // Smart Merge Sleep (Somatic)
             { id: 'act_sleep_insom', label: 'Indsovningsbesvær', category: 'Søvn', text: 'Angiver indsovningsbesvær.', exclude: ['act_sleep_ok'], smartMerge: { prefix: 'Angiver ', item: 'indsovningsbesvær', suffix: '.' } },
             { id: 'act_sleep_broken', label: 'Afbrudt søvn', category: 'Søvn', text: 'Mange opvågninger.', exclude: ['act_sleep_ok'], smartMerge: { prefix: 'Angiver ', item: 'mange opvågninger', suffix: '.' } },
             { id: 'act_sleep_early', label: 'Tidlig opvågning', category: 'Søvn', text: 'Vågner tidligt uden at kunne falde i søvn igen (terminal insomni).', exclude: ['act_sleep_ok'], smartMerge: { prefix: 'Angiver ', item: 'tidlig opvågning', suffix: '.' } },
-
             { id: 'act_appetite_ok', label: 'Appetit normal', category: 'Appetit/Vægt', text: 'Normal appetit og stabil vægt.', isDefault: true, exclude: ['act_appetite_low', 'act_appetite_high', 'act_weight_loss'] },
-            // Smart Merge Appetite
             { id: 'act_appetite_low', label: 'Nedsat appetit', category: 'Appetit/Vægt', text: 'Nedsat lyst til mad.', exclude: ['act_appetite_ok'], smartMerge: { prefix: 'Angiver ', item: 'nedsat appetit', suffix: '.' } },
             { id: 'act_weight_loss', label: 'Vægttab', category: 'Appetit/Vægt', text: 'Angiver utilsigtet vægttab.', exclude: ['act_appetite_ok'], smartMerge: { prefix: 'Angiver ', item: 'vægttab', suffix: '.' } },
         ];
 
         const SOMATIC_OBJ_OPTIONS = [
              { id: 'gen_upavirket', label: 'Upåvirket', category: 'Almentilstand', text: 'Upåvirket. Normal ernæringstilstand.', isDefault: true, exclude: ['gen_medtaget', 'gen_adipos', 'gen_emaciated'] },
-            // Smart Merge General
             { id: 'gen_medtaget', label: 'Medtaget', category: 'Almentilstand', text: 'Fremstår medtaget.', exclude: ['gen_upavirket'], smartMerge: { prefix: 'Fremstår ', item: 'medtaget', suffix: '.' } },
             { id: 'gen_emaciated', label: 'Afmagret/Kakektisk', category: 'Almentilstand', text: 'Fremstår afmagret/kakektisk.', exclude: ['gen_upavirket', 'gen_adipos'], smartMerge: { prefix: 'Fremstår ', item: 'afmagret/kakektisk', suffix: '.' } },
-
             { id: 'gen_adipos', label: 'Adipositas', category: 'Almentilstand', text: 'Adipøs ernæringstilstand.', exclude: ['gen_upavirket', 'gen_emaciated'] },
-            
             { id: 'cp_normal', label: 'St.c. et p. normal', category: 'Stethoscopia', text: 'St.c.: Regelmæssig hjerteaktion uden mislyde. St.p.: Vesikulær respiration uden bilyde.', isDefault: true, exclude: ['cp_abnorm_c', 'cp_abnorm_p'] },
             { id: 'cp_abnorm_c', label: 'St.c. uregelmæssig', category: 'Stethoscopia', text: 'St.c.: Uregelmæssig hjerteaktion (arytmi).', exclude: ['cp_normal'] },
             { id: 'cp_abnorm_p', label: 'St.p. bilyde', category: 'Stethoscopia', text: 'St.p.: Der høres bilyde (rhonchi/crepitatio).', exclude: ['cp_normal'] },
-            
-            // --- ABDOMEN ---
             { id: 'abd_normal', label: 'Abdomen normal', category: 'Abdomen & Nyreloger', text: 'Abdomen blød og uøm. Ingen udfyldninger. Normale tarmlyde. Ingen flankeømhed.', isDefault: true, exclude: ['abd_tender', 'abd_guard', 'abd_mass', 'abd_sounds_missing', 'abd_sounds_hyper', 'abd_flank_tender'] },
             { id: 'abd_tender', label: 'Ømhed', category: 'Abdomen & Nyreloger', text: 'Ømhed ved palpation.', exclude: ['abd_normal'], smartMerge: { prefix: 'Der findes ', item: 'ømhed ved palpation', suffix: '.' } },
             { id: 'abd_guard', label: 'Værn/Slipømhed', category: 'Abdomen & Nyreloger', text: 'Værn og slipømhed.', exclude: ['abd_normal'], smartMerge: { prefix: 'Der findes ', item: 'værn og slipømhed', suffix: '.' } },
             { id: 'abd_mass', label: 'Udfyldninger', category: 'Abdomen & Nyreloger', text: 'Udfyldning.', exclude: ['abd_normal'], smartMerge: { prefix: 'Der palperes ', item: 'udfyldning', suffix: '.' } },
             { id: 'abd_sounds_missing', label: 'Manglende tarmlyde', category: 'Abdomen & Nyreloger', text: 'Manglende tarmlyde.', exclude: ['abd_normal'], smartMerge: { prefix: 'Der høres ', item: 'manglende tarmlyde', suffix: '.' } },
             { id: 'abd_sounds_hyper', label: 'Hyperaktive tarmlyde', category: 'Abdomen & Nyreloger', text: 'Hyperaktive tarmlyde.', exclude: ['abd_normal'], smartMerge: { prefix: 'Der høres ', item: 'hyperaktive tarmlyde', suffix: '.' } },
-            // NY: Flankeømhed
             { id: 'abd_flank_tender', label: 'Flankeømhed', category: 'Abdomen & Nyreloger', text: 'Der er bankeømhed svarende til nyrelogerne.', exclude: ['abd_normal'], smartMerge: { prefix: 'Der er ', item: 'bankeømhed svarende til nyrelogerne', suffix: '.' } },
-
-
-            // --- CRANIAL NERVES ---
             { id: 'cn_normal', label: 'Kranienerver II-XII normal', category: 'Neurologisk (Kranienerver)', text: 'Intet abnormt påvist, systematisk undersøgt (II-XII). Synsfelter fundet normale ved Donders. Pupiller egale med normal lysrefleks. Ingen nystagmus. Ingen facialisparese. Ingen tungedeviation.', isDefault: true, exclude: ['cn_pupil', 'cn_nystag', 'cn_facial', 'cn_other'] },
             { id: 'cn_pupil', label: 'Pupilforhold afviger', category: 'Neurologisk (Kranienerver)', text: 'Pupiller: [Beskriv afvigelse, fx miosis/mydriasis].', exclude: ['cn_normal'] },
-            // Smart Merge CN (Booleans)
             { id: 'cn_nystag', label: 'Nystagmus', category: 'Neurologisk (Kranienerver)', text: 'Der ses nystagmus.', exclude: ['cn_normal'], smartMerge: { prefix: 'Der ses ', item: 'nystagmus', suffix: '.' } },
             { id: 'cn_facial', label: 'Facialisparese', category: 'Neurologisk (Kranienerver)', text: 'Tegn på facialisparese (central/perifer).', exclude: ['cn_normal'], smartMerge: { prefix: 'Der ses ', item: 'facialisparese', suffix: '.' } },
-
             { id: 'motor_sys_normal', label: 'Motorik/Kraft normal', category: 'Neurologisk (Motorik)', text: 'Strakt arm- og bentest uden nedsynkning. Egal kraft (5/5) over de større led (OE+UE). Normal tonus.', isDefault: true, exclude: ['motor_weak_oe', 'motor_weak_ue', 'motor_tonus'] },
-            // Smart Merge Motor
             { id: 'motor_weak_oe', label: 'Kraftnedsættelse OE', category: 'Neurologisk (Motorik)', text: 'Nedsat kraft i overekstremiteter.', exclude: ['motor_sys_normal'], smartMerge: { prefix: 'Nedsat kraft i ', item: 'overekstremiteter', suffix: '.' } },
             { id: 'motor_weak_ue', label: 'Kraftnedsættelse UE', category: 'Neurologisk (Motorik)', text: 'Nedsat kraft i underekstremiteter.', exclude: ['motor_sys_normal'], smartMerge: { prefix: 'Nedsat kraft i ', item: 'underekstremiteter', suffix: '.' } },
-            
             { id: 'reflex_normal', label: 'Reflekser normale (Alle)', category: 'Neurologisk (Reflekser)', text: 'Normale og sidelige dybe senereflekser. Babinski negativ bilat.', isDefault: true, exclude: ['reflex_hyper', 'reflex_babinski', 'reflex_biceps', 'reflex_triceps', 'reflex_brachiorad', 'reflex_patellar', 'reflex_achilles', 'reflex_babinski_neg', 'reflex_patho_other'] },
-            
-            // SMART MERGE REFLEKSER
             { id: 'reflex_biceps', label: 'Biceps (Normal)', category: 'Neurologisk (Reflekser)', text: 'Biceps: bilat. normal.', isDefault: false, isNormal: true, exclude: ['reflex_normal'], smartMerge: { prefix: '', item: 'biceps', suffix: ' findes bilat. normale.' } },
             { id: 'reflex_triceps', label: 'Triceps (Normal)', category: 'Neurologisk (Reflekser)', text: 'Triceps: bilat. normal.', isDefault: false, isNormal: true, exclude: ['reflex_normal'], smartMerge: { prefix: '', item: 'triceps', suffix: ' findes bilat. normale.' } },
             { id: 'reflex_brachiorad', label: 'Brachioradialis (Normal)', category: 'Neurologisk (Reflekser)', text: 'Brachioradialis: bilat. normal.', isDefault: false, isNormal: true, exclude: ['reflex_normal'], smartMerge: { prefix: '', item: 'brachioradialis', suffix: ' findes bilat. normale.' } },
             { id: 'reflex_patellar', label: 'Patellar (Normal)', category: 'Neurologisk (Reflekser)', text: 'Patellar: bilat. normal.', isDefault: false, isNormal: true, exclude: ['reflex_normal'], smartMerge: { prefix: '', item: 'patellar', suffix: ' findes bilat. normale.' } },
             { id: 'reflex_achilles', label: 'Achilles (Normal)', category: 'Neurologisk (Reflekser)', text: 'Achilles: bilat. normal.', isDefault: false, isNormal: true, exclude: ['reflex_normal'], smartMerge: { prefix: '', item: 'achilles', suffix: ' findes bilat. normale.' } },
             { id: 'reflex_babinski_neg', label: 'Babinski Neg.', category: 'Neurologisk (Reflekser)', text: 'Babinski: Negativ.', isDefault: false, isNormal: true, exclude: ['reflex_normal'] },
-            
-            // Smart Merge Pathological Reflexes
             { id: 'reflex_hyper', label: 'Hyperrefleksi', category: 'Neurologisk (Reflekser)', text: 'Livlige/Hyperaktive reflekser.', exclude: ['reflex_normal'], smartMerge: { prefix: 'Der findes ', item: 'livlige/hyperaktive reflekser', suffix: '.' } },
             { id: 'reflex_babinski', label: 'Babinski Positiv', category: 'Neurologisk (Reflekser)', text: 'Babinski positiv (extensivt tå-respons).', exclude: ['reflex_normal'], smartMerge: { prefix: 'Der findes ', item: 'positiv Babinski (extensivt tå-respons)', suffix: '.' } },
             { id: 'reflex_patho_other', label: 'Andet patologisk (Beskriv)', category: 'Neurologisk (Reflekser)', text: 'Patologiske refleksfund.', exclude: ['reflex_normal'], smartMerge: { prefix: 'Der findes ', item: 'patologiske refleksfund', suffix: '.' } },
-
             { id: 'coord_normal', label: 'Koordination normal', category: 'Neurologisk (Cerebellart)', text: 'Normal koordination ved finger-næse forsøg og knæ-hæl forsøg. Ingen ataksi.', isDefault: true, exclude: ['coord_ataxia', 'coord_romberg'] },
-            // Smart Merge Cerebellar
             { id: 'coord_ataxia', label: 'Ataksi/Usikker FNF', category: 'Neurologisk (Cerebellart)', text: 'Usikkerhed ved finger-næse forsøg (ataksi).', exclude: ['coord_normal'], smartMerge: { prefix: 'Der findes ', item: 'ataksi', suffix: '.' } },
             { id: 'coord_romberg', label: 'Romberg Positiv', category: 'Neurologisk (Cerebellart)', text: 'Rombergs test positiv (faldtendens ved lukkede øjne).', exclude: ['coord_normal'], smartMerge: { prefix: 'Der findes ', item: 'positiv Romberg', suffix: '.' } },
-            
             { id: 'gait_normal', label: 'Gang/Stand normal', category: 'Neurologisk (Gang)', text: 'Sikker gang, vending og stand. Linegang upåfaldende.', isDefault: true, exclude: ['gait_unsure', 'gait_broad'] },
             { id: 'gait_unsure', label: 'Usikker gang', category: 'Neurologisk (Gang)', text: 'Gangen er usikker/bredsporet.', exclude: ['gait_normal'] },
-
             { id: 'eps_none', label: 'Ingen EPS', category: 'Neurologisk (EPS)', text: 'Ingen bradykinesi, rigiditet eller ufrivillige bevægelser. Ingen hvile- eller intentionstremor.', isDefault: true, exclude: ['eps_rigid', 'eps_tremor', 'eps_dyskinesia', 'eps_aca'] },
-            // Smart Merge EPS
             { id: 'eps_rigid', label: 'Rigiditet', category: 'Neurologisk (EPS)', text: 'Der findes rigiditet ved passiv bevægelse.', exclude: ['eps_none'], smartMerge: { prefix: 'Der observeres ', item: 'rigiditet', suffix: '.' } },
             { id: 'eps_tremor', label: 'Tremor', category: 'Neurologisk (EPS)', text: 'Der observeres tremor (hvile/intention).', exclude: ['eps_none'], smartMerge: { prefix: 'Der observeres ', item: 'tremor', suffix: '.' } },
             { id: 'eps_dyskinesia', label: 'Dyskinesier', category: 'Neurologisk (EPS)', text: 'Der ses orofaciale dyskinesier.', exclude: ['eps_none'], smartMerge: { prefix: 'Der observeres ', item: 'dyskinesier', suffix: '.' } },
             { id: 'eps_aca', label: 'Akatisi', category: 'Neurologisk (EPS)', text: 'Motorisk urolig, tegn på akatisi.', exclude: ['eps_none'], smartMerge: { prefix: 'Der observeres ', item: 'akatisi', suffix: '.' } },
-
             { id: 'skin_normal', label: 'Hud: ingen mærker', category: 'Hud/Traumer', text: 'Ingen tegn på friske eller ældre læsioner eller injektionsmærker.', isDefault: true, exclude: ['skin_cut_fresh', 'skin_cut_old', 'skin_inject'] },
-            // Smart Merge Skin
             { id: 'skin_cut_fresh', label: 'Friske snitsår', category: 'Hud/Traumer', text: 'Der ses friske snitsår (lokalisation: ).', exclude: ['skin_normal'], smartMerge: { prefix: 'Der ses ', item: 'friske snitsår', suffix: '.' } },
             { id: 'skin_cut_old', label: 'Gamle ar', category: 'Hud/Traumer', text: 'Gamle ar efter selvskade (scars).', exclude: ['skin_normal'], smartMerge: { prefix: 'Der ses ', item: 'gamle ar', suffix: '.' } },
             { id: 'skin_inject', label: 'Injektionsmærker', category: 'Hud/Traumer', text: 'Injektionsmærker i lysken/albuebøjning.', exclude: ['skin_normal'], smartMerge: { prefix: 'Der ses ', item: 'injektionsmærker', suffix: '.' } },
         ];
         
-        // --- DIET INPUT COMPONENT ---
+        // --- INPUT COMPONENT ---
         const Input = ({ label, value, onChange }) => (
             <div className="flex flex-col gap-0.5">
                 <label className="text-[10px] uppercase font-bold text-slate-400">{label}</label>
@@ -482,56 +400,49 @@
         function App() {
             const [activeSection, setActiveSection] = useState('psych_actual');
             const [selectedIds, setSelectedIds] = useState(new Set());
-            const [optionDetails, setOptionDetails] = useState({}); // New: Store text details for options
+            const [optionDetails, setOptionDetails] = useState({}); 
             const [generatedText, setGeneratedText] = useState('');
             const [isFullscreen, setIsFullscreen] = useState(false);
             const [notification, setNotification] = useState(null);
             const [showSummary, setShowSummary] = useState(false);
-            const [timelineText, setTimelineText] = useState(''); // New: Timeline text
+            const [timelineText, setTimelineText] = useState(''); 
             
-            // --- NEW: DIET DAYS STATE ---
+            // --- DIET DAYS STATE ---
             const [dietDays, setDietDays] = useState([]);
-            const [activeDietDayId, setActiveDietDayId] = useState(null); // Which day is currently expanded?
-            const [isUniformDiet, setIsUniformDiet] = useState(false); // New: Toggle for uniform diet
+            const [activeDietDayId, setActiveDietDayId] = useState(null); 
+            const [isUniformDiet, setIsUniformDiet] = useState(false); 
 
             // SAFE MODE LOGIC
             const [manualEditMode, setManualEditMode] = useState(false);
             const [lastAutoGeneratedText, setLastAutoGeneratedText] = useState('');
 
-            // Initial load
             useEffect(() => {
                 const defaults = new Set();
                 [...PSYCH_OPTIONS, ...SOMATIC_OBJ_OPTIONS, ...SOMATIC_ACT_OPTIONS, ...ACTUAL_PSYCH_OPTIONS, ...ANOREXIA_OPTIONS].forEach(opt => {
                     if (opt.isDefault) defaults.add(opt.id);
                 });
                 setSelectedIds(defaults);
-                // Trigger initial generation immediately
             }, []);
-
-            useEffect(() => {
-                generateText();
+            
+            // Forces regeneration when section changes, resetting manual mode state
+             useEffect(() => {
+                if (!manualEditMode) {
+                    generateText();
+                }
             }, [selectedIds, activeSection, showSummary, optionDetails, timelineText, dietDays, isUniformDiet]);
+
             
             // --- DIET FUNCTIONS ---
             const addDietDay = () => {
-                if (isUniformDiet) return; // Prevent adding days if uniform diet is active
-                
+                if (isUniformDiet) return; 
                 const newId = Date.now();
                 const newDay = {
                     id: newId,
                     label: `Dag ${dietDays.length + 1}`,
-                    meals: {
-                        morgen: '',
-                        formiddag: '',
-                        frokost: '',
-                        eftermiddag: '',
-                        aften: '',
-                        sen_aften: '',
-                        vaeske: ''
-                    }
+                    meals: { morgen: '', formiddag: '', frokost: '', eftermiddag: '', aften: '', sen_aften: '', vaeske: '' }
                 };
                 setDietDays([...dietDays, newDay]);
-                setActiveDietDayId(newId); // Automatically expand the new day
+                setActiveDietDayId(newId); 
             };
 
             const updateDietDay = (id, field, value) => {
@@ -547,7 +458,7 @@
             const removeDietDay = (id) => {
                 setDietDays(prevDays => prevDays.filter(day => day.id !== id));
                 if (activeDietDayId === id) {
-                    setActiveDietDayId(null); // Or set to previous one
+                    setActiveDietDayId(null);
                 }
             };
 
@@ -555,15 +466,9 @@
                 setDietDays(prevDays => {
                     const index = prevDays.findIndex(d => d.id === id);
                     if (index <= 0) return prevDays;
-                    
                     const prevDay = prevDays[index - 1];
                     const currentDay = prevDays[index];
-                    
-                    const updatedDay = {
-                        ...currentDay,
-                        meals: { ...prevDay.meals }
-                    };
-                    
+                    const updatedDay = { ...currentDay, meals: { ...prevDay.meals } };
                     const newDays = [...prevDays];
                     newDays[index] = updatedDay;
                     return newDays;
@@ -578,11 +483,9 @@
                 
                 if (newState) {
                      setNotification({ message: 'Tilstand aktiveret: Spiser det samme hver dag', type: 'success' });
-                     // If no days exist, add one automatically
                      if (dietDays.length === 0) {
                          addDietDay();
                      } else {
-                         // Ensure Day 1 is active view
                          setActiveDietDayId(dietDays[0].id);
                      }
                 } else {
@@ -601,33 +504,31 @@
 
             const formatWithDetail = (text, detail) => {
                 if (!detail || detail.trim() === '') return text;
-                
                 let base = text.trim();
-                
-                // Håndtering af punktum vs kolon
-                // Hvis teksten slutter med ':', skal vi ikke tvinge et punktum ind før teksten
-                if (base.endsWith(':')) {
-                    // Do nothing - detail kommer direkte efter
-                } else if (!base.endsWith('.')) {
-                    // Ellers tilføj punktum for at afslutte sætningen før uddybningen
-                    base += '.';
-                }
+                // Strip trailing dot from base if we are appending a detail
+                if (base.endsWith('.')) base = base.slice(0, -1);
                 
                 let d = detail.trim();
-                // Start uddybning med stort bogstav
+                // Strip trailing dot from input detail to avoid double dots
+                if (d.endsWith('.')) d = d.slice(0, -1);
+
                 if (d.length > 0) d = d.charAt(0).toUpperCase() + d.slice(1);
-                // Sikr at uddybning slutter med punktum
-                if (!d.endsWith('.')) d += '.';
-                
-                return `${base} ${d}`;
+                return `${base} ${d}.`;
             };
             
             const capitalize = (s) => {
                 if (!s) return '';
                 return s.charAt(0).toUpperCase() + s.slice(1);
             };
+            
+            // Helper to clean input for SmartMerge
+            const cleanInput = (str) => {
+                if (!str) return '';
+                let cleaned = str.trim();
+                if (cleaned.endsWith('.')) cleaned = cleaned.slice(0, -1);
+                return cleaned;
+            };
 
-            // HELPER TO GENERATE CATEGORY STRING
             const getCategoryText = (categoryOptions, idsSet, detailsMap) => {
                 const lines = [];
                 const smartMergeGroups = {}; 
@@ -642,11 +543,11 @@
                             
                             let itemText = opt.smartMerge.item;
                             if (detail && detail.trim() !== '') {
+                                const cleanedDetail = cleanInput(detail);
                                 if (opt.detailInParens) {
-                                    itemText += ` (${detail.trim()})`;
+                                    itemText += ` (${cleanedDetail})`;
                                 } else {
-                                    // Formater uddybning: Punktum + Mellemrum + Stort bogstav
-                                    const d = detail.trim().charAt(0).toUpperCase() + detail.trim().slice(1);
+                                    const d = cleanedDetail.charAt(0).toUpperCase() + cleanedDetail.slice(1);
                                     itemText += `. ${d}`;
                                 }
                             }
@@ -669,80 +570,80 @@
                 standardOptions.forEach(opt => {
                      lines.push(formatWithDetail(opt.text, opt.detail));
                 });
-                
                 return lines.join(' ');
+            };
+            
+            // Function to handle switching sections properly
+            const changeSection = (newSection) => {
+                if (manualEditMode) {
+                     setManualEditMode(false);
+                     // Allow react state update to propagate before generation triggers via useEffect
+                }
+                setNotification(null);
+                setActiveSection(newSection);
             };
 
             const toggleOption = (option) => {
-                // If in manual mode, perform Smart Replace Logic
+                // MANUEL MODE LOGIK (RETTET)
                 if (manualEditMode) {
-                    const cat = option.category;
-                    const allOptions = [...ACTUAL_PSYCH_OPTIONS, ...PSYCH_OPTIONS, ...SOMATIC_ACT_OPTIONS, ...SOMATIC_OBJ_OPTIONS, ...ANOREXIA_OPTIONS];
-                    const catOptions = allOptions.filter(o => o.category === cat);
-                    
-                    // 1. Calculate PREVIOUS text (Current State)
-                    const prevText = getCategoryText(catOptions, selectedIds, optionDetails);
-                    // The generator adds "Category: " prefix, we must respect that pattern
-                    const prevFullLine = `${cat}: ${prevText}`;
-                    
-                    // 2. Calculate NEXT State
+                    const isSelected = selectedIds.has(option.id);
                     const nextIds = new Set(selectedIds);
-                    if (nextIds.has(option.id)) {
-                        nextIds.delete(option.id);
-                    } else {
-                        nextIds.add(option.id);
-                        option.exclude?.forEach(id => nextIds.delete(id));
-                    }
-                    
-                    const nextText = getCategoryText(catOptions, nextIds, optionDetails);
-                    const nextFullLine = `${cat}: ${nextText}`;
-                    
-                    let newGeneratedText = generatedText;
-                    let handled = false;
 
-                    // A. If previous text was empty/non-existent in generated text (New category entry), just append
-                    if (!prevText || (!newGeneratedText.includes(prevFullLine) && !newGeneratedText.includes(prevText))) {
-                        // Only append if we actually have something to add and we are adding (nextIds has option)
-                        if (nextText && nextIds.has(option.id)) { 
-                             newGeneratedText = newGeneratedText.trim() + "\n" + nextFullLine;
-                             handled = true;
-                        }
-                    } 
-                    // B. Try to find and replace the FULL LINE (safest)
-                    else if (newGeneratedText.includes(prevFullLine)) {
-                         newGeneratedText = newGeneratedText.replace(prevFullLine, nextFullLine);
-                         handled = true;
-                    }
-                    // C. Try to find just the content (User might have deleted category label)
-                    else if (newGeneratedText.includes(prevText)) {
-                        newGeneratedText = newGeneratedText.replace(prevText, nextText);
-                        handled = true;
-                    }
-                    
-                    // D. Fallback: If not handled (text edited beyond recognition) and ADDING
-                    if (!handled && nextIds.has(option.id)) {
-                        let textToAdd = option.text;
+                    if (isSelected) {
+                        // SLETNING: Prøv at finde og slette teksten, hvis den er uændret.
+                        nextIds.delete(option.id);
+                        
+                        // Her forsøger vi kun at slette, hvis vi finder den nøjagtige tekst.
+                        let textToRemove = option.text;
                         if (option.smartMerge) {
-                             // Construct simple sentence if adding as standalone
                              const p = option.smartMerge.prefix || '';
                              const s = option.smartMerge.suffix || '.';
                              let i = option.smartMerge.item;
-                             if (!p) i = capitalize(i);
-                             textToAdd = `${p}${i}${s}`;
+                             if (!p) i = i.charAt(0).toUpperCase() + i.slice(1);
+                             textToRemove = `${p}${i}${s}`;
                         }
+                        
+                        if (generatedText.includes(textToRemove)) {
+                             // Simpel replace, men kun én forekomst for en sikkerheds skyld
+                             const newText = generatedText.replace(textToRemove, '').replace(/\n\s*\n/g, '\n'); // Ryd op i tomme linjer
+                             setGeneratedText(newText);
+                             setLastAutoGeneratedText(newText);
+                        }
+                        // Hvis teksten ikke findes (fordi den er redigeret), gør vi intet ved teksten, kun knappen.
+                    } else {
+                        // TILFØJELSE: Altid i bunden.
+                        nextIds.add(option.id);
+                        option.exclude?.forEach(id => nextIds.delete(id));
+
+                        // Konstruer teksten
+                        let textLine = option.text;
+                        if (option.smartMerge) {
+                             const p = option.smartMerge.prefix || '';
+                             const s = option.smartMerge.suffix || '.';
+                             let i = option.smartMerge.item;
+                             // Simpel logik til at sikre stor bogstav hvis ingen præfix
+                             if (!p) i = i.charAt(0).toUpperCase() + i.slice(1);
+                             textLine = `${p}${i}${s}`;
+                        }
+                        
+                        // Tilføj detaljer fra inputfeltet, hvis der er noget
                         const detail = optionDetails[option.id];
-                        if (detail) textToAdd = formatWithDetail(textToAdd, detail);
-
-                        newGeneratedText = newGeneratedText.trim() + "\n" + textToAdd;
+                        if (detail) textLine = formatWithDetail(textLine, detail);
+                        
+                        // Tilføj altid til slutningen
+                        const newText = generatedText.trim() + "\n" + textLine;
+                        setGeneratedText(newText);
+                        setLastAutoGeneratedText(newText);
+                        
+                        setNotification({ message: 'Tilføjet i bunden (Manuel tilstand)', type: 'success' });
+                        setTimeout(() => setNotification(null), 2000);
                     }
-
-                    setGeneratedText(newGeneratedText);
-                    setLastAutoGeneratedText(newGeneratedText);
+                    
                     setSelectedIds(nextIds);
                     return;
                 }
 
-                // Normal Auto Mode Logic
+                // AUTO MODE LOGIK (Standard)
                 const isSelected = selectedIds.has(option.id);
                 const newSelection = new Set(selectedIds);
                 
@@ -756,7 +657,6 @@
                 setSelectedIds(newSelection);
             };
             
-            // Helper for setting normal status
             const setNormalStatus = () => {
                 let sectionOptions = [];
                 let normalIds = [];
@@ -768,11 +668,9 @@
                     sectionOptions = SOMATIC_OBJ_OPTIONS;
                     normalIds = SOMATIC_NORMAL_IDS;
                 } else {
-                    // Not applicable for other sections
                     return; 
                 }
 
-                // If in manual mode, we just want to APPEND the normal text block
                 if (manualEditMode) {
                     const normalTexts = sectionOptions
                         .filter(opt => normalIds.includes(opt.id))
@@ -783,7 +681,6 @@
                     setGeneratedText(textUpdate);
                     setLastAutoGeneratedText(textUpdate);
                     
-                    // Update buttons visually
                     const newSet = new Set(selectedIds);
                     sectionOptions.forEach(opt => newSet.delete(opt.id));
                     normalIds.forEach(id => newSet.add(id));
@@ -795,13 +692,8 @@
                 }
 
                 const newSet = new Set(selectedIds);
-                
-                // First remove all IDs belonging to this section to clear pathology
                 sectionOptions.forEach(opt => newSet.delete(opt.id));
-                
-                // Then add normal IDs
                 normalIds.forEach(id => newSet.add(id));
-                
                 setSelectedIds(newSet);
                 setNotification({ message: 'Normalstatus indsat', type: 'success' });
                 setTimeout(() => setNotification(null), 3000);
@@ -832,10 +724,9 @@
                 } else if (activeSection === 'diagnosis_anorexia') {
                     optionsToClear = ANOREXIA_OPTIONS;
                     sectionName = 'Anoreksia Nervosa';
-                    setDietDays([]); // Clear diet days also
+                    setDietDays([]); 
                     setIsUniformDiet(false);
                 } else if (activeSection === 'full_note') {
-                    // Hvis man står på "Samlet notat", giver det mening at "Ryd alt" rydder alt
                     setSelectedIds(new Set());
                     setOptionDetails({});
                     setTimelineText('');
@@ -849,32 +740,28 @@
 
                 const newSet = new Set(selectedIds);
                 const newDetails = { ...optionDetails };
-                
                 optionsToClear.forEach(o => {
                     newSet.delete(o.id);
                     delete newDetails[o.id];
                 });
                 
                 if (shouldClearTimeline) setTimelineText('');
-                
                 setSelectedIds(newSet);
                 setOptionDetails(newDetails);
-                setManualEditMode(false); // Genaktiver auto-generering
-                
+                setManualEditMode(false); 
                 setNotification({ message: `${sectionName} er ryddet`, type: 'success' });
                 setTimeout(() => setNotification(null), 3000);
             };
             
             const handleManualTextChange = (e) => {
                 setGeneratedText(e.target.value);
-                // If the user changes text, and it doesn't match what we just generated, enable manual mode
                 if (e.target.value !== lastAutoGeneratedText) {
                     setManualEditMode(true);
                 }
             };
 
             const forceSync = () => {
-                if (confirm("Er du sikker? Dette vil slette dine manuelle ændringer og genindlæse teksten baseret på de valgte knapper.")) {
+                if (confirm("Er du sikker? Dette vil slette dine manuelle ændringer.")) {
                     setManualEditMode(false);
                     generateText(true);
                 }
@@ -883,11 +770,9 @@
             const calculateDepressionSeverity = (selectedSet) => {
                 const coreCount = DEP_CORE_IDS.filter(id => selectedSet.has(id)).length;
                 const accCount = DEP_ACC_IDS.filter(id => selectedSet.has(id)).length;
-                
                 if (coreCount >= 3 && accCount >= 5) return 'svær';
                 if (coreCount >= 2 && accCount >= 4) return 'moderat';
                 if (coreCount >= 2 && accCount >= 2) return 'let';
-                
                 return null;
             };
             
@@ -898,18 +783,16 @@
                 
                 categoryOptions.forEach(opt => {
                     const detail = optionDetails[opt.id];
-                    
                     if (opt.smartMerge && !opt.isDefault) {
                         const key = JSON.stringify({ p: opt.smartMerge.prefix, s: opt.smartMerge.suffix });
                         if (!smartMergeGroups[key]) smartMergeGroups[key] = [];
-                        
                         let itemText = opt.smartMerge.item;
                         if (detail && detail.trim() !== '') {
+                             const cleanedDetail = cleanInput(detail);
                             if (opt.detailInParens) {
-                                itemText += ` (${detail.trim()})`;
+                                itemText += ` (${cleanedDetail})`;
                             } else {
-                                // Formater uddybning: Punktum + Mellemrum + Stort bogstav
-                                const d = detail.trim().charAt(0).toUpperCase() + detail.trim().slice(1);
+                                const d = cleanedDetail.charAt(0).toUpperCase() + cleanedDetail.slice(1);
                                 itemText += `. ${d}`;
                             }
                         }
@@ -943,19 +826,12 @@
                          }
                      }
                 }
-
                 return lines.join(' ');
             };
 
             const generateText = (force = false) => {
-                // IMPORTANT: If manual edit mode is on, and we aren't forcing, DO NOT UPDATE TEXT
-                if (manualEditMode && !force) {
-                    return;
-                }
-
-                if (force) {
-                    setManualEditMode(false);
-                }
+                if (manualEditMode && !force) return;
+                if (force) setManualEditMode(false);
 
                 const allSections = [
                     { id: 'psych_actual', title: 'AKTUELT PSYKISK', options: ACTUAL_PSYCH_OPTIONS },
@@ -979,11 +855,9 @@
                     const obsLines = [];
                     sectionsToRender.forEach(sec => {
                         const categories = Array.from(new Set(sec.options.map(o => o.category)));
-                        
                         categories.forEach(cat => {
                             const selectedOptions = sec.options.filter(o => o.category === cat && selectedIds.has(o.id));
                             const hasAbnormality = selectedOptions.some(o => !o.isDefault);
-                            
                             if (hasAbnormality && selectedOptions.length > 0) {
                                 const text = processCategoryOptions(selectedOptions, cat);
                                 obsLines.push(`${cat}: ${text}`);
@@ -1003,16 +877,12 @@
 
                 sectionsToRender.forEach(sec => {
                     const sectionLines = [];
-                    // Insert timeline if this is psych_actual
                     if (sec.id === 'psych_actual' && timelineText.trim()) {
                          sectionLines.push(`Sygdomsdebut & Udløsende faktorer: ${timelineText}`);
                     }
 
-                    // Insert Diet Days if this is diagnosis_anorexia
                     if (sec.id === 'diagnosis_anorexia' && dietDays.length > 0) {
-                        
                         if (isUniformDiet) {
-                             // UNIFORM DIET LOGIC - USE ONLY DAY 1
                              const day = dietDays[0];
                              if (day) {
                                 sectionLines.push("Kostanamnese: Patienten angiver at spise det samme hver dag. Nedenstående er repræsentativt for det daglige indtag:");
@@ -1025,7 +895,6 @@
                                 if (day.meals.vaeske) sectionLines.push(`- Væske: ${day.meals.vaeske}`);
                              }
                         } else {
-                            // NORMAL LOGIC - LIST ALL DAYS
                             sectionLines.push("Kostanamnese (eksempler fra sidste 14 dage):");
                             dietDays.forEach(day => {
                                 sectionLines.push(`${day.label}:`);
@@ -1036,18 +905,15 @@
                                 if (day.meals.aften) sectionLines.push(`- Aften: ${day.meals.aften}`);
                                 if (day.meals.sen_aften) sectionLines.push(`- Efter aften: ${day.meals.sen_aften}`);
                                 if (day.meals.vaeske) sectionLines.push(`- Væske: ${day.meals.vaeske}`);
-                                sectionLines.push(""); // Empty line after day
+                                sectionLines.push("");
                             });
                         }
                     }
 
                     const categories = Array.from(new Set(sec.options.map(o => o.category)));
-
                     categories.forEach(cat => {
                         if (movedCategories.has(cat)) return;
-
                         const selectedOptions = sec.options.filter(o => o.category === cat && selectedIds.has(o.id));
-                        
                         if (selectedOptions.length > 0) {
                             const text = processCategoryOptions(selectedOptions, cat);
                             sectionLines.push(`${cat}: ${text}`);
@@ -1055,7 +921,6 @@
                     });
 
                     if (sectionLines.length > 0) {
-                        // FIX: Do not include Title if it is Anorexia Diagnosis
                         if (sec.id !== 'diagnosis_anorexia') {
                              lines.push(sec.title);
                         }
@@ -1088,27 +953,20 @@
                 
                 const newSet = new Set(selectedIds);
                 const newDetails = { ...optionDetails };
-                
                 currentOptions.forEach(o => {
                     newSet.delete(o.id);
                     delete newDetails[o.id];
                 });
                 currentOptions.filter(o => o.isDefault).forEach(o => newSet.add(o.id));
-                
-                // Keep timeline text unless explicitly cleared? Let's clear it if resetting psych_actual
-                if (activeSection === 'psych_actual' || activeSection === 'full_note') {
-                     setTimelineText('');
-                }
-                
+                if (activeSection === 'psych_actual' || activeSection === 'full_note') setTimelineText('');
                 if (activeSection === 'diagnosis_anorexia' || activeSection === 'full_note') {
                      setDietDays([]);
                      setActiveDietDayId(null);
                      setIsUniformDiet(false);
                 }
-
                 setSelectedIds(newSet);
                 setOptionDetails(newDetails);
-                setManualEditMode(false); // Reset manual mode logic on reset
+                setManualEditMode(false);
             };
 
             const toggleFullscreen = () => {
@@ -1126,20 +984,15 @@
             };
             
              useEffect(() => {
-                const handleFsChange = () => {
-                    setIsFullscreen(!!document.fullscreenElement);
-                };
+                const handleFsChange = () => setIsFullscreen(!!document.fullscreenElement);
                 document.addEventListener('fullscreenchange', handleFsChange);
                 return () => document.removeEventListener('fullscreenchange', handleFsChange);
             }, []);
 
-
             const renderCardGrid = (dataSet) => {
                 const categories = Array.from(new Set(dataSet.map(o => o.category)));
-                
                 return (
                     <div className="pb-20">
-                        {/* Timeline input for psych_actual */}
                         {activeSection === 'psych_actual' && (
                              <div className="mb-6 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                                 <div className="bg-slate-50 px-4 py-3 border-b border-slate-200 flex items-center gap-2">
@@ -1157,15 +1010,13 @@
                              </div>
                         )}
 
-                        {/* --- NEW DIET DAYS SECTION FOR ANOREXIA (Master-Detail View) --- */}
                         {activeSection === 'diagnosis_anorexia' && (
                             <div className="mb-8">
                                 <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 shadow-inner">
                                     <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-4">
                                         <div>
                                             <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wide flex items-center gap-2">
-                                                <Layout className="w-4 h-4" />
-                                                Kostregistrering (14 dage)
+                                                <Layout className="w-4 h-4" /> Kostregistrering (14 dage)
                                             </h3>
                                             <p className="text-xs text-slate-500 mt-1">
                                                 {isUniformDiet ? 'Ensartet kost registreret. Rediger Dag 1 for at ændre.' : 'Vælg en dag i listen til venstre for at redigere.'}
@@ -1179,10 +1030,8 @@
                                                     ? 'bg-amber-100 text-amber-900 border border-amber-300 ring-1 ring-amber-300' 
                                                     : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
                                                 }`}
-                                                title="Klik her hvis patienten spiser det samme hver dag. Dette låser input til Dag 1."
                                             >
-                                                <Repeat size={16} />
-                                                Spiser det samme hver dag
+                                                <Repeat size={16} /> Spiser det samme hver dag
                                             </button>
                                             <button 
                                                 onClick={addDietDay}
@@ -1193,29 +1042,21 @@
                                                     : 'bg-indigo-600 text-white hover:bg-indigo-700'
                                                 }`}
                                             >
-                                                <Plus size={16} />
-                                                Tilføj Dag
+                                                <Plus size={16} /> Tilføj Dag
                                             </button>
                                         </div>
                                     </div>
                                     
-                                    {/* MASTER-DETAIL LAYOUT */}
                                     <div className="flex flex-col md:flex-row h-[550px] bg-white border border-slate-200 rounded-xl overflow-hidden relative">
-                                        
-                                        {/* UNIFORM DIET OVERLAY FOR LEFT COLUMN */}
                                         {isUniformDiet && (
                                             <div className="absolute top-0 left-0 bottom-0 w-1/3 z-10 bg-slate-50/60 backdrop-blur-[1px] flex flex-col items-center justify-center p-4 border-r border-slate-200 text-center">
                                                  <div className="bg-amber-50 p-4 rounded-xl border border-amber-200 shadow-sm">
                                                      <Repeat className="w-8 h-8 text-amber-500 mx-auto mb-2" />
                                                      <h4 className="font-bold text-amber-900 text-sm">Ensartet Kost</h4>
-                                                     <p className="text-xs text-amber-700 mt-1">
-                                                        Input er låst til <strong>Dag 1</strong>, da kosten er angivet som værende ens hver dag.
-                                                     </p>
+                                                     <p className="text-xs text-amber-700 mt-1">Input er låst til <strong>Dag 1</strong>, da kosten er angivet som værende ens hver dag.</p>
                                                  </div>
                                             </div>
                                         )}
-
-                                        {/* LEFT COLUMN: LIST */}
                                         <div className="w-full md:w-1/3 border-r border-slate-200 bg-slate-50 flex flex-col">
                                              <div className="p-3 bg-slate-100 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase flex justify-between items-center">
                                                 <span>Dage ({dietDays.length})</span>
@@ -1223,23 +1064,18 @@
                                              <div className="overflow-y-auto flex-1 p-2 space-y-1">
                                                 {dietDays.length === 0 ? (
                                                     <div className="text-center py-10 text-slate-400 text-sm italic px-4">
-                                                        Ingen dage tilføjet. <br/>
-                                                        {isUniformDiet ? 'Systemet tilføjer automatisk en dag...' : 'Tryk på "Tilføj Dag".'}
+                                                        Ingen dage tilføjet. <br/> {isUniformDiet ? 'Systemet tilføjer automatisk en dag...' : 'Tryk på "Tilføj Dag".'}
                                                     </div>
                                                 ) : (
                                                     dietDays.map((day, index) => {
                                                         const isActive = activeDietDayId === day.id;
-                                                        // Hide other days visually if uniform is active, only show Day 1
                                                         if (isUniformDiet && index > 0) return null;
-
                                                         return (
                                                             <div 
                                                                 key={day.id}
                                                                 onClick={() => setActiveDietDayId(day.id)} 
                                                                 className={`w-full text-left px-3 py-3 rounded-lg flex items-center justify-between cursor-pointer transition-all border ${
-                                                                    isActive 
-                                                                    ? 'bg-white border-indigo-200 shadow-sm ring-1 ring-indigo-50' 
-                                                                    : 'bg-transparent border-transparent hover:bg-white hover:border-slate-200'
+                                                                    isActive ? 'bg-white border-indigo-200 shadow-sm ring-1 ring-indigo-50' : 'bg-transparent border-transparent hover:bg-white hover:border-slate-200'
                                                                 }`}
                                                             >
                                                                 <div className="flex items-center gap-3">
@@ -1248,21 +1084,12 @@
                                                                         <div className={`text-sm font-semibold ${isActive ? 'text-indigo-700' : 'text-slate-600'}`}>
                                                                             {isUniformDiet ? 'Standard Dag (Dag 1)' : day.label}
                                                                         </div>
-                                                                        <div className="text-[10px] text-slate-400">
-                                                                            {Object.values(day.meals).filter(v => v).length} måltider
-                                                                        </div>
+                                                                        <div className="text-[10px] text-slate-400">{Object.values(day.meals).filter(v => v).length} måltider</div>
                                                                     </div>
                                                                 </div>
-                                                                
                                                                 <div className="flex items-center gap-1">
                                                                     {!isUniformDiet && (
-                                                                        <button 
-                                                                            onClick={(e) => { e.stopPropagation(); removeDietDay(day.id); }} 
-                                                                            className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
-                                                                            title="Slet dag"
-                                                                        >
-                                                                            <Trash2 size={14}/>
-                                                                        </button>
+                                                                        <button onClick={(e) => { e.stopPropagation(); removeDietDay(day.id); }} className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded transition-colors"><Trash2 size={14}/></button>
                                                                     )}
                                                                     {isActive && <ChevronRight className="w-4 h-4 text-indigo-400" />}
                                                                 </div>
@@ -1272,8 +1099,6 @@
                                                 )}
                                              </div>
                                         </div>
-
-                                        {/* RIGHT COLUMN: EDITOR */}
                                         <div className="w-full md:w-2/3 bg-white flex flex-col">
                                             {activeDietDayId && dietDays.find(d => d.id === activeDietDayId) ? (
                                                 (() => {
@@ -1290,17 +1115,11 @@
                                                                     disabled={isUniformDiet}
                                                                 />
                                                                 {!isUniformDiet && index > 0 && (
-                                                                     <button 
-                                                                        onClick={() => copyPreviousDay(activeDay.id)}
-                                                                        className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition-colors"
-                                                                        title="Kopier måltider fra dagen før i listen"
-                                                                    >
-                                                                        <Copy className="w-3 h-3" />
-                                                                        Kopier forrige
+                                                                     <button onClick={() => copyPreviousDay(activeDay.id)} className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition-colors">
+                                                                        <Copy className="w-3 h-3" /> Kopier forrige
                                                                     </button>
                                                                 )}
                                                             </div>
-                                                            
                                                             <div className="flex-1 overflow-y-auto p-6 space-y-5 bg-slate-50/30">
                                                                 <Input label="Morgenmad" value={activeDay.meals.morgen} onChange={v => updateDietDay(activeDay.id, 'morgen', v)} />
                                                                 <Input label="Før frokost" value={activeDay.meals.formiddag} onChange={v => updateDietDay(activeDay.id, 'formiddag', v)} />
@@ -1316,17 +1135,11 @@
                                                 })()
                                             ) : (
                                                 <div className="h-full flex flex-col items-center justify-center text-slate-400 p-8 text-center">
-                                                    <div className="bg-slate-50 p-4 rounded-full mb-3">
-                                                        <Layout className="w-8 h-8 text-slate-300" />
-                                                    </div>
+                                                    <div className="bg-slate-50 p-4 rounded-full mb-3"><Layout className="w-8 h-8 text-slate-300" /></div>
                                                     <p className="font-medium text-slate-500">Ingen dag valgt</p>
-                                                    <p className="text-xs mt-1 max-w-xs">
-                                                        {isUniformDiet ? 'Systemfejl: Dag 1 mangler. Prøv at slå funktionen fra og til igen.' : 'Vælg en dag fra listen til venstre for at redigere måltiderne, eller tilføj en ny dag.'}
-                                                    </p>
                                                 </div>
                                             )}
                                         </div>
-
                                     </div>
                                 </div>
                             </div>
@@ -1337,23 +1150,16 @@
                                 <div key={cat} className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-full">
                                     <div className="bg-slate-50 px-4 py-3 border-b border-slate-200 flex items-center justify-between">
                                         <h3 className="font-semibold text-slate-700 text-sm uppercase tracking-wide">{cat}</h3>
-                                        {dataSet.filter(o => o.category === cat && !o.isDefault && !o.isNormal && selectedIds.has(o.id)).length > 0 && (
-                                            <AlertCircle className="w-4 h-4 text-red-500" />
-                                        )}
+                                        {dataSet.filter(o => o.category === cat && !o.isDefault && !o.isNormal && selectedIds.has(o.id)).length > 0 && <AlertCircle className="w-4 h-4 text-red-500" />}
                                     </div>
                                     <div className="p-4 flex flex-col gap-2">
                                         {dataSet.filter(o => o.category === cat).map(option => {
                                             const isSelected = selectedIds.has(option.id);
                                             const isPathology = !option.isDefault && !option.isNormal;
-                                            
                                             let btnClass = "w-full text-left px-3 py-2.5 text-sm rounded-lg border transition-all duration-200 flex items-center justify-between group ";
-                                            
                                             if (isSelected) {
-                                                if (isPathology) {
-                                                    btnClass += "bg-red-50 border-red-200 text-red-900 shadow-sm";
-                                                } else {
-                                                    btnClass += "bg-emerald-50 border-emerald-200 text-emerald-900 shadow-sm";
-                                                }
+                                                if (isPathology) btnClass += "bg-red-50 border-red-200 text-red-900 shadow-sm";
+                                                else btnClass += "bg-emerald-50 border-emerald-200 text-emerald-900 shadow-sm";
                                             } else {
                                                 btnClass += "bg-white border-transparent hover:bg-slate-50 text-slate-600 hover:text-slate-900";
                                             }
@@ -1362,14 +1168,8 @@
                                                 <div key={option.id}>
                                                     <button onClick={() => toggleOption(option)} className={btnClass}>
                                                         <span className="truncate pr-2">{option.label}</span>
-                                                        {isSelected && (
-                                                            isPathology ? 
-                                                            <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0" /> : 
-                                                            <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                                                        )}
+                                                        {isSelected && (isPathology ? <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0" /> : <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />)}
                                                     </button>
-                                                    
-                                                    {/* INPUT FELT: Vises hvis valgt, OG hvis det enten er patologisk ELLER har input flag (hasInput) */}
                                                     {isSelected && (isPathology || option.hasInput) && (
                                                         <div className="mt-1 mb-1 ml-1 pl-2 border-l-2 border-slate-200">
                                                             <input 
@@ -1395,104 +1195,59 @@
 
             return (
                 <div className="flex flex-col h-screen bg-slate-100 text-slate-900 font-sans overflow-hidden relative">
-                    
                     {notification && (
-                        <div className={`absolute top-16 left-1/2 transform -translate-x-1/2 z-50 px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 transition-all duration-300 ${
-                            notification.type === 'error' ? 'bg-red-600 text-white' : 'bg-slate-800 text-white'
-                        }`}>
+                        <div className={`absolute top-16 left-1/2 transform -translate-x-1/2 z-50 px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 transition-all duration-300 ${notification.type === 'error' ? 'bg-red-600 text-white' : 'bg-slate-800 text-white'}`}>
                             {notification.type === 'error' ? <XCircle className="h-5 w-5" /> : <CheckCircle2 className="h-5 w-5" />}
                             <span className="text-sm font-medium">{notification.message}</span>
                         </div>
                     )}
-
                     <header className="bg-white border-b border-slate-200 px-6 py-3 flex justify-between items-center shadow-sm shrink-0 z-20">
                         <div className="flex items-center gap-3">
-                            <div className="bg-indigo-600 p-1.5 rounded-lg">
-                                <Activity className="text-white h-5 w-5" />
-                            </div>
+                            <div className="bg-indigo-600 p-1.5 rounded-lg"><Activity className="text-white h-5 w-5" /></div>
                             <div>
                                 <h1 className="text-lg font-bold text-slate-800 leading-tight">Psykiatrisk Journalværktøj</h1>
-                                <div className="flex items-center gap-1.5 text-xs text-slate-500">
-                                    <span>Klinisk dokumentationsstøtte</span>
-                                    <span className="text-slate-300">•</span>
-                                    <span>Udarbejdet af Læge Magnus Juul</span>
-                                </div>
+                                <div className="flex items-center gap-1.5 text-xs text-slate-500"><span>Klinisk dokumentationsstøtte</span><span className="text-slate-300">•</span><span>Udarbejdet af Læge Magnus Juul</span></div>
                             </div>
                         </div>
                         <div className="flex items-center gap-4">
-                            
-                            {/* Clear All Button */}
-                            <button 
-                                type="button"
-                                onClick={clearAll}
-                                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors bg-white text-red-600 border border-red-200 hover:bg-red-50 hover:border-red-300 cursor-pointer"
-                                title="Fjern alle markeringer i den aktive sektion"
-                            >
-                                <Trash2 className="w-5 h-5" />
-                                <span>{activeSection === 'full_note' ? 'Ryd Alt' : 'Ryd Sektion'}</span>
+                            <button type="button" onClick={clearAll} className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors bg-white text-red-600 border border-red-200 hover:bg-red-50 hover:border-red-300 cursor-pointer">
+                                <Trash2 className="w-5 h-5" /> <span>{activeSection === 'full_note' ? 'Ryd Alt' : 'Ryd Sektion'}</span>
                             </button>
-
-                            {/* Toggle for Summary Mode */}
-                            <button 
-                                type="button"
-                                onClick={() => setShowSummary(!showSummary)}
-                                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border cursor-pointer ${showSummary ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'}`}
-                                title="Vis opsummering af fund øverst i notatet"
-                            >
-                                {showSummary ? <ToggleRight className="w-5 h-5 text-emerald-400" /> : <ToggleLeft className="w-5 h-5 text-slate-400" />}
-                                <span>Vis fund øverst</span>
+                            <button type="button" onClick={() => setShowSummary(!showSummary)} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border cursor-pointer ${showSummary ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'}`}>
+                                {showSummary ? <ToggleRight className="w-5 h-5 text-emerald-400" /> : <ToggleLeft className="w-5 h-5 text-slate-400" />} <span>Vis fund øverst</span>
                             </button>
-
                             <div className="h-6 w-px bg-slate-200 mx-1"></div>
-
-                            <button onClick={toggleFullscreen} className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer" title={isFullscreen ? "Afslut fuldskærm" : "Fuldskærm"}>
+                            <button onClick={toggleFullscreen} className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer">
                                 {isFullscreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
                             </button>
                         </div>
                     </header>
-
                     <div className="flex flex-1 overflow-hidden">
                         <nav className="w-64 bg-slate-50 border-r border-slate-200 flex flex-col flex-shrink-0 z-10 overflow-y-auto">
                             <div className="p-4 space-y-2">
-                                <button onClick={() => setActiveSection('psych_actual')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${activeSection === 'psych_actual' ? 'bg-white text-indigo-700 shadow ring-1 ring-slate-200' : 'text-slate-600 hover:bg-slate-100'}`}>
-                                    <MessageSquare className={`h-5 w-5 ${activeSection === 'psych_actual' ? 'text-indigo-600' : 'text-slate-400'}`} />
-                                    <span className="font-medium">Aktuelt Psykisk</span>
+                                <button onClick={() => changeSection('psych_actual')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${activeSection === 'psych_actual' ? 'bg-white text-indigo-700 shadow ring-1 ring-slate-200' : 'text-slate-600 hover:bg-slate-100'}`}>
+                                    <MessageSquare className={`h-5 w-5 ${activeSection === 'psych_actual' ? 'text-indigo-600' : 'text-slate-400'}`} /> <span className="font-medium">Aktuelt Psykisk</span>
                                 </button>
-                                <button onClick={() => setActiveSection('psych')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${activeSection === 'psych' ? 'bg-white text-indigo-700 shadow ring-1 ring-slate-200' : 'text-slate-600 hover:bg-slate-100'}`}>
-                                    <Brain className={`h-5 w-5 ${activeSection === 'psych' ? 'text-indigo-600' : 'text-slate-400'}`} />
-                                    <span className="font-medium">Objektivt Psykisk</span>
+                                <button onClick={() => changeSection('psych')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${activeSection === 'psych' ? 'bg-white text-indigo-700 shadow ring-1 ring-slate-200' : 'text-slate-600 hover:bg-slate-100'}`}>
+                                    <Brain className={`h-5 w-5 ${activeSection === 'psych' ? 'text-indigo-600' : 'text-slate-400'}`} /> <span className="font-medium">Objektivt Psykisk</span>
                                 </button>
-                                <button onClick={() => setActiveSection('somatic_act')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${activeSection === 'somatic_act' ? 'bg-white text-indigo-700 shadow ring-1 ring-slate-200' : 'text-slate-600 hover:bg-slate-100'}`}>
-                                    <FileText className={`h-5 w-5 ${activeSection === 'somatic_act' ? 'text-indigo-600' : 'text-slate-400'}`} />
-                                    <span className="font-medium">Aktuelt Somatisk</span>
+                                <button onClick={() => changeSection('somatic_act')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${activeSection === 'somatic_act' ? 'bg-white text-indigo-700 shadow ring-1 ring-slate-200' : 'text-slate-600 hover:bg-slate-100'}`}>
+                                    <FileText className={`h-5 w-5 ${activeSection === 'somatic_act' ? 'text-indigo-600' : 'text-slate-400'}`} /> <span className="font-medium">Aktuelt Somatisk</span>
                                 </button>
-                                <button onClick={() => setActiveSection('somatic_obj')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${activeSection === 'somatic_obj' ? 'bg-white text-indigo-700 shadow ring-1 ring-slate-200' : 'text-slate-600 hover:bg-slate-100'}`}>
-                                    <Stethoscope className={`h-5 w-5 ${activeSection === 'somatic_obj' ? 'text-indigo-600' : 'text-slate-400'}`} />
-                                    <span className="font-medium">Somatisk Vurdering</span>
+                                <button onClick={() => changeSection('somatic_obj')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${activeSection === 'somatic_obj' ? 'bg-white text-indigo-700 shadow ring-1 ring-slate-200' : 'text-slate-600 hover:bg-slate-100'}`}>
+                                    <Stethoscope className={`h-5 w-5 ${activeSection === 'somatic_obj' ? 'text-indigo-600' : 'text-slate-400'}`} /> <span className="font-medium">Somatisk Vurdering</span>
                                 </button>
-                                
                                 <div className="h-px bg-slate-200 my-2"></div>
-                                <div className="px-3 py-1">
-                                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Diagnose-specifikke</span>
-                                </div>
-                                <button onClick={() => setActiveSection('diagnosis_anorexia')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${activeSection === 'diagnosis_anorexia' ? 'bg-white text-indigo-700 shadow ring-1 ring-slate-200' : 'text-slate-600 hover:bg-slate-100'}`}>
-                                    <Cookie className={`h-5 w-5 ${activeSection === 'diagnosis_anorexia' ? 'text-indigo-600' : 'text-slate-400'}`} />
-                                    <span className="font-medium">Anoreksia Nervosa</span>
+                                <div className="px-3 py-1"><span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Diagnose-specifikke</span></div>
+                                <button onClick={() => changeSection('diagnosis_anorexia')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${activeSection === 'diagnosis_anorexia' ? 'bg-white text-indigo-700 shadow ring-1 ring-slate-200' : 'text-slate-600 hover:bg-slate-100'}`}>
+                                    <Cookie className={`h-5 w-5 ${activeSection === 'diagnosis_anorexia' ? 'text-indigo-600' : 'text-slate-400'}`} /> <span className="font-medium">Anoreksia Nervosa</span>
                                 </button>
-
                                 <div className="h-px bg-slate-200 my-2"></div>
-                                <button onClick={() => setActiveSection('full_note')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${activeSection === 'full_note' ? 'bg-slate-800 text-white shadow ring-1 ring-slate-900' : 'text-slate-700 bg-slate-200 hover:bg-slate-300'}`}>
-                                    <Layers className={`h-5 w-5 ${activeSection === 'full_note' ? 'text-emerald-400' : 'text-slate-600'}`} />
-                                    <span className="font-bold">Samlet Notat</span>
+                                <button onClick={() => changeSection('full_note')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${activeSection === 'full_note' ? 'bg-slate-800 text-white shadow ring-1 ring-slate-900' : 'text-slate-700 bg-slate-200 hover:bg-slate-300'}`}>
+                                    <Layers className={`h-5 w-5 ${activeSection === 'full_note' ? 'text-emerald-400' : 'text-slate-600'}`} /> <span className="font-bold">Samlet Notat</span>
                                 </button>
-                            </div>
-                            <div className="mt-auto p-4 border-t border-slate-200">
-                                <div className="bg-indigo-50 rounded-lg p-3 text-xs text-indigo-900">
-                                    <strong>Tip:</strong> Røde markeringer indikerer patologiske fund. Grønne er normalfund.
-                                </div>
                             </div>
                         </nav>
-
                         <main className="flex-1 overflow-y-auto bg-slate-100 p-6">
                             <div className="max-w-6xl mx-auto">
                                 <div className="flex justify-between items-center mb-6">
@@ -1505,18 +1260,10 @@
                                             {activeSection === 'diagnosis_anorexia' && 'Anoreksia Nervosa (F50.0)'}
                                             {activeSection === 'full_note' && 'Samlet Journalnotat (Oversigt)'}
                                         </h2>
-                                        <p className="text-sm text-slate-500 mt-1">
-                                            {activeSection === 'full_note' ? 'Her ses det samlede notat. Brug menuen til venstre for at redigere indholdet.' : 'Vælg relevante observationer. Standardværdier er præ-selekterede.'}
-                                        </p>
                                     </div>
                                     <div className="flex gap-3">
-                                        {/* ONE CLICK NORMAL BUTTON */}
                                         {(activeSection === 'psych' || activeSection === 'somatic_obj') && (
-                                            <button 
-                                                onClick={setNormalStatus} 
-                                                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-colors shadow-sm"
-                                                title="Sæt alle felter til standard normalværdier"
-                                            >
+                                            <button onClick={setNormalStatus} className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-colors shadow-sm">
                                                 <Star className="h-4 w-4" /> Sæt Normalstatus
                                             </button>
                                         )}
@@ -1534,27 +1281,16 @@
                                     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-10 flex flex-col items-center justify-center text-center h-96">
                                         <Layers className="h-16 w-16 text-slate-200 mb-4" />
                                         <h3 className="text-lg font-medium text-slate-800">Samlet Visning</h3>
-                                        <p className="text-slate-500 max-w-md mt-2">
-                                            Tekstboksen til højre viser nu det komplette notat samlet fra alle sektioner.
-                                            <br/><br/>
-                                            Gå til de enkelte sektioner i menuen til venstre for at redigere indholdet.
-                                        </p>
+                                        <p className="text-slate-500 max-w-md mt-2">Tekstboksen til højre viser nu det komplette notat samlet fra alle sektioner.<br/><br/>Gå til de enkelte sektioner i menuen til venstre for at redigere indholdet.</p>
                                     </div>
                                 )}
                             </div>
                         </main>
-
                         <aside className="w-80 xl:w-96 bg-white border-l border-slate-200 flex flex-col shadow-xl z-20 flex-shrink-0">
                             <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                                <div className="flex items-center gap-2">
-                                    <FileText className="h-4 w-4 text-slate-500" />
-                                    <h3 className="font-semibold text-slate-700 text-sm uppercase tracking-wide">
-                                        {activeSection === 'full_note' ? 'Hele Notatet' : 'Resultat (Sektion)'}
-                                    </h3>
-                                </div>
+                                <div className="flex items-center gap-2"><FileText className="h-4 w-4 text-slate-500" /><h3 className="font-semibold text-slate-700 text-sm uppercase tracking-wide">{activeSection === 'full_note' ? 'Hele Notatet' : 'Resultat (Sektion)'}</h3></div>
                                 {showSummary && <span className="text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-medium">Resume aktivt</span>}
                             </div>
-                            
                             <div className="flex-1 relative">
                                 <textarea 
                                     className={`absolute inset-0 w-full h-full p-5 border-none resize-none focus:ring-0 text-sm leading-relaxed text-slate-800 font-mono bg-white focus:outline-none ${manualEditMode ? 'bg-amber-50/10' : ''}`}
@@ -1563,28 +1299,15 @@
                                     spellCheck="false"
                                 ></textarea>
                             </div>
-
-                            {/* MANUAL EDIT MODE FOOTER */}
                             {manualEditMode && (
                                 <div className="bg-slate-50 px-4 py-2 border-t border-slate-200 flex items-center justify-between text-xs">
-                                    <div className="flex items-center gap-1.5 text-slate-500">
-                                        <PenLine className="w-3.5 h-3.5" />
-                                        <span>Fri redigering: Nye valg tilføjes i bunden uden overskrifter.</span>
-                                    </div>
-                                    <button 
-                                        onClick={forceSync}
-                                        className="text-indigo-600 hover:text-indigo-800 font-medium hover:underline px-2 py-1"
-                                        title="Sletter dine manuelle ændringer og starter forfra"
-                                    >
-                                        Gendan Standard (Sletter ændringer)
-                                    </button>
+                                    <div className="flex items-center gap-1.5 text-slate-500"><PenLine className="w-3.5 h-3.5" /><span>Fri redigering: Nye valg tilføjes i bunden uden overskrifter.</span></div>
+                                    <button onClick={forceSync} className="text-indigo-600 hover:text-indigo-800 font-medium hover:underline px-2 py-1">Gendan Standard (Sletter ændringer)</button>
                                 </div>
                             )}
-
                             <div className="p-4 bg-slate-50 border-t border-slate-200">
                                 <button onClick={copyToClipboard} className="w-full flex justify-center items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-4 py-3 rounded-lg font-medium transition-all shadow-lg hover:shadow-xl active:transform active:scale-95">
-                                    <Clipboard className="h-4 w-4" /> 
-                                    {activeSection === 'full_note' ? 'Kopier HELE notatet' : 'Kopier SEKTION'}
+                                    <Clipboard className="h-4 w-4" /> {activeSection === 'full_note' ? 'Kopier HELE notatet' : 'Kopier SEKTION'}
                                 </button>
                             </div>
                         </aside>
@@ -1592,7 +1315,6 @@
                 </div>
             );
         }
-
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
