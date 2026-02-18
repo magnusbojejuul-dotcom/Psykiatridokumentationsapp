@@ -18,14 +18,15 @@
     <style>
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .transition-width { transition-property: width, min-width, flex-basis; transition-duration: 300ms; }
+        /* Prevent layout shift on scrollbar toggle */
+        body { margin: 0; padding: 0; }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-900 font-sans overflow-hidden">
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+        const { useState, useEffect, useRef, useMemo } = React;
 
         // --- IKONER ---
         const Icon = ({ children, className }) => (
@@ -33,6 +34,7 @@
                 {children}
             </svg>
         );
+        // Ikoner genbruges fra tidligere version for konsistens
         const Activity = ({ className }) => <Icon className={className}><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></Icon>;
         const Brain = ({ className }) => <Icon className={className}><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></Icon>;
         const Stethoscope = ({ className }) => <Icon className={className}><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"/><circle cx="20" cy="10" r="2"/></Icon>;
@@ -55,13 +57,13 @@
         const Cookie = ({ className }) => <Icon className={className}><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/><path d="M8.5 8.5v.01"/><path d="M16 15.5v.01"/><path d="M12 12v.01"/><path d="M11 17v.01"/><path d="M7 14v.01"/></Icon>;
         const Plus = ({ className }) => <Icon className={className}><path d="M5 12h14"/><path d="M12 5v14"/></Icon>;
         const ChevronRight = ({ className }) => <Icon className={className}><path d="m9 18 6-6-6-6"/></Icon>;
-        const ChevronDown = ({ className }) => <Icon className={className}><path d="m6 9 6 6 6-6"/></Icon>;
         const Layout = ({ className }) => <Icon className={className}><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></Icon>;
         const Repeat = ({ className }) => <Icon className={className}><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></Icon>;
 
-        // --- DATA ---
+        // --- DATA DEFS ---
         const DEP_CORE_IDS = ['dep_core_mood', 'dep_core_interest', 'dep_core_energy'];
         const DEP_ACC_IDS = ['dep_acc_conf', 'dep_acc_guilt', 'dep_acc_sui', 'dep_acc_conc', 'dep_acc_agit', 'dep_acc_sleep', 'dep_acc_app'];
+        
         const PSYCH_NORMAL_IDS = [
             'orient_normal', 'appear_normal', 'att_coop', 'anx_none', 
             'c_form_norm', 'c_emo_good', 'contact_eye_norm', 'aff_adekvat', 
@@ -69,12 +71,14 @@
             'think_content_norm', 'psychosis_none', 'delusion_none', 'cog_normal', 
             'insight_good', 'sui_none'
         ];
+        
         const SOMATIC_NORMAL_IDS = [
             'gen_upavirket', 'cp_normal', 'abd_normal', 'cn_normal', 
             'motor_sys_normal', 'reflex_normal', 'coord_normal', 'gait_normal', 
             'eps_none', 'skin_normal'
         ];
 
+        // --- OPTION ARRAYS (Samme data som før, men indsat her for komplethed) ---
         const ANOREXIA_OPTIONS = [
             { id: 'an_cal_count', label: 'Tæller kalorier', category: 'Spiseadfærd & Mønstre', text: 'Der tælles kalorier.', smartMerge: { prefix: 'Der ', item: 'tælles kalorier', suffix: '.' } },
             { id: 'an_meals_skipped', label: 'Springes måltider over?', category: 'Spiseadfærd & Mønstre', text: 'Der springes måltider over.', hasInput: true, inputPlaceholder: 'Hvilke?', detailInParens: true, smartMerge: { prefix: 'Der ', item: 'springes måltider over', suffix: '.' } },
@@ -86,26 +90,9 @@
             { id: 'an_comp_diuretic', label: 'Vanddrivende', category: 'Kompenserende Adfærd', text: 'Benytter vanddrivende midler.', smartMerge: { prefix: 'Af kompenserende adfærd benyttes ', item: 'vanddrivende midler', suffix: '.' } },
             { id: 'an_comp_meds', label: 'Slankemedicin', category: 'Kompenserende Adfærd', text: 'Benytter slankemedicin.', smartMerge: { prefix: 'Af kompenserende adfærd benyttes ', item: 'slankemedicin', suffix: '.' } },
             { id: 'an_comp_prevent', label: 'Hvis forhindret?', category: 'Kompenserende Adfærd', text: 'Ved forhindring af kompenserende adfærd ses:', hasInput: true, inputPlaceholder: 'Angst, uro, etc...' },
-            
-            // --- STANDARD ORDINATIONER ---
-            { 
-                id: 'an_ord_standard', 
-                label: 'Ingen aktuelle kosttilskud', 
-                category: 'Standard Ordinationer', 
-                text: 'Patienten får ikke kosttilskud. Der ordineres:\nMEDICIN:\nrp. Multivitamin x 1 dagl\nrp. Thiamin 300 mg x 1 dagl i 3 uger, gerne før første måltid.\nrp. Unikalk x 2 dagl' 
-            },
-            { 
-                id: 'an_ord_thiamin_chronic', 
-                label: 'Kronisk pt. (Thiamin)', 
-                category: 'Standard Ordinationer', 
-                text: 'Rp. Thiamin 300mg x1 dgl, gerne før første måltid' 
-            },
-            { 
-                id: 'an_ord_bcombin', 
-                label: 'B-combin tillæg', 
-                category: 'Standard Ordinationer', 
-                text: 'Rp. B-combin x3 dgl' 
-            },
+            { id: 'an_ord_standard', label: 'Ingen aktuelle kosttilskud', category: 'Standard Ordinationer', text: 'Patienten får ikke kosttilskud. Der ordineres:\nMEDICIN:\nrp. Multivitamin x 1 dagl\nrp. Thiamin 300 mg x 1 dagl i 3 uger, gerne før første måltid.\nrp. Unikalk x 2 dagl' },
+            { id: 'an_ord_thiamin_chronic', label: 'Kronisk pt. (Thiamin)', category: 'Standard Ordinationer', text: 'Rp. Thiamin 300mg x1 dgl, gerne før første måltid' },
+            { id: 'an_ord_bcombin', label: 'B-combin tillæg', category: 'Standard Ordinationer', text: 'Rp. B-combin x3 dgl' },
         ];
 
         const ACTUAL_PSYCH_OPTIONS = [
@@ -175,18 +162,12 @@
             { id: 'ap_ctrl_some', label: 'Nogen kontrol', category: 'Symptomtryk & Mestring', text: 'Har nogen følelse af kontrol over symptomerne.', exclude: ['ap_ctrl_good', 'ap_ctrl_little', 'ap_ctrl_none'] },
             { id: 'ap_ctrl_little', label: 'Lidt kontrol', category: 'Symptomtryk & Mestring', text: 'Har lidt følelse af kontrol over symptomerne.', exclude: ['ap_ctrl_good', 'ap_ctrl_some', 'ap_ctrl_none'] },
             { id: 'ap_ctrl_none', label: 'Ingen kontrol', category: 'Symptomtryk & Mestring', text: 'Har ingen følelse af kontrol over symptomerne.', exclude: ['ap_ctrl_good', 'ap_ctrl_some', 'ap_ctrl_little'] },
-            
-            // --- SEKTION 1: SELVSKADE & RISIKO (OPDATERET STRUKTUR) ---
             { id: 'ap_risk_none', label: 'Ingen selvskade/tanker', category: 'Selvskade & Risiko', text: 'Benægter aktuelle selvmordstanker, planer eller intentioner. Benægter ligeledes aktuel selvskade.', isDefault: true, exclude: ['ap_risk_thoughts', 'ap_risk_plans', 'ap_risk_sh_curr'] },
             { id: 'ap_risk_thoughts', label: 'Selvmordstanker', category: 'Selvskade & Risiko', text: 'Tilkendegiver selvmordstanker.', exclude: ['ap_risk_none'], hasInput: true, inputPlaceholder: 'Karakter/Hyppighed' },
             { id: 'ap_risk_plans', label: 'Konkrete planer', category: 'Selvskade & Risiko', text: 'Har konkrete planer om selvmord.', exclude: ['ap_risk_none'], hasInput: true, inputPlaceholder: 'Beskriv planer' },
             { id: 'ap_risk_sh_curr', label: 'Aktuel selvskade', category: 'Selvskade & Risiko', text: 'Aktuel selvskadende adfærd.', exclude: ['ap_risk_none'], hasInput: true, inputPlaceholder: 'Metode/Hyppighed' },
-            
-            // HISTORIK I SAMME SEKTION (Som anmodet)
             { id: 'ap_risk_hist_sui', label: 'Tidl. selvmordsforsøg', category: 'Selvskade & Risiko', text: 'Tidligere selvmordsforsøg.', hasInput: true, inputPlaceholder: 'Hvornår? Metode? Antal?', smartMerge: { prefix: 'Anamnestisk er der oplysninger om ', item: 'tidligere selvmordsforsøg', suffix: '.' } },
             { id: 'ap_risk_hist_sh', label: 'Tidl. selvskade', category: 'Selvskade & Risiko', text: 'Tidligere selvskadende adfærd.', hasInput: true, inputPlaceholder: 'Type? Periode?', smartMerge: { prefix: 'Anamnestisk er der oplysninger om ', item: 'tidligere selvskadende adfærd', suffix: '.' } },
-
-            // --- SEKTION 2: PSYKOTISKE SYMPTOMER ---
             { id: 'ap_psych_no', label: 'Ingen psykose-tegn', category: 'Psykotiske Symptomer', text: 'Oplever ikke mærkelige eller ubehagelige tanker, sanser ting, som andre ikke gør, eller føler sig påvirket af noget udefrakommende.', isDefault: true, exclude: ['ap_psych_gen', 'ap_psych_audit', 'ap_psych_vis', 'ap_psych_para', 'ap_psych_thought', 'ap_psych_control'] },
             { id: 'ap_psych_gen', label: 'Psykotiske oplevelser (Generelt)', category: 'Psykotiske Symptomer', text: 'Oplever mærkelige eller ubehagelige tanker og sanseoplevelser.', exclude: ['ap_psych_no'] },
             { id: 'ap_psych_audit', label: 'Hørehallucinationer', category: 'Psykotiske Symptomer', text: 'Beskriver hørehallucinationer (stemmer/lyde).', exclude: ['ap_psych_no'], smartMerge: { prefix: 'Patienten beskriver ', item: 'hørehallucinationer', suffix: '.' } },
@@ -194,7 +175,6 @@
             { id: 'ap_psych_para', label: 'Paranoia/Forfølgelse', category: 'Psykotiske Symptomer', text: 'Føler sig forfulgt eller overvåget.', exclude: ['ap_psych_no'], smartMerge: { prefix: 'Patienten beskriver ', item: 'oplevelser af forfølgelse eller overvågning', suffix: '.' } },
             { id: 'ap_psych_thought', label: 'Tankeinterferens', category: 'Psykotiske Symptomer', text: 'Oplever tankepåvirkning (indsættelse/fratagelse/hørlighed).', exclude: ['ap_psych_no'], smartMerge: { prefix: 'Patienten beskriver ', item: 'tankeinterferens (indsættelse/fratagelse/hørlighed)', suffix: '.' } },
             { id: 'ap_psych_control', label: 'Styringsoplevelser', category: 'Psykotiske Symptomer', text: 'Føler sig styret af udefrakommende kræfter.', exclude: ['ap_psych_no'], smartMerge: { prefix: 'Patienten beskriver ', item: 'styringsoplevelser', suffix: '.' } },
-
             { id: 'ap_mot_yes', label: 'Motiveret', category: 'Motivation & Ønsker', text: 'Er motiveret for behandling.', isDefault: true, exclude: ['ap_mot_no'] },
             { id: 'ap_mot_no', label: 'Ikke motiveret', category: 'Motivation & Ønsker', text: 'Er ikke motiveret for behandling.', exclude: ['ap_mot_yes'] },
             { id: 'ap_help_yes', label: 'Ønsker hjælp', category: 'Motivation & Ønsker', text: 'Ønsker hjælp til...', isDefault: true, exclude: ['ap_help_no'] },
@@ -203,7 +183,7 @@
         ];
 
         const PSYCH_OPTIONS = [
-             { id: 'orient_normal', label: 'Fuldt orienteret', category: 'Bevidsthed', text: 'Vågen, klar og orienteret i tid, sted og egne data.', isDefault: true, exclude: ['orient_confused', 'orient_delir', 'orient_sløv', 'orient_sopor', 'orient_cloud'] },
+            { id: 'orient_normal', label: 'Fuldt orienteret', category: 'Bevidsthed', text: 'Vågen, klar og orienteret i tid, sted og egne data.', isDefault: true, exclude: ['orient_confused', 'orient_delir', 'orient_sløv', 'orient_sopor', 'orient_cloud'] },
             { id: 'orient_sløv', label: 'Somnolent/Sløv', category: 'Bevidsthed', text: 'Somnolent og sløv i kontakten.', exclude: ['orient_normal', 'orient_confused', 'orient_delir', 'orient_sopor', 'orient_cloud'] },
             { id: 'orient_sopor', label: 'Sopor', category: 'Bevidsthed', text: 'Soporøs (dybt bevidsthedssvækket), men vækbar.', exclude: ['orient_normal', 'orient_confused', 'orient_delir', 'orient_sløv', 'orient_cloud'] },
             { id: 'orient_confused', label: 'Konfus', category: 'Bevidsthed', text: 'Konfus og desorienteret.', exclude: ['orient_normal', 'orient_delir', 'orient_sløv', 'orient_sopor', 'orient_cloud'] },
@@ -304,7 +284,7 @@
         ];
 
         const SOMATIC_ACT_OPTIONS = [
-             { id: 'act_cns_ok', label: 'Ingen CNS klager', category: 'CNS', text: 'Benægter hovedpine, svimmelhed, besvimelse, synsforstyrrelser eller kramper.', isDefault: true, exclude: ['act_cns_headache', 'act_cns_dizzy', 'act_cns_faint'] },
+            { id: 'act_cns_ok', label: 'Ingen CNS klager', category: 'CNS', text: 'Benægter hovedpine, svimmelhed, besvimelse, synsforstyrrelser eller kramper.', isDefault: true, exclude: ['act_cns_headache', 'act_cns_dizzy', 'act_cns_faint'] },
             { id: 'act_cns_headache', label: 'Hovedpine', category: 'CNS', text: 'Angiver hovedpine.', exclude: ['act_cns_ok'], smartMerge: { prefix: 'Angiver ', item: 'hovedpine', suffix: '.' } },
             { id: 'act_cns_dizzy', label: 'Svimmelhed', category: 'CNS', text: 'Angiver svimmelhed (karakter: ).', exclude: ['act_cns_ok'], smartMerge: { prefix: 'Angiver ', item: 'svimmelhed (karakter: )', suffix: '.' } },
             { id: 'act_cp_ok', label: 'Ingen CP klager', category: 'Cardio/Pulm', text: 'Ingen klager over brystsmerter, hjertebanken eller dyspnø.', isDefault: true, exclude: ['act_cp_pain', 'act_cp_palp', 'act_cp_dysp'] },
@@ -336,7 +316,7 @@
         ];
 
         const SOMATIC_OBJ_OPTIONS = [
-             { id: 'gen_upavirket', label: 'Upåvirket', category: 'Almentilstand', text: 'Upåvirket. Normal ernæringstilstand.', isDefault: true, exclude: ['gen_medtaget', 'gen_adipos', 'gen_emaciated'] },
+            { id: 'gen_upavirket', label: 'Upåvirket', category: 'Almentilstand', text: 'Upåvirket. Normal ernæringstilstand.', isDefault: true, exclude: ['gen_medtaget', 'gen_adipos', 'gen_emaciated'] },
             { id: 'gen_medtaget', label: 'Medtaget', category: 'Almentilstand', text: 'Fremstår medtaget.', exclude: ['gen_upavirket'], smartMerge: { prefix: 'Fremstår ', item: 'medtaget', suffix: '.' } },
             { id: 'gen_emaciated', label: 'Afmagret/Kakektisk', category: 'Almentilstand', text: 'Fremstår afmagret/kakektisk.', exclude: ['gen_upavirket', 'gen_adipos'], smartMerge: { prefix: 'Fremstår ', item: 'afmagret/kakektisk', suffix: '.' } },
             { id: 'gen_adipos', label: 'Adipositas', category: 'Almentilstand', text: 'Adipøs ernæringstilstand.', exclude: ['gen_upavirket', 'gen_emaciated'] },
@@ -414,8 +394,8 @@
 
             // SAFE MODE LOGIC
             const [manualEditMode, setManualEditMode] = useState(false);
-            const [lastAutoGeneratedText, setLastAutoGeneratedText] = useState('');
-
+            
+            // Initial defaults
             useEffect(() => {
                 const defaults = new Set();
                 [...PSYCH_OPTIONS, ...SOMATIC_OBJ_OPTIONS, ...SOMATIC_ACT_OPTIONS, ...ACTUAL_PSYCH_OPTIONS, ...ANOREXIA_OPTIONS].forEach(opt => {
@@ -424,14 +404,356 @@
                 setSelectedIds(defaults);
             }, []);
             
-            // Forces regeneration when section changes, resetting manual mode state
-             useEffect(() => {
+            // --- CORE TEXT GENERATION LOGIC ---
+            // Helper to clean input for SmartMerge
+            const cleanInput = (str) => {
+                if (!str) return '';
+                let cleaned = str.trim();
+                // Fjern afsluttende punktum og mellemrum
+                while (cleaned.endsWith('.') || cleaned.endsWith(' ')) {
+                    cleaned = cleaned.slice(0, -1);
+                }
+                return cleaned;
+            };
+
+            const capitalize = (s) => {
+                if (!s) return '';
+                return s.charAt(0).toUpperCase() + s.slice(1);
+            };
+            
+            const formatList = (items) => {
+                if (items.length === 0) return '';
+                if (items.length === 1) return items[0];
+                const last = items.pop();
+                return items.join(', ') + ' og ' + last;
+            };
+
+            const formatWithDetail = (text, detail) => {
+                if (!detail || cleanInput(detail) === '') return text;
+                let base = cleanInput(text); // Ensure base doesn't end with dot
+                
+                let d = cleanInput(detail); // Ensure detail doesn't end with dot
+                
+                if (d.length > 0) d = d.charAt(0).toUpperCase() + d.slice(1);
+                return `${base} ${d}.`;
+            };
+
+            const calculateDepressionSeverity = (selectedSet) => {
+                const coreCount = DEP_CORE_IDS.filter(id => selectedSet.has(id)).length;
+                const accCount = DEP_ACC_IDS.filter(id => selectedSet.has(id)).length;
+                if (coreCount >= 3 && accCount >= 5) return 'svær';
+                if (coreCount >= 2 && accCount >= 4) return 'moderat';
+                if (coreCount >= 2 && accCount >= 2) return 'let';
+                return null;
+            };
+
+            const processCategoryOptions = (categoryOptions, categoryName, currentSelectedIds, currentDetails) => {
+                const lines = [];
+                const smartMergeGroups = {}; 
+                const standardOptions = [];
+                
+                categoryOptions.forEach(opt => {
+                    if (currentSelectedIds.has(opt.id)) {
+                        const detail = currentDetails[opt.id];
+                        
+                        if (opt.smartMerge && !opt.isDefault) {
+                            const key = JSON.stringify({ p: opt.smartMerge.prefix, s: opt.smartMerge.suffix });
+                            if (!smartMergeGroups[key]) smartMergeGroups[key] = [];
+                            
+                            let itemText = opt.smartMerge.item;
+                            if (detail && cleanInput(detail) !== '') {
+                                 const cleanedDetail = cleanInput(detail);
+                                if (opt.detailInParens) {
+                                    itemText += ` (${cleanedDetail})`;
+                                } else {
+                                    const d = cleanedDetail.charAt(0).toUpperCase() + cleanedDetail.slice(1);
+                                    itemText += `. ${d}`;
+                                }
+                            }
+                            smartMergeGroups[key].push(itemText);
+                        } else {
+                            standardOptions.push({ ...opt, detail });
+                        }
+                    }
+                });
+
+                Object.keys(smartMergeGroups).forEach(key => {
+                    const { p, s } = JSON.parse(key);
+                    const items = smartMergeGroups[key];
+                    if (items.length > 0) {
+                        const mergedText = `${p}${formatList(items)}${s}`;
+                        lines.push(capitalize(mergedText));
+                    }
+                });
+
+                standardOptions.forEach(opt => {
+                     lines.push(formatWithDetail(opt.text, opt.detail));
+                });
+                
+                if (categoryName === 'Depression (ICD-10 Screening)') {
+                     const severity = calculateDepressionSeverity(currentSelectedIds);
+                     if (severity) {
+                         lines.push(`Opfylder dermed kriterierne for en ${severity} depressiv episode.`);
+                     } else {
+                         const hasAnySymptoms = [...DEP_CORE_IDS, ...DEP_ACC_IDS].some(id => currentSelectedIds.has(id));
+                         if (hasAnySymptoms) {
+                             lines.push('Opfylder ikke kriterierne for en depressiv episode.');
+                         }
+                     }
+                }
+                return lines.join(' ');
+            };
+
+            // Pure function to generate text based on state
+            const generateTextContent = (section, ids, details, timeline, diets, uniform, summaryMode) => {
+                const allSections = [
+                    { id: 'psych_actual', title: 'AKTUELT PSYKISK', options: ACTUAL_PSYCH_OPTIONS },
+                    { id: 'psych', title: 'OBJEKTIVT PSYKISK', options: PSYCH_OPTIONS },
+                    { id: 'somatic_act', title: 'AKTUELT SOMATISK', options: SOMATIC_ACT_OPTIONS },
+                    { id: 'somatic_obj', title: 'SOMATISK VURDERING', options: SOMATIC_OBJ_OPTIONS },
+                    { id: 'diagnosis_anorexia', title: 'ANOREKSIA NERVOSA (F50.0)', options: ANOREXIA_OPTIONS }
+                ];
+
+                let sectionsToRender = [];
+                if (section === 'full_note') {
+                    sectionsToRender = allSections;
+                } else {
+                    sectionsToRender = allSections.filter(s => s.id === section);
+                }
+
+                const lines = [];
+                const movedCategories = new Set(); 
+
+                if (summaryMode) {
+                    const obsLines = [];
+                    sectionsToRender.forEach(sec => {
+                        const categories = Array.from(new Set(sec.options.map(o => o.category)));
+                        categories.forEach(cat => {
+                            const selectedOptions = sec.options.filter(o => o.category === cat && ids.has(o.id));
+                            const hasAbnormality = selectedOptions.some(o => !o.isDefault);
+                            if (hasAbnormality && selectedOptions.length > 0) {
+                                const text = processCategoryOptions(sec.options, cat, ids, details); // Pass options to filter correctly inside
+                                obsLines.push(`${cat}: ${text}`);
+                                movedCategories.add(cat);
+                            }
+                        });
+                    });
+
+                    if (obsLines.length > 0) {
+                        lines.push("OBSERVATIONER");
+                        lines.push(...obsLines);
+                        lines.push("");
+                        lines.push("---");
+                        lines.push(""); 
+                    }
+                }
+
+                sectionsToRender.forEach(sec => {
+                    const sectionLines = [];
+                    
+                    // SECTION SPECIFIC HEADERS/INTRO
+                    if (sec.id === 'psych_actual' && timeline.trim()) {
+                         sectionLines.push(`Sygdomsdebut & Udløsende faktorer: ${timeline}`);
+                    }
+
+                    if (sec.id === 'diagnosis_anorexia' && diets.length > 0) {
+                        if (uniform) {
+                             const day = diets[0];
+                             if (day) {
+                                sectionLines.push("Kostanamnese: Patienten angiver at spise det samme hver dag. Nedenstående er repræsentativt for det daglige indtag:");
+                                if (day.meals.morgen) sectionLines.push(`- Morgen: ${day.meals.morgen}`);
+                                if (day.meals.formiddag) sectionLines.push(`- Før frokost: ${day.meals.formiddag}`);
+                                if (day.meals.frokost) sectionLines.push(`- Frokost: ${day.meals.frokost}`);
+                                if (day.meals.eftermiddag) sectionLines.push(`- Eftermiddag: ${day.meals.eftermiddag}`);
+                                if (day.meals.aften) sectionLines.push(`- Aften: ${day.meals.aften}`);
+                                if (day.meals.sen_aften) sectionLines.push(`- Efter aften: ${day.meals.sen_aften}`);
+                                if (day.meals.vaeske) sectionLines.push(`- Væske: ${day.meals.vaeske}`);
+                             }
+                        } else {
+                            sectionLines.push("Kostanamnese (eksempler fra sidste 14 dage):");
+                            diets.forEach(day => {
+                                sectionLines.push(`${day.label}:`);
+                                if (day.meals.morgen) sectionLines.push(`- Morgen: ${day.meals.morgen}`);
+                                if (day.meals.formiddag) sectionLines.push(`- Før frokost: ${day.meals.formiddag}`);
+                                if (day.meals.frokost) sectionLines.push(`- Frokost: ${day.meals.frokost}`);
+                                if (day.meals.eftermiddag) sectionLines.push(`- Eftermiddag: ${day.meals.eftermiddag}`);
+                                if (day.meals.aften) sectionLines.push(`- Aften: ${day.meals.aften}`);
+                                if (day.meals.sen_aften) sectionLines.push(`- Efter aften: ${day.meals.sen_aften}`);
+                                if (day.meals.vaeske) sectionLines.push(`- Væske: ${day.meals.vaeske}`);
+                                sectionLines.push("");
+                            });
+                        }
+                    }
+
+                    const categories = Array.from(new Set(sec.options.map(o => o.category)));
+                    categories.forEach(cat => {
+                        if (movedCategories.has(cat)) return;
+                        
+                        // FIX: We need to filter options belonging to THIS category
+                        // AND pass them to processCategoryOptions
+                        const categoryOptions = sec.options.filter(o => o.category === cat);
+                        const selectedInCat = categoryOptions.filter(o => ids.has(o.id));
+                        
+                        if (selectedInCat.length > 0) {
+                            const text = processCategoryOptions(categoryOptions, cat, ids, details);
+                            if (text) sectionLines.push(`${cat}: ${text}`);
+                        }
+                    });
+
+                    if (sectionLines.length > 0) {
+                        if (sec.id !== 'diagnosis_anorexia') {
+                             lines.push(sec.title);
+                        }
+                        lines.push(...sectionLines);
+                        lines.push(""); 
+                    }
+                });
+
+                return lines.join('\n');
+            };
+
+            // Effect to update text when dependencies change (only if NOT in manual mode)
+            useEffect(() => {
                 if (!manualEditMode) {
-                    generateText();
+                    const text = generateTextContent(activeSection, selectedIds, optionDetails, timelineText, dietDays, isUniformDiet, showSummary);
+                    setGeneratedText(text);
                 }
             }, [selectedIds, activeSection, showSummary, optionDetails, timelineText, dietDays, isUniformDiet]);
 
+
+            // --- ACTIONS ---
+
+            const changeSection = (newSection) => {
+                // FORCE RESET MANUAL MODE ON SECTION CHANGE
+                setManualEditMode(false);
+                setActiveSection(newSection);
+                // Text generation will trigger via useEffect because activeSection changed
+            };
             
+            const handleManualTextChange = (e) => {
+                setGeneratedText(e.target.value);
+                setManualEditMode(true);
+            };
+
+            const toggleOption = (option) => {
+                // LOGIC FOR MANUAL MODE
+                if (manualEditMode) {
+                    const isSelected = selectedIds.has(option.id);
+                    const nextIds = new Set(selectedIds);
+
+                    if (isSelected) {
+                        // REMOVE LOGIC
+                        nextIds.delete(option.id);
+                        
+                        // Construct the exact string we expect to find
+                        let textToRemove = option.text;
+                        const detail = optionDetails[option.id];
+                        
+                        // Use the shared formatting logic to predict what text looks like
+                        if (option.smartMerge) {
+                             // This is hard because smartMerge combines multiple items. 
+                             // We might just want to remove the specific item from the list? 
+                             // Too complex for regex reliably. We only attempt simple removal.
+                             // Fallback: Do nothing to text, just toggle button.
+                             setNotification({ message: 'Tekst skal slettes manuelt i fritekst-tilstand', type: 'error' });
+                        } else {
+                             // Standard text removal attempt
+                             let expectedString = formatWithDetail(option.text, detail);
+                             if (generatedText.includes(expectedString)) {
+                                 const newText = generatedText.replace(expectedString, '').replace(/\n\s*\n/g, '\n');
+                                 setGeneratedText(newText);
+                             } else {
+                                 // Try without detail
+                                 if (generatedText.includes(option.text)) {
+                                     const newText = generatedText.replace(option.text, '').replace(/\n\s*\n/g, '\n');
+                                     setGeneratedText(newText); 
+                                 }
+                             }
+                        }
+                    } else {
+                        // ADD LOGIC (Append to bottom)
+                        nextIds.add(option.id);
+                        option.exclude?.forEach(id => nextIds.delete(id));
+
+                        let textLine = option.text;
+                        const detail = optionDetails[option.id];
+                        
+                        if (option.smartMerge) {
+                             const p = option.smartMerge.prefix || '';
+                             const s = option.smartMerge.suffix || '.';
+                             let i = option.smartMerge.item;
+                             if (detail) {
+                                 const cleanedDetail = cleanInput(detail);
+                                 if (option.detailInParens) i += ` (${cleanedDetail})`;
+                                 else i += `. ${capitalize(cleanedDetail)}`;
+                             }
+                             if (!p) i = capitalize(i);
+                             textLine = `${p}${i}${s}`;
+                        } else {
+                            textLine = formatWithDetail(textLine, detail);
+                        }
+                        
+                        const newText = generatedText.trim() + "\n" + textLine;
+                        setGeneratedText(newText);
+                        
+                        setNotification({ message: 'Tilføjet i bunden (Manuel tilstand)', type: 'success' });
+                    }
+                    
+                    setSelectedIds(nextIds);
+                    setTimeout(() => setNotification(null), 2000);
+                    return;
+                }
+
+                // LOGIC FOR AUTO MODE
+                const isSelected = selectedIds.has(option.id);
+                const newSelection = new Set(selectedIds);
+                
+                if (isSelected) {
+                    newSelection.delete(option.id);
+                } else {
+                    newSelection.add(option.id);
+                    option.exclude?.forEach(exId => newSelection.delete(exId));
+                }
+                setSelectedIds(newSelection);
+            };
+
+            const setNormalStatus = () => {
+                let sectionOptions = [];
+                let normalIds = [];
+
+                if (activeSection === 'psych') {
+                    sectionOptions = PSYCH_OPTIONS;
+                    normalIds = PSYCH_NORMAL_IDS;
+                } else if (activeSection === 'somatic_obj') {
+                    sectionOptions = SOMATIC_OBJ_OPTIONS;
+                    normalIds = SOMATIC_NORMAL_IDS;
+                } else {
+                    return; 
+                }
+
+                const newSet = new Set(selectedIds);
+                // Remove all from this section
+                sectionOptions.forEach(opt => newSet.delete(opt.id));
+                // Add normals
+                normalIds.forEach(id => newSet.add(id));
+                
+                if (manualEditMode) {
+                    // Append normal text to bottom
+                    const normalTexts = sectionOptions
+                        .filter(opt => normalIds.includes(opt.id))
+                        .map(opt => opt.text)
+                        .join(' ');
+                    
+                    setGeneratedText(generatedText.trim() + "\n" + normalTexts);
+                    setNotification({ message: 'Normalstatus tilføjet i bunden', type: 'success' });
+                } else {
+                    setNotification({ message: 'Normalstatus indsat', type: 'success' });
+                }
+                
+                setSelectedIds(newSet);
+                setTimeout(() => setNotification(null), 3000);
+            };
+
             // --- DIET FUNCTIONS ---
             const addDietDay = () => {
                 if (isUniformDiet) return; 
@@ -462,21 +784,6 @@
                 }
             };
 
-            const copyPreviousDay = (id) => {
-                setDietDays(prevDays => {
-                    const index = prevDays.findIndex(d => d.id === id);
-                    if (index <= 0) return prevDays;
-                    const prevDay = prevDays[index - 1];
-                    const currentDay = prevDays[index];
-                    const updatedDay = { ...currentDay, meals: { ...prevDay.meals } };
-                    const newDays = [...prevDays];
-                    newDays[index] = updatedDay;
-                    return newDays;
-                });
-                setNotification({ message: 'Måltider kopieret fra forrige dag', type: 'success' });
-                setTimeout(() => setNotification(null), 3000);
-            };
-
             const toggleUniform = () => {
                 const newState = !isUniformDiet;
                 setIsUniformDiet(newState);
@@ -494,444 +801,69 @@
                 setTimeout(() => setNotification(null), 3000);
             };
 
-
-            const formatList = (items) => {
-                if (items.length === 0) return '';
-                if (items.length === 1) return items[0];
-                const last = items.pop();
-                return items.join(', ') + ' og ' + last;
-            };
-
-            const formatWithDetail = (text, detail) => {
-                if (!detail || detail.trim() === '') return text;
-                let base = text.trim();
-                // Strip trailing dot from base if we are appending a detail
-                if (base.endsWith('.')) base = base.slice(0, -1);
-                
-                let d = detail.trim();
-                // Strip trailing dot from input detail to avoid double dots
-                if (d.endsWith('.')) d = d.slice(0, -1);
-
-                if (d.length > 0) d = d.charAt(0).toUpperCase() + d.slice(1);
-                return `${base} ${d}.`;
-            };
-            
-            const capitalize = (s) => {
-                if (!s) return '';
-                return s.charAt(0).toUpperCase() + s.slice(1);
-            };
-            
-            // Helper to clean input for SmartMerge
-            const cleanInput = (str) => {
-                if (!str) return '';
-                let cleaned = str.trim();
-                if (cleaned.endsWith('.')) cleaned = cleaned.slice(0, -1);
-                return cleaned;
-            };
-
-            const getCategoryText = (categoryOptions, idsSet, detailsMap) => {
-                const lines = [];
-                const smartMergeGroups = {}; 
-                const standardOptions = [];
-                
-                categoryOptions.forEach(opt => {
-                    const detail = detailsMap[opt.id];
-                    if (idsSet.has(opt.id)) {
-                        if (opt.smartMerge && !opt.isDefault) {
-                            const key = JSON.stringify({ p: opt.smartMerge.prefix, s: opt.smartMerge.suffix });
-                            if (!smartMergeGroups[key]) smartMergeGroups[key] = [];
-                            
-                            let itemText = opt.smartMerge.item;
-                            if (detail && detail.trim() !== '') {
-                                const cleanedDetail = cleanInput(detail);
-                                if (opt.detailInParens) {
-                                    itemText += ` (${cleanedDetail})`;
-                                } else {
-                                    const d = cleanedDetail.charAt(0).toUpperCase() + cleanedDetail.slice(1);
-                                    itemText += `. ${d}`;
-                                }
-                            }
-                            smartMergeGroups[key].push(itemText);
-                        } else {
-                            standardOptions.push({ ...opt, detail });
-                        }
-                    }
+             const copyPreviousDay = (id) => {
+                setDietDays(prevDays => {
+                    const index = prevDays.findIndex(d => d.id === id);
+                    if (index <= 0) return prevDays;
+                    const prevDay = prevDays[index - 1];
+                    const currentDay = prevDays[index];
+                    const updatedDay = { ...currentDay, meals: { ...prevDay.meals } };
+                    const newDays = [...prevDays];
+                    newDays[index] = updatedDay;
+                    return newDays;
                 });
-
-                Object.keys(smartMergeGroups).forEach(key => {
-                    const { p, s } = JSON.parse(key);
-                    const items = smartMergeGroups[key];
-                    if (items.length > 0) {
-                        const mergedText = `${p}${formatList(items)}${s}`;
-                        lines.push(capitalize(mergedText));
-                    }
-                });
-
-                standardOptions.forEach(opt => {
-                     lines.push(formatWithDetail(opt.text, opt.detail));
-                });
-                return lines.join(' ');
-            };
-            
-            // Function to handle switching sections properly
-            const changeSection = (newSection) => {
-                if (manualEditMode) {
-                     setManualEditMode(false);
-                     // Allow react state update to propagate before generation triggers via useEffect
-                }
-                setNotification(null);
-                setActiveSection(newSection);
-            };
-
-            const toggleOption = (option) => {
-                // MANUEL MODE LOGIK (RETTET)
-                if (manualEditMode) {
-                    const isSelected = selectedIds.has(option.id);
-                    const nextIds = new Set(selectedIds);
-
-                    if (isSelected) {
-                        // SLETNING: Prøv at finde og slette teksten, hvis den er uændret.
-                        nextIds.delete(option.id);
-                        
-                        // Her forsøger vi kun at slette, hvis vi finder den nøjagtige tekst.
-                        let textToRemove = option.text;
-                        if (option.smartMerge) {
-                             const p = option.smartMerge.prefix || '';
-                             const s = option.smartMerge.suffix || '.';
-                             let i = option.smartMerge.item;
-                             if (!p) i = i.charAt(0).toUpperCase() + i.slice(1);
-                             textToRemove = `${p}${i}${s}`;
-                        }
-                        
-                        if (generatedText.includes(textToRemove)) {
-                             // Simpel replace, men kun én forekomst for en sikkerheds skyld
-                             const newText = generatedText.replace(textToRemove, '').replace(/\n\s*\n/g, '\n'); // Ryd op i tomme linjer
-                             setGeneratedText(newText);
-                             setLastAutoGeneratedText(newText);
-                        }
-                        // Hvis teksten ikke findes (fordi den er redigeret), gør vi intet ved teksten, kun knappen.
-                    } else {
-                        // TILFØJELSE: Altid i bunden.
-                        nextIds.add(option.id);
-                        option.exclude?.forEach(id => nextIds.delete(id));
-
-                        // Konstruer teksten
-                        let textLine = option.text;
-                        if (option.smartMerge) {
-                             const p = option.smartMerge.prefix || '';
-                             const s = option.smartMerge.suffix || '.';
-                             let i = option.smartMerge.item;
-                             // Simpel logik til at sikre stor bogstav hvis ingen præfix
-                             if (!p) i = i.charAt(0).toUpperCase() + i.slice(1);
-                             textLine = `${p}${i}${s}`;
-                        }
-                        
-                        // Tilføj detaljer fra inputfeltet, hvis der er noget
-                        const detail = optionDetails[option.id];
-                        if (detail) textLine = formatWithDetail(textLine, detail);
-                        
-                        // Tilføj altid til slutningen
-                        const newText = generatedText.trim() + "\n" + textLine;
-                        setGeneratedText(newText);
-                        setLastAutoGeneratedText(newText);
-                        
-                        setNotification({ message: 'Tilføjet i bunden (Manuel tilstand)', type: 'success' });
-                        setTimeout(() => setNotification(null), 2000);
-                    }
-                    
-                    setSelectedIds(nextIds);
-                    return;
-                }
-
-                // AUTO MODE LOGIK (Standard)
-                const isSelected = selectedIds.has(option.id);
-                const newSelection = new Set(selectedIds);
-                
-                if (isSelected) {
-                    newSelection.delete(option.id);
-                } else {
-                    newSelection.add(option.id);
-                    option.exclude?.forEach(exId => newSelection.delete(exId));
-                }
-                
-                setSelectedIds(newSelection);
-            };
-            
-            const setNormalStatus = () => {
-                let sectionOptions = [];
-                let normalIds = [];
-
-                if (activeSection === 'psych') {
-                    sectionOptions = PSYCH_OPTIONS;
-                    normalIds = PSYCH_NORMAL_IDS;
-                } else if (activeSection === 'somatic_obj') {
-                    sectionOptions = SOMATIC_OBJ_OPTIONS;
-                    normalIds = SOMATIC_NORMAL_IDS;
-                } else {
-                    return; 
-                }
-
-                if (manualEditMode) {
-                    const normalTexts = sectionOptions
-                        .filter(opt => normalIds.includes(opt.id))
-                        .map(opt => opt.text)
-                        .join(' ');
-                    
-                    const textUpdate = generatedText.trim() + "\n" + normalTexts;
-                    setGeneratedText(textUpdate);
-                    setLastAutoGeneratedText(textUpdate);
-                    
-                    const newSet = new Set(selectedIds);
-                    sectionOptions.forEach(opt => newSet.delete(opt.id));
-                    normalIds.forEach(id => newSet.add(id));
-                    setSelectedIds(newSet);
-                    
-                    setNotification({ message: 'Normalstatus tilføjet i bunden', type: 'success' });
-                    setTimeout(() => setNotification(null), 3000);
-                    return;
-                }
-
-                const newSet = new Set(selectedIds);
-                sectionOptions.forEach(opt => newSet.delete(opt.id));
-                normalIds.forEach(id => newSet.add(id));
-                setSelectedIds(newSet);
-                setNotification({ message: 'Normalstatus indsat', type: 'success' });
+                setNotification({ message: 'Måltider kopieret fra forrige dag', type: 'success' });
                 setTimeout(() => setNotification(null), 3000);
             };
 
+            // --- UTILS ---
             const handleDetailChange = (id, value) => {
                 setOptionDetails(prev => ({ ...prev, [id]: value }));
             };
-            
-            const clearAll = () => {
-                let optionsToClear = [];
-                let shouldClearTimeline = false;
-                let sectionName = '';
 
-                if (activeSection === 'psych_actual') {
-                    optionsToClear = ACTUAL_PSYCH_OPTIONS;
-                    shouldClearTimeline = true;
-                    sectionName = 'Aktuelt Psykisk';
-                } else if (activeSection === 'psych') {
-                    optionsToClear = PSYCH_OPTIONS;
-                    sectionName = 'Objektivt Psykisk';
-                } else if (activeSection === 'somatic_act') {
-                    optionsToClear = SOMATIC_ACT_OPTIONS;
-                    sectionName = 'Aktuelt Somatisk';
-                } else if (activeSection === 'somatic_obj') {
-                    optionsToClear = SOMATIC_OBJ_OPTIONS;
-                    sectionName = 'Somatisk Vurdering';
-                } else if (activeSection === 'diagnosis_anorexia') {
-                    optionsToClear = ANOREXIA_OPTIONS;
-                    sectionName = 'Anoreksia Nervosa';
-                    setDietDays([]); 
-                    setIsUniformDiet(false);
-                } else if (activeSection === 'full_note') {
-                    setSelectedIds(new Set());
-                    setOptionDetails({});
-                    setTimelineText('');
-                    setDietDays([]);
-                    setIsUniformDiet(false);
-                    setManualEditMode(false);
-                    setNotification({ message: 'Hele notatet er ryddet', type: 'success' });
-                    setTimeout(() => setNotification(null), 3000);
-                    return;
-                }
-
-                const newSet = new Set(selectedIds);
-                const newDetails = { ...optionDetails };
-                optionsToClear.forEach(o => {
-                    newSet.delete(o.id);
-                    delete newDetails[o.id];
-                });
-                
-                if (shouldClearTimeline) setTimelineText('');
-                setSelectedIds(newSet);
-                setOptionDetails(newDetails);
-                setManualEditMode(false); 
-                setNotification({ message: `${sectionName} er ryddet`, type: 'success' });
-                setTimeout(() => setNotification(null), 3000);
-            };
-            
-            const handleManualTextChange = (e) => {
-                setGeneratedText(e.target.value);
-                if (e.target.value !== lastAutoGeneratedText) {
-                    setManualEditMode(true);
-                }
-            };
-
-            const forceSync = () => {
-                if (confirm("Er du sikker? Dette vil slette dine manuelle ændringer.")) {
-                    setManualEditMode(false);
-                    generateText(true);
-                }
-            };
-
-            const calculateDepressionSeverity = (selectedSet) => {
-                const coreCount = DEP_CORE_IDS.filter(id => selectedSet.has(id)).length;
-                const accCount = DEP_ACC_IDS.filter(id => selectedSet.has(id)).length;
-                if (coreCount >= 3 && accCount >= 5) return 'svær';
-                if (coreCount >= 2 && accCount >= 4) return 'moderat';
-                if (coreCount >= 2 && accCount >= 2) return 'let';
-                return null;
-            };
-            
-            const processCategoryOptions = (categoryOptions, categoryName) => {
-                const lines = [];
-                const smartMergeGroups = {}; 
-                const standardOptions = [];
-                
-                categoryOptions.forEach(opt => {
-                    const detail = optionDetails[opt.id];
-                    if (opt.smartMerge && !opt.isDefault) {
-                        const key = JSON.stringify({ p: opt.smartMerge.prefix, s: opt.smartMerge.suffix });
-                        if (!smartMergeGroups[key]) smartMergeGroups[key] = [];
-                        let itemText = opt.smartMerge.item;
-                        if (detail && detail.trim() !== '') {
-                             const cleanedDetail = cleanInput(detail);
-                            if (opt.detailInParens) {
-                                itemText += ` (${cleanedDetail})`;
-                            } else {
-                                const d = cleanedDetail.charAt(0).toUpperCase() + cleanedDetail.slice(1);
-                                itemText += `. ${d}`;
-                            }
-                        }
-                        smartMergeGroups[key].push(itemText);
+             const clearAll = () => {
+                if (confirm('Er du sikker på, at du vil rydde data for denne visning?')) {
+                    if (activeSection === 'full_note') {
+                        // Clear everything
+                        setSelectedIds(new Set());
+                        setOptionDetails({});
+                        setTimelineText('');
+                        setDietDays([]);
+                        setIsUniformDiet(false);
                     } else {
-                        standardOptions.push({ ...opt, detail });
-                    }
-                });
+                        // Clear current section only
+                        let currentOptions = [];
+                        if (activeSection === 'psych_actual') currentOptions = ACTUAL_PSYCH_OPTIONS;
+                        else if (activeSection === 'psych') currentOptions = PSYCH_OPTIONS;
+                        else if (activeSection === 'somatic_obj') currentOptions = SOMATIC_OBJ_OPTIONS;
+                        else if (activeSection === 'somatic_act') currentOptions = SOMATIC_ACT_OPTIONS;
+                        else if (activeSection === 'diagnosis_anorexia') currentOptions = ANOREXIA_OPTIONS;
 
-                Object.keys(smartMergeGroups).forEach(key => {
-                    const { p, s } = JSON.parse(key);
-                    const items = smartMergeGroups[key];
-                    if (items.length > 0) {
-                        const mergedText = `${p}${formatList(items)}${s}`;
-                        lines.push(capitalize(mergedText));
-                    }
-                });
-
-                standardOptions.forEach(opt => {
-                     lines.push(formatWithDetail(opt.text, opt.detail));
-                });
-                
-                if (categoryName === 'Depression (ICD-10 Screening)') {
-                     const severity = calculateDepressionSeverity(selectedIds);
-                     if (severity) {
-                         lines.push(`Opfylder dermed kriterierne for en ${severity} depressiv episode.`);
-                     } else {
-                         const hasAnySymptoms = [...DEP_CORE_IDS, ...DEP_ACC_IDS].some(id => selectedIds.has(id));
-                         if (hasAnySymptoms) {
-                             lines.push('Opfylder ikke kriterierne for en depressiv episode.');
-                         }
-                     }
-                }
-                return lines.join(' ');
-            };
-
-            const generateText = (force = false) => {
-                if (manualEditMode && !force) return;
-                if (force) setManualEditMode(false);
-
-                const allSections = [
-                    { id: 'psych_actual', title: 'AKTUELT PSYKISK', options: ACTUAL_PSYCH_OPTIONS },
-                    { id: 'psych', title: 'OBJEKTIVT PSYKISK', options: PSYCH_OPTIONS },
-                    { id: 'somatic_act', title: 'AKTUELT SOMATISK', options: SOMATIC_ACT_OPTIONS },
-                    { id: 'somatic_obj', title: 'SOMATISK VURDERING', options: SOMATIC_OBJ_OPTIONS },
-                    { id: 'diagnosis_anorexia', title: 'ANOREKSIA NERVOSA (F50.0)', options: ANOREXIA_OPTIONS }
-                ];
-
-                let sectionsToRender = [];
-                if (activeSection === 'full_note') {
-                    sectionsToRender = allSections;
-                } else {
-                    sectionsToRender = allSections.filter(s => s.id === activeSection);
-                }
-
-                const lines = [];
-                const movedCategories = new Set(); 
-
-                if (showSummary) {
-                    const obsLines = [];
-                    sectionsToRender.forEach(sec => {
-                        const categories = Array.from(new Set(sec.options.map(o => o.category)));
-                        categories.forEach(cat => {
-                            const selectedOptions = sec.options.filter(o => o.category === cat && selectedIds.has(o.id));
-                            const hasAbnormality = selectedOptions.some(o => !o.isDefault);
-                            if (hasAbnormality && selectedOptions.length > 0) {
-                                const text = processCategoryOptions(selectedOptions, cat);
-                                obsLines.push(`${cat}: ${text}`);
-                                movedCategories.add(cat);
-                            }
+                        const newSet = new Set(selectedIds);
+                        const newDetails = { ...optionDetails };
+                        currentOptions.forEach(o => {
+                            newSet.delete(o.id);
+                            delete newDetails[o.id];
                         });
-                    });
-
-                    if (obsLines.length > 0) {
-                        lines.push("OBSERVATIONER");
-                        lines.push(...obsLines);
-                        lines.push("");
-                        lines.push("---");
-                        lines.push(""); 
+                        
+                        if (activeSection === 'psych_actual') setTimelineText('');
+                        if (activeSection === 'diagnosis_anorexia') {
+                            setDietDays([]);
+                            setIsUniformDiet(false);
+                        }
+                        
+                        setSelectedIds(newSet);
+                        setOptionDetails(newDetails);
                     }
+                    setManualEditMode(false);
                 }
-
-                sectionsToRender.forEach(sec => {
-                    const sectionLines = [];
-                    if (sec.id === 'psych_actual' && timelineText.trim()) {
-                         sectionLines.push(`Sygdomsdebut & Udløsende faktorer: ${timelineText}`);
-                    }
-
-                    if (sec.id === 'diagnosis_anorexia' && dietDays.length > 0) {
-                        if (isUniformDiet) {
-                             const day = dietDays[0];
-                             if (day) {
-                                sectionLines.push("Kostanamnese: Patienten angiver at spise det samme hver dag. Nedenstående er repræsentativt for det daglige indtag:");
-                                if (day.meals.morgen) sectionLines.push(`- Morgen: ${day.meals.morgen}`);
-                                if (day.meals.formiddag) sectionLines.push(`- Før frokost: ${day.meals.formiddag}`);
-                                if (day.meals.frokost) sectionLines.push(`- Frokost: ${day.meals.frokost}`);
-                                if (day.meals.eftermiddag) sectionLines.push(`- Eftermiddag: ${day.meals.eftermiddag}`);
-                                if (day.meals.aften) sectionLines.push(`- Aften: ${day.meals.aften}`);
-                                if (day.meals.sen_aften) sectionLines.push(`- Efter aften: ${day.meals.sen_aften}`);
-                                if (day.meals.vaeske) sectionLines.push(`- Væske: ${day.meals.vaeske}`);
-                             }
-                        } else {
-                            sectionLines.push("Kostanamnese (eksempler fra sidste 14 dage):");
-                            dietDays.forEach(day => {
-                                sectionLines.push(`${day.label}:`);
-                                if (day.meals.morgen) sectionLines.push(`- Morgen: ${day.meals.morgen}`);
-                                if (day.meals.formiddag) sectionLines.push(`- Før frokost: ${day.meals.formiddag}`);
-                                if (day.meals.frokost) sectionLines.push(`- Frokost: ${day.meals.frokost}`);
-                                if (day.meals.eftermiddag) sectionLines.push(`- Eftermiddag: ${day.meals.eftermiddag}`);
-                                if (day.meals.aften) sectionLines.push(`- Aften: ${day.meals.aften}`);
-                                if (day.meals.sen_aften) sectionLines.push(`- Efter aften: ${day.meals.sen_aften}`);
-                                if (day.meals.vaeske) sectionLines.push(`- Væske: ${day.meals.vaeske}`);
-                                sectionLines.push("");
-                            });
-                        }
-                    }
-
-                    const categories = Array.from(new Set(sec.options.map(o => o.category)));
-                    categories.forEach(cat => {
-                        if (movedCategories.has(cat)) return;
-                        const selectedOptions = sec.options.filter(o => o.category === cat && selectedIds.has(o.id));
-                        if (selectedOptions.length > 0) {
-                            const text = processCategoryOptions(selectedOptions, cat);
-                            sectionLines.push(`${cat}: ${text}`);
-                        }
-                    });
-
-                    if (sectionLines.length > 0) {
-                        if (sec.id !== 'diagnosis_anorexia') {
-                             lines.push(sec.title);
-                        }
-                        lines.push(...sectionLines);
-                        lines.push(""); 
-                    }
-                });
-
-                const finalString = lines.join('\n');
-                setGeneratedText(finalString);
-                setLastAutoGeneratedText(finalString);
+            };
+            
+            const forceSync = () => {
+                if (confirm("Er du sikker? Dette vil slette dine manuelle ændringer og gendanne teksten baseret på dine valg.")) {
+                    setManualEditMode(false);
+                    // Effect will trigger regen
+                }
             };
 
             const copyToClipboard = () => {
@@ -939,42 +871,11 @@
                 setNotification({ message: 'Tekst kopieret til udklipsholder', type: 'success' });
                 setTimeout(() => setNotification(null), 3000);
             };
-
-            const resetSection = () => {
-                let currentOptions = [];
-                if (activeSection === 'psych_actual') currentOptions = ACTUAL_PSYCH_OPTIONS;
-                else if (activeSection === 'psych') currentOptions = PSYCH_OPTIONS;
-                else if (activeSection === 'somatic_obj') currentOptions = SOMATIC_OBJ_OPTIONS;
-                else if (activeSection === 'somatic_act') currentOptions = SOMATIC_ACT_OPTIONS;
-                else if (activeSection === 'diagnosis_anorexia') currentOptions = ANOREXIA_OPTIONS;
-                else if (activeSection === 'full_note') {
-                   currentOptions = [...ACTUAL_PSYCH_OPTIONS, ...PSYCH_OPTIONS, ...SOMATIC_ACT_OPTIONS, ...SOMATIC_OBJ_OPTIONS, ...ANOREXIA_OPTIONS];
-                }
-                
-                const newSet = new Set(selectedIds);
-                const newDetails = { ...optionDetails };
-                currentOptions.forEach(o => {
-                    newSet.delete(o.id);
-                    delete newDetails[o.id];
-                });
-                currentOptions.filter(o => o.isDefault).forEach(o => newSet.add(o.id));
-                if (activeSection === 'psych_actual' || activeSection === 'full_note') setTimelineText('');
-                if (activeSection === 'diagnosis_anorexia' || activeSection === 'full_note') {
-                     setDietDays([]);
-                     setActiveDietDayId(null);
-                     setIsUniformDiet(false);
-                }
-                setSelectedIds(newSet);
-                setOptionDetails(newDetails);
-                setManualEditMode(false);
-            };
-
+            
             const toggleFullscreen = () => {
                  if (!document.fullscreenElement) {
                     document.documentElement.requestFullscreen().catch((err) => {
                         console.error(err);
-                        setNotification({ message: 'Fuldskærm blokeret af browseren', type: 'error' });
-                        setTimeout(() => setNotification(null), 3000);
                     });
                     setIsFullscreen(true);
                 } else {
@@ -983,11 +884,52 @@
                 }
             };
             
-             useEffect(() => {
-                const handleFsChange = () => setIsFullscreen(!!document.fullscreenElement);
-                document.addEventListener('fullscreenchange', handleFsChange);
-                return () => document.removeEventListener('fullscreenchange', handleFsChange);
-            }, []);
+            const resetSection = () => {
+                // Similar to Clear All but keeps defaults
+                let currentOptions = [];
+                 if (activeSection === 'psych_actual') currentOptions = ACTUAL_PSYCH_OPTIONS;
+                else if (activeSection === 'psych') currentOptions = PSYCH_OPTIONS;
+                else if (activeSection === 'somatic_obj') currentOptions = SOMATIC_OBJ_OPTIONS;
+                else if (activeSection === 'somatic_act') currentOptions = SOMATIC_ACT_OPTIONS;
+                else if (activeSection === 'diagnosis_anorexia') currentOptions = ANOREXIA_OPTIONS;
+                else if (activeSection === 'full_note') {
+                     // Reset all to defaults
+                     const defaults = new Set();
+                    [...PSYCH_OPTIONS, ...SOMATIC_OBJ_OPTIONS, ...SOMATIC_ACT_OPTIONS, ...ACTUAL_PSYCH_OPTIONS, ...ANOREXIA_OPTIONS].forEach(opt => {
+                        if (opt.isDefault) defaults.add(opt.id);
+                    });
+                    setSelectedIds(defaults);
+                    setOptionDetails({});
+                    setTimelineText('');
+                    setDietDays([]);
+                    setIsUniformDiet(false);
+                    setManualEditMode(false);
+                    return;
+                }
+
+                const newSet = new Set(selectedIds);
+                const newDetails = { ...optionDetails };
+                
+                // Remove current section items
+                currentOptions.forEach(o => {
+                    newSet.delete(o.id);
+                    delete newDetails[o.id];
+                });
+                
+                // Add back defaults for this section
+                currentOptions.filter(o => o.isDefault).forEach(o => newSet.add(o.id));
+                
+                if (activeSection === 'psych_actual') setTimelineText('');
+                if (activeSection === 'diagnosis_anorexia') {
+                    setDietDays([]);
+                    setIsUniformDiet(false);
+                }
+                
+                setSelectedIds(newSet);
+                setOptionDetails(newDetails);
+                setManualEditMode(false);
+            };
+
 
             const renderCardGrid = (dataSet) => {
                 const categories = Array.from(new Set(dataSet.map(o => o.category)));
@@ -1206,7 +1148,7 @@
                             <div className="bg-indigo-600 p-1.5 rounded-lg"><Activity className="text-white h-5 w-5" /></div>
                             <div>
                                 <h1 className="text-lg font-bold text-slate-800 leading-tight">Psykiatrisk Journalværktøj</h1>
-                                <div className="flex items-center gap-1.5 text-xs text-slate-500"><span>Klinisk dokumentationsstøtte</span><span className="text-slate-300">•</span><span>Udarbejdet af Læge Magnus Juul</span></div>
+                                <div className="flex items-center gap-1.5 text-xs text-slate-500"><span>Klinisk dokumentationsstøtte</span><span className="text-slate-300">•</span><span>v4.0 (Fix)</span></div>
                             </div>
                         </div>
                         <div className="flex items-center gap-4">
@@ -1301,8 +1243,8 @@
                             </div>
                             {manualEditMode && (
                                 <div className="bg-slate-50 px-4 py-2 border-t border-slate-200 flex items-center justify-between text-xs">
-                                    <div className="flex items-center gap-1.5 text-slate-500"><PenLine className="w-3.5 h-3.5" /><span>Fri redigering: Nye valg tilføjes i bunden uden overskrifter.</span></div>
-                                    <button onClick={forceSync} className="text-indigo-600 hover:text-indigo-800 font-medium hover:underline px-2 py-1">Gendan Standard (Sletter ændringer)</button>
+                                    <div className="flex items-center gap-1.5 text-slate-500"><PenLine className="w-3.5 h-3.5" /><span>Fri redigering aktiv.</span></div>
+                                    <button onClick={forceSync} className="text-indigo-600 hover:text-indigo-800 font-medium hover:underline px-2 py-1">Gendan Standard</button>
                                 </div>
                             )}
                             <div className="p-4 bg-slate-50 border-t border-slate-200">
