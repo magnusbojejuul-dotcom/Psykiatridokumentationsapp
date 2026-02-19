@@ -18,7 +18,6 @@
     <style>
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        /* Prevent layout shift on scrollbar toggle */
         body { margin: 0; padding: 0; }
     </style>
 </head>
@@ -34,7 +33,6 @@
                 {children}
             </svg>
         );
-        // Ikoner genbruges fra tidligere version for konsistens
         const Activity = ({ className }) => <Icon className={className}><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></Icon>;
         const Brain = ({ className }) => <Icon className={className}><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></Icon>;
         const Stethoscope = ({ className }) => <Icon className={className}><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"/><circle cx="20" cy="10" r="2"/></Icon>;
@@ -78,7 +76,7 @@
             'eps_none', 'skin_normal'
         ];
 
-        // --- OPTION ARRAYS (Samme data som før, men indsat her for komplethed) ---
+        // --- OPTION ARRAYS ---
         const ANOREXIA_OPTIONS = [
             { id: 'an_cal_count', label: 'Tæller kalorier', category: 'Spiseadfærd & Mønstre', text: 'Der tælles kalorier.', smartMerge: { prefix: 'Der ', item: 'tælles kalorier', suffix: '.' } },
             { id: 'an_meals_skipped', label: 'Springes måltider over?', category: 'Spiseadfærd & Mønstre', text: 'Der springes måltider over.', hasInput: true, inputPlaceholder: 'Hvilke?', detailInParens: true, smartMerge: { prefix: 'Der ', item: 'springes måltider over', suffix: '.' } },
@@ -286,7 +284,7 @@
         const SOMATIC_ACT_OPTIONS = [
             { id: 'act_cns_ok', label: 'Ingen CNS klager', category: 'CNS', text: 'Benægter hovedpine, svimmelhed, besvimelse, synsforstyrrelser eller kramper.', isDefault: true, exclude: ['act_cns_headache', 'act_cns_dizzy', 'act_cns_faint'] },
             { id: 'act_cns_headache', label: 'Hovedpine', category: 'CNS', text: 'Angiver hovedpine.', exclude: ['act_cns_ok'], smartMerge: { prefix: 'Angiver ', item: 'hovedpine', suffix: '.' } },
-            { id: 'act_cns_dizzy', label: 'Svimmelhed', category: 'CNS', text: 'Angiver svimmelhed (karakter: ).', exclude: ['act_cns_ok'], smartMerge: { prefix: 'Angiver ', item: 'svimmelhed (karakter: )', suffix: '.' } },
+            { id: 'act_cns_dizzy', label: 'Svimmelhed', category: 'CNS', text: 'Angiver svimmelhed.', hasInput: true, inputPlaceholder: 'Karakter/Hyppighed...', exclude: ['act_cns_ok'], smartMerge: { prefix: 'Angiver ', item: 'svimmelhed', suffix: '.' } },
             { id: 'act_cp_ok', label: 'Ingen CP klager', category: 'Cardio/Pulm', text: 'Ingen klager over brystsmerter, hjertebanken eller dyspnø.', isDefault: true, exclude: ['act_cp_pain', 'act_cp_palp', 'act_cp_dysp'] },
             { id: 'act_cp_pain', label: 'Brystsmerter', category: 'Cardio/Pulm', text: 'Angiver brystsmerter.', exclude: ['act_cp_ok'], smartMerge: { prefix: 'Angiver ', item: 'brystsmerter', suffix: '.' } },
             { id: 'act_cp_palp', label: 'Hjertebanken', category: 'Cardio/Pulm', text: 'Angiver hjertebanken.', exclude: ['act_cp_ok'], smartMerge: { prefix: 'Angiver ', item: 'hjertebanken', suffix: '.' } },
@@ -324,16 +322,16 @@
             { id: 'cp_abnorm_c', label: 'St.c. uregelmæssig', category: 'Stethoscopia', text: 'St.c.: Uregelmæssig hjerteaktion (arytmi).', exclude: ['cp_normal'] },
             { id: 'cp_abnorm_p', label: 'St.p. bilyde', category: 'Stethoscopia', text: 'St.p.: Der høres bilyde (rhonchi/crepitatio).', exclude: ['cp_normal'] },
             { id: 'abd_normal', label: 'Abdomen normal', category: 'Abdomen & Nyreloger', text: 'Abdomen blød og uøm. Ingen udfyldninger. Normale tarmlyde. Ingen flankeømhed.', isDefault: true, exclude: ['abd_tender', 'abd_guard', 'abd_mass', 'abd_sounds_missing', 'abd_sounds_hyper', 'abd_flank_tender'] },
-            { id: 'abd_tender', label: 'Ømhed', category: 'Abdomen & Nyreloger', text: 'Ømhed ved palpation.', exclude: ['abd_normal'], smartMerge: { prefix: 'Der findes ', item: 'ømhed ved palpation', suffix: '.' } },
-            { id: 'abd_guard', label: 'Værn/Slipømhed', category: 'Abdomen & Nyreloger', text: 'Værn og slipømhed.', exclude: ['abd_normal'], smartMerge: { prefix: 'Der findes ', item: 'værn og slipømhed', suffix: '.' } },
-            { id: 'abd_mass', label: 'Udfyldninger', category: 'Abdomen & Nyreloger', text: 'Udfyldning.', exclude: ['abd_normal'], smartMerge: { prefix: 'Der palperes ', item: 'udfyldning', suffix: '.' } },
+            { id: 'abd_tender', label: 'Ømhed', category: 'Abdomen & Nyreloger', text: 'Ømhed ved palpation.', exclude: ['abd_normal'], hasInput: true, smartMerge: { prefix: 'Der findes ', item: 'ømhed ved palpation', suffix: '.' } },
+            { id: 'abd_guard', label: 'Værn/Slipømhed', category: 'Abdomen & Nyreloger', text: 'Værn og slipømhed.', exclude: ['abd_normal'], hasInput: true, smartMerge: { prefix: 'Der findes ', item: 'værn og slipømhed', suffix: '.' } },
+            { id: 'abd_mass', label: 'Udfyldninger', category: 'Abdomen & Nyreloger', text: 'Udfyldning.', exclude: ['abd_normal'], hasInput: true, smartMerge: { prefix: 'Der palperes ', item: 'udfyldning', suffix: '.' } },
             { id: 'abd_sounds_missing', label: 'Manglende tarmlyde', category: 'Abdomen & Nyreloger', text: 'Manglende tarmlyde.', exclude: ['abd_normal'], smartMerge: { prefix: 'Der høres ', item: 'manglende tarmlyde', suffix: '.' } },
             { id: 'abd_sounds_hyper', label: 'Hyperaktive tarmlyde', category: 'Abdomen & Nyreloger', text: 'Hyperaktive tarmlyde.', exclude: ['abd_normal'], smartMerge: { prefix: 'Der høres ', item: 'hyperaktive tarmlyde', suffix: '.' } },
             { id: 'abd_flank_tender', label: 'Flankeømhed', category: 'Abdomen & Nyreloger', text: 'Der er bankeømhed svarende til nyrelogerne.', exclude: ['abd_normal'], smartMerge: { prefix: 'Der er ', item: 'bankeømhed svarende til nyrelogerne', suffix: '.' } },
             { id: 'cn_normal', label: 'Kranienerver II-XII normal', category: 'Neurologisk (Kranienerver)', text: 'Intet abnormt påvist, systematisk undersøgt (II-XII). Synsfelter fundet normale ved Donders. Pupiller egale med normal lysrefleks. Ingen nystagmus. Ingen facialisparese. Ingen tungedeviation.', isDefault: true, exclude: ['cn_pupil', 'cn_nystag', 'cn_facial', 'cn_other'] },
-            { id: 'cn_pupil', label: 'Pupilforhold afviger', category: 'Neurologisk (Kranienerver)', text: 'Pupiller: [Beskriv afvigelse, fx miosis/mydriasis].', exclude: ['cn_normal'] },
-            { id: 'cn_nystag', label: 'Nystagmus', category: 'Neurologisk (Kranienerver)', text: 'Der ses nystagmus.', exclude: ['cn_normal'], smartMerge: { prefix: 'Der ses ', item: 'nystagmus', suffix: '.' } },
-            { id: 'cn_facial', label: 'Facialisparese', category: 'Neurologisk (Kranienerver)', text: 'Tegn på facialisparese (central/perifer).', exclude: ['cn_normal'], smartMerge: { prefix: 'Der ses ', item: 'facialisparese', suffix: '.' } },
+            { id: 'cn_pupil', label: 'Pupilforhold afviger', category: 'Neurologisk (Kranienerver)', text: 'Afvigende pupilforhold.', hasInput: true, inputPlaceholder: 'Beskriv afvigelse...', exclude: ['cn_normal'] },
+            { id: 'cn_nystag', label: 'Nystagmus', category: 'Neurologisk (Kranienerver)', text: 'Der ses nystagmus.', hasInput: true, exclude: ['cn_normal'], smartMerge: { prefix: 'Der ses ', item: 'nystagmus', suffix: '.' } },
+            { id: 'cn_facial', label: 'Facialisparese', category: 'Neurologisk (Kranienerver)', text: 'Tegn på facialisparese (central/perifer).', hasInput: true, exclude: ['cn_normal'], smartMerge: { prefix: 'Der ses ', item: 'facialisparese', suffix: '.' } },
             { id: 'motor_sys_normal', label: 'Motorik/Kraft normal', category: 'Neurologisk (Motorik)', text: 'Strakt arm- og bentest uden nedsynkning. Egal kraft (5/5) over de større led (OE+UE). Normal tonus.', isDefault: true, exclude: ['motor_weak_oe', 'motor_weak_ue', 'motor_tonus'] },
             { id: 'motor_weak_oe', label: 'Kraftnedsættelse OE', category: 'Neurologisk (Motorik)', text: 'Nedsat kraft i overekstremiteter.', exclude: ['motor_sys_normal'], smartMerge: { prefix: 'Nedsat kraft i ', item: 'overekstremiteter', suffix: '.' } },
             { id: 'motor_weak_ue', label: 'Kraftnedsættelse UE', category: 'Neurologisk (Motorik)', text: 'Nedsat kraft i underekstremiteter.', exclude: ['motor_sys_normal'], smartMerge: { prefix: 'Nedsat kraft i ', item: 'underekstremiteter', suffix: '.' } },
@@ -343,10 +341,10 @@
             { id: 'reflex_brachiorad', label: 'Brachioradialis (Normal)', category: 'Neurologisk (Reflekser)', text: 'Brachioradialis: bilat. normal.', isDefault: false, isNormal: true, exclude: ['reflex_normal'], smartMerge: { prefix: '', item: 'brachioradialis', suffix: ' findes bilat. normale.' } },
             { id: 'reflex_patellar', label: 'Patellar (Normal)', category: 'Neurologisk (Reflekser)', text: 'Patellar: bilat. normal.', isDefault: false, isNormal: true, exclude: ['reflex_normal'], smartMerge: { prefix: '', item: 'patellar', suffix: ' findes bilat. normale.' } },
             { id: 'reflex_achilles', label: 'Achilles (Normal)', category: 'Neurologisk (Reflekser)', text: 'Achilles: bilat. normal.', isDefault: false, isNormal: true, exclude: ['reflex_normal'], smartMerge: { prefix: '', item: 'achilles', suffix: ' findes bilat. normale.' } },
-            { id: 'reflex_babinski_neg', label: 'Babinski Neg.', category: 'Neurologisk (Reflekser)', text: 'Babinski: Negativ.', isDefault: false, isNormal: true, exclude: ['reflex_normal'] },
+            { id: 'reflex_babinski_neg', label: 'Babinski Neg.', category: 'Neurologisk (Reflekser)', text: 'Babinski: Negativ.', isDefault: false, isNormal: true, exclude: ['reflex_normal', 'reflex_babinski'] },
             { id: 'reflex_hyper', label: 'Hyperrefleksi', category: 'Neurologisk (Reflekser)', text: 'Livlige/Hyperaktive reflekser.', exclude: ['reflex_normal'], smartMerge: { prefix: 'Der findes ', item: 'livlige/hyperaktive reflekser', suffix: '.' } },
-            { id: 'reflex_babinski', label: 'Babinski Positiv', category: 'Neurologisk (Reflekser)', text: 'Babinski positiv (extensivt tå-respons).', exclude: ['reflex_normal'], smartMerge: { prefix: 'Der findes ', item: 'positiv Babinski (extensivt tå-respons)', suffix: '.' } },
-            { id: 'reflex_patho_other', label: 'Andet patologisk (Beskriv)', category: 'Neurologisk (Reflekser)', text: 'Patologiske refleksfund.', exclude: ['reflex_normal'], smartMerge: { prefix: 'Der findes ', item: 'patologiske refleksfund', suffix: '.' } },
+            { id: 'reflex_babinski', label: 'Babinski Positiv', category: 'Neurologisk (Reflekser)', text: 'Babinski positiv (extensivt tå-respons).', exclude: ['reflex_normal', 'reflex_babinski_neg'], isPathology: true, smartMerge: { prefix: 'Der findes ', item: 'positiv Babinski (extensivt tå-respons)', suffix: '.' } },
+            { id: 'reflex_patho_other', label: 'Andet patologisk (Beskriv)', category: 'Neurologisk (Reflekser)', text: 'Patologiske refleksfund.', hasInput: true, inputPlaceholder: 'Beskriv fund...', exclude: ['reflex_normal'], smartMerge: { prefix: 'Der findes ', item: 'patologiske refleksfund', suffix: '.' } },
             { id: 'coord_normal', label: 'Koordination normal', category: 'Neurologisk (Cerebellart)', text: 'Normal koordination ved finger-næse forsøg og knæ-hæl forsøg. Ingen ataksi.', isDefault: true, exclude: ['coord_ataxia', 'coord_romberg'] },
             { id: 'coord_ataxia', label: 'Ataksi/Usikker FNF', category: 'Neurologisk (Cerebellart)', text: 'Usikkerhed ved finger-næse forsøg (ataksi).', exclude: ['coord_normal'], smartMerge: { prefix: 'Der findes ', item: 'ataksi', suffix: '.' } },
             { id: 'coord_romberg', label: 'Romberg Positiv', category: 'Neurologisk (Cerebellart)', text: 'Rombergs test positiv (faldtendens ved lukkede øjne).', exclude: ['coord_normal'], smartMerge: { prefix: 'Der findes ', item: 'positiv Romberg', suffix: '.' } },
@@ -358,7 +356,7 @@
             { id: 'eps_dyskinesia', label: 'Dyskinesier', category: 'Neurologisk (EPS)', text: 'Der ses orofaciale dyskinesier.', exclude: ['eps_none'], smartMerge: { prefix: 'Der observeres ', item: 'dyskinesier', suffix: '.' } },
             { id: 'eps_aca', label: 'Akatisi', category: 'Neurologisk (EPS)', text: 'Motorisk urolig, tegn på akatisi.', exclude: ['eps_none'], smartMerge: { prefix: 'Der observeres ', item: 'akatisi', suffix: '.' } },
             { id: 'skin_normal', label: 'Hud: ingen mærker', category: 'Hud/Traumer', text: 'Ingen tegn på friske eller ældre læsioner eller injektionsmærker.', isDefault: true, exclude: ['skin_cut_fresh', 'skin_cut_old', 'skin_inject'] },
-            { id: 'skin_cut_fresh', label: 'Friske snitsår', category: 'Hud/Traumer', text: 'Der ses friske snitsår (lokalisation: ).', exclude: ['skin_normal'], smartMerge: { prefix: 'Der ses ', item: 'friske snitsår', suffix: '.' } },
+            { id: 'skin_cut_fresh', label: 'Friske snitsår', category: 'Hud/Traumer', text: 'Der ses friske snitsår.', hasInput: true, inputPlaceholder: 'Lokalisation...', exclude: ['skin_normal'], smartMerge: { prefix: 'Der ses ', item: 'friske snitsår', suffix: '.' } },
             { id: 'skin_cut_old', label: 'Gamle ar', category: 'Hud/Traumer', text: 'Gamle ar efter selvskade (scars).', exclude: ['skin_normal'], smartMerge: { prefix: 'Der ses ', item: 'gamle ar', suffix: '.' } },
             { id: 'skin_inject', label: 'Injektionsmærker', category: 'Hud/Traumer', text: 'Injektionsmærker i lysken/albuebøjning.', exclude: ['skin_normal'], smartMerge: { prefix: 'Der ses ', item: 'injektionsmærker', suffix: '.' } },
         ];
@@ -428,14 +426,19 @@
                 return items.join(', ') + ' og ' + last;
             };
 
+            // Ensure separator (period) between base text and detail input
             const formatWithDetail = (text, detail) => {
                 if (!detail || cleanInput(detail) === '') return text;
-                let base = cleanInput(text); // Ensure base doesn't end with dot
-                
-                let d = cleanInput(detail); // Ensure detail doesn't end with dot
+                let base = cleanInput(text); 
+                let d = cleanInput(detail); 
                 
                 if (d.length > 0) d = d.charAt(0).toUpperCase() + d.slice(1);
-                return `${base} ${d}.`;
+                
+                // If base ends with colon/question mark, use space. Otherwise force a dot.
+                if (base.endsWith(':') || base.endsWith('?') || base.endsWith('!')) {
+                    return `${base} ${d}.`;
+                }
+                return `${base}. ${d}.`;
             };
 
             const calculateDepressionSeverity = (selectedSet) => {
@@ -455,28 +458,25 @@
                 categoryOptions.forEach(opt => {
                     if (currentSelectedIds.has(opt.id)) {
                         const detail = currentDetails[opt.id];
+                        // Tjek om brugeren faktisk har indtastet fritekst
+                        const hasDetail = detail && cleanInput(detail) !== '';
                         
-                        if (opt.smartMerge && !opt.isDefault) {
+                        // LØSNING PÅ FLETNING:
+                        // Hvis punktet normalt ville blive flettet (smartMerge),
+                        // MEN brugeren har skrevet fritekst, så piller vi det UD af fletningen
+                        // og behandler det som en separat standard-sætning.
+                        if (opt.smartMerge && !opt.isDefault && !hasDetail) {
                             const key = JSON.stringify({ p: opt.smartMerge.prefix, s: opt.smartMerge.suffix });
                             if (!smartMergeGroups[key]) smartMergeGroups[key] = [];
-                            
-                            let itemText = opt.smartMerge.item;
-                            if (detail && cleanInput(detail) !== '') {
-                                 const cleanedDetail = cleanInput(detail);
-                                if (opt.detailInParens) {
-                                    itemText += ` (${cleanedDetail})`;
-                                } else {
-                                    const d = cleanedDetail.charAt(0).toUpperCase() + cleanedDetail.slice(1);
-                                    itemText += `. ${d}`;
-                                }
-                            }
-                            smartMergeGroups[key].push(itemText);
+                            smartMergeGroups[key].push(opt.smartMerge.item);
                         } else {
+                            // Bliver nu udskrevet som sin egen punktum-separerede sætning.
                             standardOptions.push({ ...opt, detail });
                         }
                     }
                 });
 
+                // Udskriv de flettede, rene lister først
                 Object.keys(smartMergeGroups).forEach(key => {
                     const { p, s } = JSON.parse(key);
                     const items = smartMergeGroups[key];
@@ -486,6 +486,7 @@
                     }
                 });
 
+                // Udskriv fritekst-elementerne som separate sætninger bagefter
                 standardOptions.forEach(opt => {
                      lines.push(formatWithDetail(opt.text, opt.detail));
                 });
@@ -530,9 +531,12 @@
                         const categories = Array.from(new Set(sec.options.map(o => o.category)));
                         categories.forEach(cat => {
                             const selectedOptions = sec.options.filter(o => o.category === cat && ids.has(o.id));
-                            const hasAbnormality = selectedOptions.some(o => !o.isDefault);
+                            
+                            // Tjekker for REEL patologi før den tvinges i resuméet
+                            const hasAbnormality = selectedOptions.some(o => o.isPathology || (!o.isDefault && !o.isNormal));
+                            
                             if (hasAbnormality && selectedOptions.length > 0) {
-                                const text = processCategoryOptions(sec.options, cat, ids, details); // Pass options to filter correctly inside
+                                const text = processCategoryOptions(sec.options, cat, ids, details); 
                                 obsLines.push(`${cat}: ${text}`);
                                 movedCategories.add(cat);
                             }
@@ -589,8 +593,6 @@
                     categories.forEach(cat => {
                         if (movedCategories.has(cat)) return;
                         
-                        // FIX: We need to filter options belonging to THIS category
-                        // AND pass them to processCategoryOptions
                         const categoryOptions = sec.options.filter(o => o.category === cat);
                         const selectedInCat = categoryOptions.filter(o => ids.has(o.id));
                         
@@ -624,10 +626,8 @@
             // --- ACTIONS ---
 
             const changeSection = (newSection) => {
-                // FORCE RESET MANUAL MODE ON SECTION CHANGE
                 setManualEditMode(false);
                 setActiveSection(newSection);
-                // Text generation will trigger via useEffect because activeSection changed
             };
             
             const handleManualTextChange = (e) => {
@@ -645,25 +645,17 @@
                         // REMOVE LOGIC
                         nextIds.delete(option.id);
                         
-                        // Construct the exact string we expect to find
                         let textToRemove = option.text;
                         const detail = optionDetails[option.id];
                         
-                        // Use the shared formatting logic to predict what text looks like
                         if (option.smartMerge) {
-                             // This is hard because smartMerge combines multiple items. 
-                             // We might just want to remove the specific item from the list? 
-                             // Too complex for regex reliably. We only attempt simple removal.
-                             // Fallback: Do nothing to text, just toggle button.
                              setNotification({ message: 'Tekst skal slettes manuelt i fritekst-tilstand', type: 'error' });
                         } else {
-                             // Standard text removal attempt
                              let expectedString = formatWithDetail(option.text, detail);
                              if (generatedText.includes(expectedString)) {
                                  const newText = generatedText.replace(expectedString, '').replace(/\n\s*\n/g, '\n');
                                  setGeneratedText(newText);
                              } else {
-                                 // Try without detail
                                  if (generatedText.includes(option.text)) {
                                      const newText = generatedText.replace(option.text, '').replace(/\n\s*\n/g, '\n');
                                      setGeneratedText(newText); 
@@ -684,8 +676,7 @@
                              let i = option.smartMerge.item;
                              if (detail) {
                                  const cleanedDetail = cleanInput(detail);
-                                 if (option.detailInParens) i += ` (${cleanedDetail})`;
-                                 else i += `. ${capitalize(cleanedDetail)}`;
+                                 i += ` (${cleanedDetail})`;
                              }
                              if (!p) i = capitalize(i);
                              textLine = `${p}${i}${s}`;
@@ -824,14 +815,12 @@
              const clearAll = () => {
                 if (confirm('Er du sikker på, at du vil rydde data for denne visning?')) {
                     if (activeSection === 'full_note') {
-                        // Clear everything
                         setSelectedIds(new Set());
                         setOptionDetails({});
                         setTimelineText('');
                         setDietDays([]);
                         setIsUniformDiet(false);
                     } else {
-                        // Clear current section only
                         let currentOptions = [];
                         if (activeSection === 'psych_actual') currentOptions = ACTUAL_PSYCH_OPTIONS;
                         else if (activeSection === 'psych') currentOptions = PSYCH_OPTIONS;
@@ -862,7 +851,6 @@
             const forceSync = () => {
                 if (confirm("Er du sikker? Dette vil slette dine manuelle ændringer og gendanne teksten baseret på dine valg.")) {
                     setManualEditMode(false);
-                    // Effect will trigger regen
                 }
             };
 
@@ -885,7 +873,6 @@
             };
             
             const resetSection = () => {
-                // Similar to Clear All but keeps defaults
                 let currentOptions = [];
                  if (activeSection === 'psych_actual') currentOptions = ACTUAL_PSYCH_OPTIONS;
                 else if (activeSection === 'psych') currentOptions = PSYCH_OPTIONS;
@@ -893,7 +880,6 @@
                 else if (activeSection === 'somatic_act') currentOptions = SOMATIC_ACT_OPTIONS;
                 else if (activeSection === 'diagnosis_anorexia') currentOptions = ANOREXIA_OPTIONS;
                 else if (activeSection === 'full_note') {
-                     // Reset all to defaults
                      const defaults = new Set();
                     [...PSYCH_OPTIONS, ...SOMATIC_OBJ_OPTIONS, ...SOMATIC_ACT_OPTIONS, ...ACTUAL_PSYCH_OPTIONS, ...ANOREXIA_OPTIONS].forEach(opt => {
                         if (opt.isDefault) defaults.add(opt.id);
@@ -910,13 +896,11 @@
                 const newSet = new Set(selectedIds);
                 const newDetails = { ...optionDetails };
                 
-                // Remove current section items
                 currentOptions.forEach(o => {
                     newSet.delete(o.id);
                     delete newDetails[o.id];
                 });
                 
-                // Add back defaults for this section
                 currentOptions.filter(o => o.isDefault).forEach(o => newSet.add(o.id));
                 
                 if (activeSection === 'psych_actual') setTimelineText('');
@@ -1097,7 +1081,7 @@
                                     <div className="p-4 flex flex-col gap-2">
                                         {dataSet.filter(o => o.category === cat).map(option => {
                                             const isSelected = selectedIds.has(option.id);
-                                            const isPathology = !option.isDefault && !option.isNormal;
+                                            const isPathology = option.isPathology || (!option.isDefault && !option.isNormal);
                                             let btnClass = "w-full text-left px-3 py-2.5 text-sm rounded-lg border transition-all duration-200 flex items-center justify-between group ";
                                             if (isSelected) {
                                                 if (isPathology) btnClass += "bg-red-50 border-red-200 text-red-900 shadow-sm";
@@ -1148,7 +1132,7 @@
                             <div className="bg-indigo-600 p-1.5 rounded-lg"><Activity className="text-white h-5 w-5" /></div>
                             <div>
                                 <h1 className="text-lg font-bold text-slate-800 leading-tight">Psykiatrisk Journalværktøj</h1>
-                                <div className="flex items-center gap-1.5 text-xs text-slate-500"><span>Klinisk dokumentationsstøtte</span><span className="text-slate-300">•</span><span>v4.0 (Fix)</span></div>
+                                <div className="flex items-center gap-1.5 text-xs text-slate-500"><span>Klinisk dokumentationsstøtte</span><span className="text-slate-300">•</span><span>v4.0 (Final)</span></div>
                             </div>
                         </div>
                         <div className="flex items-center gap-4">
