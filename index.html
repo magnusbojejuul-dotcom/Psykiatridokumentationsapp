@@ -434,25 +434,27 @@
                 return items.join(', ') + ' og ' + last;
             };
 
-            const formatWithDetail = (opt) => {
-                const { text, detailInParens } = opt;
-                const detail = optionDetails[opt.id];
+            const formatWithDetail = (opt, detail) => {
+                let base = cleanInput(opt.text); 
                 
-                if (!detail || cleanInput(detail) === '') return text;
+                if (!detail || cleanInput(detail) === '') {
+                    return base + (base.match(/[.:?!]$/) ? '' : '.');
+                }
                 
-                let base = cleanInput(text); 
                 let d = cleanInput(detail); 
                 
-                // Implementeret detailInParens logikken
-                if (detailInParens) {
+                if (opt.detailInParens) {
                     return `${base} (${d}).`;
                 }
                 
-                if (d.length > 0) d = d.charAt(0).toUpperCase() + d.slice(1);
+                d = d.charAt(0).toUpperCase() + d.slice(1);
                 
-                if (base.endsWith(':') || base.endsWith('?') || base.endsWith('!')) {
+                if (base.match(/[:?!]$/)) {
                     return `${base} ${d}.`;
                 }
+                
+                // Forhindrer dobbelt punktum (eks "besvær..")
+                base = base.replace(/\.$/, '');
                 return `${base}. ${d}.`;
             };
 
@@ -460,13 +462,10 @@
                 const coreCount = DEP_CORE_IDS.filter(id => selectedSet.has(id)).length;
                 const accCount = DEP_ACC_IDS.filter(id => selectedSet.has(id)).length;
                 
-                // ICD-10 F32 eksakt vurdering
-                // Svær: Alle 3 kernesymptomer + mindst 4 ledsagesymptomer
-                if (coreCount === 3 && accCount >= 4) return 'svær';
-                // Moderat: 2 kerne + 4 ledsage, ELLER 3 kerne + 3 ledsage (Sikrer bred dækning klinisk)
-                if ((coreCount >= 2 && accCount >= 4) || (coreCount === 3 && accCount === 3)) return 'moderat';
-                // Let: Mindst 2 kerne + mindst 2 ledsagesymptomer
-                if (coreCount >= 2 && accCount >= 2) return 'let';
+                // Eksakt ICD-10 ifølge fremsendte dokumentation
+                if (coreCount === 3 && accCount >= 5) return 'svær';
+                if (coreCount >= 2 && accCount >= 4) return 'moderat';
+                if (coreCount >= 2 && accCount >= 2) return 'lettere';
                 
                 return null;
             };
@@ -481,38 +480,59 @@
                         const detail = currentDetails[opt.id];
                         const hasDetail = detail && cleanInput(detail) !== '';
                         
-                        if (opt.smartMerge && !opt.isDefault && !hasDetail) {
-                            const key = JSON.stringify({ p: opt.smartMerge.prefix, s: opt.smartMerge.suffix });
-                            if (!smartMergeGroups[key]) smartMergeGroups[key] = [];
-                            smartMergeGroups[key].push(opt.smartMerge.item);
+                        if (opt.smartMerge && !opt.isDefault) {
+                            if (hasDetail) {
+                                // FIX: Hvis der er fritekst, trækkes det 100% ud af "og"-listerne 
+                                // og formateres som en fuldstændig uafhængig sætning.
+                                let p = opt.smartMerge.prefix || '';
+                                let i = opt.smartMerge.item;
+                                let s = opt.smartMerge.suffix || '.';
+                                
+                                let standalone = capitalize(`${p}${i}`);
+                                
+                                if (opt.detailInParens) {
+                                    standardOptions.push(`${standalone} (${cleanInput(detail)})${s}`);
+                                } else {
+                                    let cleanS = s.trim();
+                                    if (!cleanS.endsWith('.')) cleanS += '.';
+                                    standardOptions.push(`${standalone}${cleanS} ${capitalize(cleanInput(detail))}.`);
+                                }
+                            } else {
+                                // Ingen fritekst -> flet i en smuk kommasepareret liste.
+                                const key = JSON.stringify({ p: opt.smartMerge.prefix, s: opt.smartMerge.suffix });
+                                if (!smartMergeGroups[key]) smartMergeGroups[key] = [];
+                                smartMergeGroups[key].push(opt.smartMerge.item);
+                            }
                         } else {
-                            standardOptions.push(opt);
+                            // Standardfelter
+                            standardOptions.push(formatWithDetail(opt, detail));
                         }
                     }
                 });
 
+                // 1. Udskriv de rene flettede lister først
                 Object.keys(smartMergeGroups).forEach(key => {
                     const { p, s } = JSON.parse(key);
                     const items = smartMergeGroups[key];
                     if (items.length > 0) {
-                        // Korrekt capialisering hvis prefix er tomt
                         let mergedText = `${p}${formatList(items)}${s}`;
                         lines.push(capitalize(mergedText));
                     }
                 });
 
-                standardOptions.forEach(opt => {
-                     lines.push(formatWithDetail(opt));
+                // 2. Udskriv elementer MED fritekst (eller uden smartMerge) bagefter
+                standardOptions.forEach(textLine => {
+                     lines.push(textLine);
                 });
                 
                 if (categoryName === 'Depression (ICD-10 Screening)') {
                      const severity = calculateDepressionSeverity(currentSelectedIds);
                      if (severity) {
-                         lines.push(`Opfylder dermed ICD-10 kriterierne for en ${severity} depressiv episode.`);
+                         lines.push(`Opfylder dermed ICD-10 kriterierne for en depression i ${severity} grad.`);
                      } else {
                          const hasAnySymptoms = [...DEP_CORE_IDS, ...DEP_ACC_IDS].some(id => currentSelectedIds.has(id));
                          if (hasAnySymptoms) {
-                             lines.push('Opfylder ikke ICD-10 kriterierne for en formel depressiv episode.');
+                             lines.push('Opfylder ikke de fulde ICD-10 kriterier for en depressiv episode.');
                          }
                      }
                 }
@@ -545,7 +565,6 @@
                         categories.forEach(cat => {
                             const selectedOptions = sec.options.filter(o => o.category === cat && ids.has(o.id));
                             
-                            // Tjekker for REEL patologi før det tvinges i resuméet
                             const hasAbnormality = selectedOptions.some(o => o.isPathology || (!o.isDefault && !o.isNormal));
                             
                             if (hasAbnormality && selectedOptions.length > 0) {
@@ -651,13 +670,12 @@
                     if (isSelected) {
                         nextIds.delete(option.id);
                         
-                        let textToRemove = option.text;
                         const detail = optionDetails[option.id];
                         
                         if (option.smartMerge) {
                              setNotification({ message: 'Tekst skal slettes manuelt i fritekst-tilstand', type: 'error' });
                         } else {
-                             let expectedString = formatWithDetail(option);
+                             let expectedString = formatWithDetail(option, detail);
                              if (generatedText.includes(expectedString)) {
                                  const newText = generatedText.replace(expectedString, '').replace(/\n\s*\n/g, '\n');
                                  setGeneratedText(newText);
@@ -686,7 +704,7 @@
                              if (!p) i = capitalize(i);
                              textLine = `${p}${i}${s}`;
                         } else {
-                            textLine = formatWithDetail(option);
+                            textLine = formatWithDetail(option, detail);
                         }
                         
                         const newText = generatedText.trim() + "\n" + textLine;
@@ -1131,7 +1149,7 @@
                             <div className="bg-indigo-600 p-1.5 rounded-lg"><Activity className="text-white h-5 w-5" /></div>
                             <div>
                                 <h1 className="text-lg font-bold text-slate-800 leading-tight">Psykiatrisk Journalværktøj</h1>
-                                <div className="flex items-center gap-1.5 text-xs text-slate-500"><span>Klinisk dokumentationsstøtte</span><span className="text-slate-300">•</span><span>v5.0 (Expert)</span></div>
+                                <div className="flex items-center gap-1.5 text-xs text-slate-500"><span>Klinisk dokumentationsstøtte</span><span className="text-slate-300">•</span><span>v6.0 (Precision)</span></div>
                             </div>
                         </div>
                         <div className="flex items-center gap-4">
