@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Psykiatrisk Journalværktøj - Anamnesis</title>
+    <title>Psykiatrisk Journalværktøj - Clean MSE</title>
     
     <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -62,12 +62,12 @@
         const DEP_CORE_IDS = ['dep_core_mood', 'dep_core_interest', 'dep_core_energy'];
         const DEP_ACC_IDS = ['dep_acc_conf', 'dep_acc_guilt', 'dep_acc_sui', 'dep_acc_conc', 'dep_acc_agit', 'dep_acc_sleep', 'dep_acc_app'];
         
+        // Bemærk: Uden vrangforestillinger, psykose og suic for et fuldstændig rent Objektivt Psykisk flow
         const PSYCH_NORMAL_IDS = [
             'orient_normal', 'appear_normal', 'att_coop', 'anx_none', 
             'c_form_norm', 'c_emo_good', 'contact_eye_norm', 'aff_adekvat', 
             'mood_neutral', 'motor_normal', 'think_form_norm', 'think_speed_norm', 
-            'think_content_norm', 'psychosis_none', 'delusion_none', 'cog_normal', 
-            'insight_good', 'sui_none'
+            'think_content_norm', 'cog_normal', 'insight_good'
         ];
         
         const SOMATIC_NORMAL_IDS = [
@@ -177,13 +177,18 @@
             { id: 'ap_risk_hist_sui', label: 'Tidl. selvmordsforsøg', category: 'Selvskade & Risiko', text: 'Tidligere selvmordsforsøg i anamnesen', hasInput: true, inputPlaceholder: 'Hvornår? Metode?' },
             { id: 'ap_risk_hist_sh', label: 'Tidl. selvskade', category: 'Selvskade & Risiko', text: 'Tidligere selvskadende adfærd i anamnesen', hasInput: true, inputPlaceholder: 'Type? Periode?' },
             
-            { id: 'ap_psych_no', label: 'Ingen psykose-tegn', category: 'Psykotiske Symptomer', text: 'Oplever ikke mærkelige eller ubehagelige tanker, sanser ting, som andre ikke gør, eller føler sig påvirket af noget udefrakommende.', isDefault: true, exclude: ['ap_psych_gen', 'ap_psych_audit', 'ap_psych_vis', 'ap_psych_para', 'ap_psych_thought', 'ap_psych_control'] },
-            { id: 'ap_psych_gen', label: 'Psykotiske oplevelser (Generelt)', category: 'Psykotiske Symptomer', text: 'Oplever mærkelige eller ubehagelige tanker og sanseoplevelser.', exclude: ['ap_psych_no'] },
-            { id: 'ap_psych_audit', label: 'Hørehallucinationer', category: 'Psykotiske Symptomer', text: 'Beskriver hørehallucinationer (stemmer/lyde).', exclude: ['ap_psych_no'], smartMerge: { prefix: 'Patienten beskriver ', item: 'hørehallucinationer', suffix: '.' } },
-            { id: 'ap_psych_vis', label: 'Synshallucinationer', category: 'Psykotiske Symptomer', text: 'Beskriver synshallucinationer.', exclude: ['ap_psych_no'], smartMerge: { prefix: 'Patienten beskriver ', item: 'synshallucinationer', suffix: '.' } },
-            { id: 'ap_psych_para', label: 'Paranoia/Forfølgelse', category: 'Psykotiske Symptomer', text: 'Føler sig forfulgt eller overvåget.', exclude: ['ap_psych_no'], smartMerge: { prefix: 'Patienten beskriver ', item: 'oplevelser af forfølgelse eller overvågning', suffix: '.' } },
-            { id: 'ap_psych_thought', label: 'Tankeinterferens', category: 'Psykotiske Symptomer', text: 'Oplever tankepåvirkning (indsættelse/fratagelse/hørlighed).', exclude: ['ap_psych_no'], smartMerge: { prefix: 'Patienten beskriver ', item: 'tankeinterferens (indsættelse/fratagelse/hørlighed)', suffix: '.' } },
-            { id: 'ap_psych_control', label: 'Styringsoplevelser', category: 'Psykotiske Symptomer', text: 'Føler sig styret af udefrakommende kræfter.', exclude: ['ap_psych_no'], smartMerge: { prefix: 'Patienten beskriver ', item: 'styringsoplevelser', suffix: '.' } },
+            // PSYKOTISKE SYMPTOMER - Flyttet og opgraderet til Anamnese (Aktuelt Psykisk)
+            { id: 'ap_hallu_none', label: 'Ingen hallucinationer', category: 'Perception (Hallucinationer)', text: 'Beskriver ingen hallucinationer.', isDefault: true, exclude: ['ap_hallu_audit', 'ap_hallu_visual', 'ap_hallu_olfact'] },
+            { id: 'ap_hallu_audit', label: 'Hørehallucinationer', category: 'Perception (Hallucinationer)', text: 'Beskriver hørehallucinationer', hasInput: true, exclude: ['ap_hallu_none'], smartMerge: { prefix: 'Patienten beskriver ', item: 'hørehallucinationer', suffix: ':' } },
+            { id: 'ap_hallu_visual', label: 'Synshallucinationer', category: 'Perception (Hallucinationer)', text: 'Beskriver synshallucinationer', hasInput: true, exclude: ['ap_hallu_none'], smartMerge: { prefix: 'Patienten beskriver ', item: 'synshallucinationer', suffix: ':' } },
+            { id: 'ap_hallu_olfact', label: 'Lugt/Smag', category: 'Perception (Hallucinationer)', text: 'Beskriver lugt- eller smagshallucinationer', hasInput: true, exclude: ['ap_hallu_none'], smartMerge: { prefix: 'Patienten beskriver ', item: 'lugt-/smagshallucinationer', suffix: ':' } },
+
+            { id: 'ap_delusion_none', label: 'Ingen vrangforestillinger', category: 'Tankeindhold (Vrangforestillinger)', text: 'Beskriver ingen vrangforestillinger.', isDefault: true, exclude: ['ap_delusion_para', 'ap_delusion_megalo', 'ap_delusion_depress', 'ap_delusion_hypo', 'ap_delusion_control'] },
+            { id: 'ap_delusion_para', label: 'Paranoia (Persekutorisk)', category: 'Tankeindhold (Vrangforestillinger)', text: 'Oplever paranoide/persekutoriske vrangforestillinger', hasInput: true, exclude: ['ap_delusion_none'], smartMerge: { prefix: 'Tankeindholdet er præget af ', item: 'paranoide (persekutoriske) vrangforestillinger', suffix: ':' } },
+            { id: 'ap_delusion_megalo', label: 'Storhed (Megaloman)', category: 'Tankeindhold (Vrangforestillinger)', text: 'Giver udtryk for megalomane vrangforestillinger', hasInput: true, exclude: ['ap_delusion_none'], smartMerge: { prefix: 'Tankeindholdet er præget af ', item: 'megalomane vrangforestillinger', suffix: ':' } },
+            { id: 'ap_delusion_depress', label: 'Depressive/Skyld', category: 'Tankeindhold (Vrangforestillinger)', text: 'Udviser depressive vrangforestillinger', hasInput: true, exclude: ['ap_delusion_none'], smartMerge: { prefix: 'Tankeindholdet er præget af ', item: 'depressive vrangforestillinger', suffix: ':' } },
+            { id: 'ap_delusion_hypo', label: 'Hypokondre', category: 'Tankeindhold (Vrangforestillinger)', text: 'Udviser hypokondre vrangforestillinger', hasInput: true, exclude: ['ap_delusion_none'], smartMerge: { prefix: 'Tankeindholdet er præget af ', item: 'hypokondre vrangforestillinger', suffix: ':' } },
+            { id: 'ap_delusion_control', label: 'Styring/Påvirkning', category: 'Tankeindhold (Vrangforestillinger)', text: 'Oplever tankepåvirknings- eller styringsoplevelser', hasInput: true, exclude: ['ap_delusion_none'], smartMerge: { prefix: 'Tankeindholdet er præget af ', item: 'tankepåvirknings-/styringsoplevelser', suffix: ':' } },
             
             { id: 'ap_mot_yes', label: 'Motiveret', category: 'Motivation & Ønsker', text: 'Er motiveret for behandling.', isDefault: true, exclude: ['ap_mot_no'] },
             { id: 'ap_mot_no', label: 'Ikke motiveret', category: 'Motivation & Ønsker', text: 'Er ikke motiveret for behandling.', exclude: ['ap_mot_yes'] },
@@ -192,6 +197,7 @@
             { id: 'ap_plan', label: 'Behandlingsplan (Fritekst)', category: 'Motivation & Ønsker', text: 'Patienten ønsker at følgende indgår i behandlingsplanen:', hasInput: true, inputPlaceholder: 'Ønsker til plan...' },
         ];
 
+        // RENT OBJEKTIVT PSYKISK (Klassisk MSE)
         const PSYCH_OPTIONS = [
             { id: 'orient_normal', label: 'Fuldt orienteret', category: 'Bevidsthed', text: 'Vågen, klar og orienteret i tid, sted og egne data.', isDefault: true, exclude: ['orient_confused', 'orient_delir', 'orient_sløv', 'orient_sopor', 'orient_cloud'] },
             { id: 'orient_sløv', label: 'Somnolent/Sløv', category: 'Bevidsthed', text: 'Somnolent og sløv i kontakten.', exclude: ['orient_normal', 'orient_confused', 'orient_delir', 'orient_sopor', 'orient_cloud'] },
@@ -266,16 +272,6 @@
             { id: 'think_content_norm', label: 'Normalt indhold', category: 'Tænkning (Indhold)', text: 'Indholdsmæssigt relevant uden bizariteter eller neologismer.', isDefault: true, exclude: ['think_ruminate', 'think_quarrel'] },
             { id: 'think_ruminate', label: 'Ruminerende', category: 'Tænkning (Indhold)', text: 'Tankeindholdet er præget af depressive grublerier (ruminationer).', exclude: ['think_content_norm'], smartMerge: { prefix: 'Tankeindholdet er præget af ', item: 'depressive grublerier (ruminationer)', suffix: '.' } },
             { id: 'think_quarrel', label: 'Kværulerende', category: 'Tænkning (Indhold)', text: 'Tankeindholdet er præget af kværulans.', exclude: ['think_content_norm'], smartMerge: { prefix: 'Tankeindholdet er præget af ', item: 'kværulans', suffix: '.' } },
-            { id: 'psychosis_none', label: 'Ingen hallucinationer', category: 'Perception (Hallucinationer)', text: 'Ingen tegn på produktive psykotiske symptomer, herunder ingen hallucinationer.', isDefault: true, exclude: ['hallu_audit', 'hallu_visual', 'hallu_olfact'] },
-            { id: 'hallu_audit', label: 'Hørehallucinationer', category: 'Perception (Hallucinationer)', text: 'Der er evidens for hørehallucinationer (stemmer/lyde).', exclude: ['psychosis_none'], smartMerge: { prefix: 'Der er evidens for ', item: 'hørehallucinationer', suffix: '.' } },
-            { id: 'hallu_visual', label: 'Synshallucinationer', category: 'Perception (Hallucinationer)', text: 'Angiver synshallucinationer.', exclude: ['psychosis_none'], smartMerge: { prefix: 'Der er evidens for ', item: 'synshallucinationer', suffix: '.' } },
-            { id: 'hallu_olfact', label: 'Lugt/Smag', category: 'Perception (Hallucinationer)', text: 'Angiver lugt- eller smagshallucinationer.', exclude: ['psychosis_none'], smartMerge: { prefix: 'Der er evidens for ', item: 'lugt-/smagshallucinationer', suffix: '.' } },
-            { id: 'delusion_none', label: 'Ingen vrangforestillinger', category: 'Indhold (Vrangforestillinger)', text: 'Ingen vrangforestillinger.', isDefault: true, exclude: ['delusion_para', 'delusion_megalo', 'delusion_depress', 'delusion_bizarre', 'delusion_control', 'delusion_hypo'] },
-            { id: 'delusion_para', label: 'Paranoia (Persekutorisk)', category: 'Indhold (Vrangforestillinger)', text: 'Præget af paranoide (persekutoriske) vrangforestillinger.', exclude: ['delusion_none'], smartMerge: { prefix: 'Tankeindholdet er præget af ', item: 'paranoide (persekutoriske) vrangforestillinger', suffix: '.' } },
-            { id: 'delusion_megalo', label: 'Storhed (Megaloman)', category: 'Indhold (Vrangforestillinger)', text: 'Giver udtryk for megalomane vrangforestillinger (storhedsvanvid).', exclude: ['delusion_none'], smartMerge: { prefix: 'Tankeindholdet er præget af ', item: 'megalomane vrangforestillinger', suffix: '.' } },
-            { id: 'delusion_depress', label: 'Depressive/Skyld', category: 'Indhold (Vrangforestillinger)', text: 'Udviser depressive vrangforestillinger (ruin, skyld, fortabele).', exclude: ['delusion_none'], smartMerge: { prefix: 'Tankeindholdet er præget af ', item: 'depressive vrangforestillinger', suffix: '.' } },
-            { id: 'delusion_hypo', label: 'Hypokondre', category: 'Indhold (Vrangforestillinger)', text: 'Udviser hypokondre vrangforestillinger.', exclude: ['delusion_none'], smartMerge: { prefix: 'Tankeindholdet er præget af ', item: 'hypokondre vrangforestillinger', suffix: '.' } },
-            { id: 'delusion_control', label: 'Styring/Påvirkning', category: 'Indhold (Vrangforestillinger)', text: 'Oplever tankepåvirknings- eller styringsoplevelser.', exclude: ['delusion_none'], smartMerge: { prefix: 'Tankeindholdet er præget af ', item: 'tankepåvirknings-/styringsoplevelser', suffix: '.' } },
             { id: 'cog_normal', label: 'Normal kognition', category: 'Kognition & Hukommelse', text: 'Kognitivt upåfaldende i samtalen. Intet tegn på hukommelsessvigt.', isDefault: true, exclude: ['cog_imp', 'cog_memory', 'cog_conc', 'cog_confab', 'cog_amnesia'] },
             { id: 'cog_imp', label: 'Kognitivt svækket', category: 'Kognition & Hukommelse', text: 'Virker generelt kognitivt svækket.', exclude: ['cog_normal'], smartMerge: { prefix: 'Der er tegn på ', item: 'generel kognitiv svækkelse', suffix: '.' } },
             { id: 'cog_memory', label: 'Hukommelsesbesvær', category: 'Kognition & Hukommelse', text: 'Udviser tegn på hukommelsesbesvær (indprentning/langtid).', exclude: ['cog_normal'], smartMerge: { prefix: 'Der er tegn på ', item: 'hukommelsesbesvær', suffix: '.' } },
@@ -285,12 +281,6 @@
             { id: 'insight_good', label: 'God indsigt', category: 'Indsigt', text: 'Har relevant og god sygdomsindsigt.', isDefault: true, exclude: ['insight_none', 'insight_part'] },
             { id: 'insight_part', label: 'Partiel indsigt', category: 'Indsigt', text: 'Har partiel sygdomsindsigt, erkender symptomer men ikke behandlingsbehov.', exclude: ['insight_good', 'insight_none'] },
             { id: 'insight_none', label: 'Ingen indsigt', category: 'Indsigt', text: 'Ingen sygdomsindsigt.', exclude: ['insight_good', 'insight_part'] },
-            { id: 'sui_none', label: 'Ingen suicidalitet', category: 'Risikovurdering (Suic)', text: 'Ingen aktuelle tanker om død eller selvmord. Ingen selvmordsplaner eller -intentioner.', isDefault: true, exclude: ['sui_passive', 'sui_active_thoughts', 'sui_plans', 'sui_intent'] },
-            { id: 'sui_passive', label: 'Passive dødstanker', category: 'Risikovurdering (Suic)', text: 'Angiver passive dødstanker/livsled ("kunne være rart ikke at vågne"), men ingen aktuelle planer eller intentioner.', exclude: ['sui_none', 'sui_active_thoughts'] },
-            { id: 'sui_active_thoughts', label: 'Aktive selvmordstanker', category: 'Risikovurdering (Suic)', text: 'Tilkendegiver aktive selvmordstanker.', exclude: ['sui_none', 'sui_passive'] },
-            { id: 'sui_plans', label: 'Konkrete planer', category: 'Risikovurdering (Suic)', text: 'Har udarbejdet konkrete planer for selvmord.', exclude: ['sui_none'] },
-            { id: 'sui_intent', label: 'Aktuel intention', category: 'Risikovurdering (Suic)', text: 'Tilkendegiver intention om at handle på tankerne.', exclude: ['sui_none'] },
-            { id: 'sui_prev', label: 'Tidl. forsøg', category: 'Risikovurdering (Suic)', text: 'Tidligere selvmordsforsøg i anamnesen.', summaryLabel: 'Tidl. suicidalforsøg' },
         ];
 
         const SOMATIC_ACT_OPTIONS = [
@@ -521,8 +511,13 @@
                         finalSentence = capitalize(`${effectivePrefix}${formattedItem} (${cleanedDetail})${suffix}`);
                     } else {
                         let cleanS = suffix.trim();
-                        if (!cleanS.endsWith('.')) cleanS += '.';
-                        finalSentence = capitalize(`${effectivePrefix}${formattedItem}${cleanS} ${capitalize(cleanedDetail)}.`);
+                        // Tillad at suffix kan være f.eks. ':' uden at der klistres et punktum lige bagefter.
+                        if (cleanS === ':' || cleanS.endsWith(':')) {
+                             finalSentence = capitalize(`${effectivePrefix}${formattedItem}${cleanS} ${capitalize(cleanedDetail)}.`);
+                        } else {
+                             if (!cleanS.endsWith('.')) cleanS += '.';
+                             finalSentence = capitalize(`${effectivePrefix}${formattedItem}${cleanS} ${capitalize(cleanedDetail)}.`);
+                        }
                     }
 
                     lines.push(finalSentence);
@@ -549,8 +544,8 @@
 
             const generateTextContent = (section, ids, details, contactReason, timeline, diets, uniform, summaryMode) => {
                 const allSections = [
-                    { id: 'psych_actual', title: 'AKTUELT PSYKISK', options: ACTUAL_PSYCH_OPTIONS },
-                    { id: 'psych', title: 'OBJEKTIVT PSYKISK', options: PSYCH_OPTIONS },
+                    { id: 'psych_actual', title: 'AKTUELT PSYKISK (ANAMNESE)', options: ACTUAL_PSYCH_OPTIONS },
+                    { id: 'psych', title: 'OBJEKTIVT PSYKISK (MSE)', options: PSYCH_OPTIONS },
                     { id: 'somatic_act', title: 'AKTUELT SOMATISK', options: SOMATIC_ACT_OPTIONS },
                     { id: 'somatic_obj', title: 'SOMATISK VURDERING', options: SOMATIC_OBJ_OPTIONS },
                     { id: 'diagnosis_anorexia', title: 'ANOREKSIA NERVOSA (F50.0)', options: ANOREXIA_OPTIONS }
@@ -698,8 +693,12 @@
                                      textLine = capitalize(`${p}${i} (${detail.trim()})${s}`);
                                  } else {
                                      let cleanS = s.trim();
-                                     if (!cleanS.endsWith('.')) cleanS += '.';
-                                     textLine = capitalize(`${p}${i}${cleanS} ${capitalize(detail.trim())}.`);
+                                     if (cleanS === ':' || cleanS.endsWith(':')) {
+                                          textLine = capitalize(`${p}${i}${cleanS} ${capitalize(detail.trim())}.`);
+                                     } else {
+                                          if (!cleanS.endsWith('.')) cleanS += '.';
+                                          textLine = capitalize(`${p}${i}${cleanS} ${capitalize(detail.trim())}.`);
+                                     }
                                  }
                              } else {
                                  textLine = capitalize(`${p}${i}${s}`);
@@ -1171,7 +1170,7 @@
                             <div className="bg-indigo-600 p-1.5 rounded-lg"><Activity className="text-white h-5 w-5" /></div>
                             <div>
                                 <h1 className="text-lg font-bold text-slate-800 leading-tight">Psykiatrisk Journalværktøj</h1>
-                                <div className="flex items-center gap-1.5 text-xs text-slate-500"><span>Klinisk dokumentationsstøtte</span><span className="text-slate-300">•</span><span>v8.0 (Anamnesis Flow)</span></div>
+                                <div className="flex items-center gap-1.5 text-xs text-slate-500"><span>Klinisk dokumentationsstøtte</span><span className="text-slate-300">•</span><span>v9.0 (Clean MSE Flow)</span></div>
                             </div>
                         </div>
                         <div className="flex items-center gap-4">
@@ -1219,7 +1218,7 @@
                                     <div>
                                         <h2 className="text-xl font-bold text-slate-800">
                                             {activeSection === 'psych_actual' && 'Aktuelt Psykisk (Anamnese)'}
-                                            {activeSection === 'psych' && 'Klinisk vurdering (Psykisk)'}
+                                            {activeSection === 'psych' && 'Klinisk vurdering (Objektivt Psykisk)'}
                                             {activeSection === 'somatic_obj' && 'Somatisk Vurdering'}
                                             {activeSection === 'somatic_act' && 'Somatisk Anamnese'}
                                             {activeSection === 'diagnosis_anorexia' && 'Anoreksia Nervosa (F50.0)'}
