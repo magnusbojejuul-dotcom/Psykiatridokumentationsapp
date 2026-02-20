@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Psykiatrisk Journalværktøj - Clean MSE</title>
+    <title>Psykiatrisk Journalværktøj - Klinisk Opstrammet</title>
     
     <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -62,7 +62,6 @@
         const DEP_CORE_IDS = ['dep_core_mood', 'dep_core_interest', 'dep_core_energy'];
         const DEP_ACC_IDS = ['dep_acc_conf', 'dep_acc_guilt', 'dep_acc_sui', 'dep_acc_conc', 'dep_acc_agit', 'dep_acc_sleep', 'dep_acc_app'];
         
-        // Bemærk: Uden vrangforestillinger, psykose og suic for et fuldstændig rent Objektivt Psykisk flow
         const PSYCH_NORMAL_IDS = [
             'orient_normal', 'appear_normal', 'att_coop', 'anx_none', 
             'c_form_norm', 'c_emo_good', 'contact_eye_norm', 'aff_adekvat', 
@@ -74,6 +73,10 @@
             'gen_upavirket', 'cp_normal', 'abd_normal', 'cn_normal', 
             'motor_sys_normal', 'reflex_normal', 'coord_normal', 'gait_normal', 
             'eps_none', 'skin_normal'
+        ];
+
+        const SOMATIC_ACT_NORMAL_IDS = [
+            'act_cns_ok', 'act_cp_ok', 'act_gi_ok', 'act_uro_ok', 'act_musc_ok', 'act_sleep_ok', 'act_appetite_ok'
         ];
 
         // --- OPTION ARRAYS ---
@@ -94,9 +97,7 @@
         ];
 
         const ACTUAL_PSYCH_OPTIONS = [
-            { id: 'ap_reason', label: 'Søger hjælp fordi (Fritekst)', category: 'Henvendelse & Problem', text: 'Patienten henvender sig grundet', hasInput: true, inputPlaceholder: 'Årsag til henvendelse...' },
-            { id: 'ap_hard', label: 'Svært at håndtere (Fritekst)', category: 'Henvendelse & Problem', text: 'Aktuelt vurderes det sværeste at være', hasInput: true, inputPlaceholder: 'Hvad er svært at håndtere?' },
-            { id: 'ap_main', label: 'Fylder mest (Fritekst)', category: 'Henvendelse & Problem', text: 'Det primære kliniske problem angives at være', hasInput: true, inputPlaceholder: 'Hvad fylder mest?' },
+            { id: 'ap_reason', label: 'Søger hjælp fordi (Fritekst)', category: 'Henvendelse & Problem', text: 'Patienten henvender sig grundet', hasInput: true, inputPlaceholder: 'Primære problematik...' },
             
             { id: 'ap_prob_depress', label: 'Depressive symptomer', category: 'Henvendelse & Problem', text: 'Depressive symptomer.', smartMerge: { prefix: 'Henvendelsen drejer sig primært om ', item: 'depressive symptomer', suffix: '.' } },
             { id: 'ap_prob_anxiety', label: 'Angst/Uro', category: 'Henvendelse & Problem', text: 'Angst og uro.', smartMerge: { prefix: 'Henvendelsen drejer sig primært om ', item: 'angst og uro', suffix: '.' } },
@@ -115,8 +116,6 @@
             { id: 'ap_worse', label: 'Tilstand forværret', category: 'Udvikling & Faktorer', text: 'Tilstanden er blevet værre.', exclude: ['ap_unchanged', 'ap_better'], smartMerge: { prefix: 'Aktuelt er tilstanden ', item: 'forværret', suffix: '.' } },
             { id: 'ap_unchanged', label: 'Tilstand uændret', category: 'Udvikling & Faktorer', text: 'Tilstanden er uændret.', isDefault: true, exclude: ['ap_worse', 'ap_better'], smartMerge: { prefix: 'Aktuelt er tilstanden ', item: 'uændret', suffix: '.' } },
             { id: 'ap_better', label: 'Tilstand bedret', category: 'Udvikling & Faktorer', text: 'Tilstanden er blevet bedre.', exclude: ['ap_worse', 'ap_unchanged'], smartMerge: { prefix: 'Aktuelt er tilstanden ', item: 'bedret', suffix: '.' } },
-            { id: 'ap_new_symp_yes', label: 'Nye symptomer', category: 'Udvikling & Faktorer', text: 'Der er kommet nye symptomer til.', exclude: ['ap_new_symp_no'], smartMerge: { prefix: 'Der beskrives ', item: 'tilkomne nye symptomer', suffix: '.' } },
-            { id: 'ap_new_symp_no', label: 'Ingen nye symptomer', category: 'Udvikling & Faktorer', text: 'Ingen nye symptomer.', isDefault: true, exclude: ['ap_new_symp_yes'] },
             { id: 'ap_modifying', label: 'Modificeres af (Fritekst)', category: 'Udvikling & Faktorer', text: 'Symptomerne angives at forværres/bedres af', hasInput: true, inputPlaceholder: 'Hvad påvirker tilstanden?' },
             
             { id: 'ap_soc_unspec', label: 'Socialt uafklaret', category: 'Sociale forhold', text: 'Sociale forhold ikke nærmere belyst.', isDefault: true, exclude: ['ap_soc_alone', 'ap_soc_cohab', 'ap_soc_kids', 'ap_soc_work', 'ap_soc_sick', 'ap_soc_pension', 'ap_soc_student'] },
@@ -133,15 +132,6 @@
             { id: 'ap_func_work', label: 'Arbejde', category: 'Funktionsniveau', text: 'Arbejdet er påvirket.', exclude: ['ap_func_unchanged'], smartMerge: { prefix: 'Det daglige funktionsniveau er påvirket i forhold til ', item: 'arbejde', suffix: '.' } },
             { id: 'ap_func_social', label: 'Socialt/Fritid', category: 'Funktionsniveau', text: 'Sociale relationer/fritid er påvirket.', exclude: ['ap_func_unchanged'], smartMerge: { prefix: 'Det daglige funktionsniveau er påvirket i forhold til ', item: 'sociale relationer', suffix: '.' } },
             { id: 'ap_func_adl', label: 'ADL (Daglige gøremål)', category: 'Funktionsniveau', text: 'ADL er påvirket.', exclude: ['ap_func_unchanged'], smartMerge: { prefix: 'Det daglige funktionsniveau er påvirket i forhold til ', item: 'daglige gøremål (ADL)', suffix: '.' } },
-            
-            { id: 'ap_sleep_good', label: 'Søvn god', category: 'Subjektive symptomer', text: 'Søvnen har været god.', isDefault: true, exclude: ['ap_sleep_unrest', 'ap_sleep_dist'] },
-            { id: 'ap_sleep_unrest', label: 'Søvn urolig', category: 'Subjektive symptomer', text: 'Søvnen har været urolig.', exclude: ['ap_sleep_good'], smartMerge: { prefix: 'Subjektivt beskrives søvnen som ', item: 'urolig', suffix: '.' } },
-            { id: 'ap_sleep_dist', label: 'Søvn forstyrret', category: 'Subjektive symptomer', text: 'Søvnen har været forstyrret.', exclude: ['ap_sleep_good'], smartMerge: { prefix: 'Subjektivt beskrives søvnen som ', item: 'forstyrret', suffix: '.' } },
-            { id: 'ap_energy_high', label: 'Energi høj', category: 'Subjektive symptomer', text: 'Energiniveauet føles højt.', exclude: ['ap_energy_norm', 'ap_energy_low'] },
-            { id: 'ap_energy_norm', label: 'Energi uændret', category: 'Subjektive symptomer', text: 'Energiniveauet føles uændret.', isDefault: true, exclude: ['ap_energy_high', 'ap_energy_low'] },
-            { id: 'ap_energy_low', label: 'Energi lav', category: 'Subjektive symptomer', text: 'Energiniveauet føles lavt.', exclude: ['ap_energy_high', 'ap_energy_norm'] },
-            { id: 'ap_cog_yes', label: 'Kognitive problemer', category: 'Subjektive symptomer', text: 'Pt. har haft problemer med at huske, holde overblik eller koncentrere sig.', exclude: ['ap_cog_no'] },
-            { id: 'ap_cog_no', label: 'Ingen kognitive problemer', category: 'Subjektive symptomer', text: 'Ingen subjektive kognitive klager.', isDefault: true, exclude: ['ap_cog_yes'] },
             
             { id: 'dep_none', label: 'Ingen depr. symptomer', category: 'Depression (ICD-10 Screening)', text: 'Ingen tegn på depressive symptomer.', isDefault: true, exclude: [...DEP_CORE_IDS, ...DEP_ACC_IDS] },
             { id: 'dep_core_mood', label: 'Nedtrykthed', category: 'Depression (ICD-10 Screening)', text: 'Nedtrykthed.', exclude: ['dep_none'], smartMerge: { prefix: 'Kernesymptomer: ', item: 'nedtrykthed', suffix: '.' } },
@@ -162,14 +152,6 @@
             { id: 'ap_subst_benzo', label: 'Benzodiazepiner', category: 'Rusmidler', text: 'Angiver forbrug af benzodiazepiner.', exclude: ['ap_subst_none'], smartMerge: { prefix: 'Der angives forbrug af ', item: 'benzodiazepiner', suffix: '.' } },
             { id: 'ap_subst_opioid', label: 'Opioider', category: 'Rusmidler', text: 'Angiver forbrug af opioider.', exclude: ['ap_subst_none'], smartMerge: { prefix: 'Der angives forbrug af ', item: 'opioider', suffix: '.' } },
             
-            { id: 'ap_distress_more', label: 'Mere forpint', category: 'Symptomtryk & Mestring', text: 'Føler sig mere forpint.', exclude: ['ap_distress_less', 'ap_distress_same'] },
-            { id: 'ap_distress_same', label: 'Uændret forpint', category: 'Symptomtryk & Mestring', text: 'Føler sig uændret forpint.', isDefault: true, exclude: ['ap_distress_less', 'ap_distress_more'] },
-            { id: 'ap_distress_less', label: 'Mindre forpint', category: 'Symptomtryk & Mestring', text: 'Føler sig mindre forpint.', exclude: ['ap_distress_more', 'ap_distress_same'] },
-            { id: 'ap_ctrl_good', label: 'God kontrol', category: 'Symptomtryk & Mestring', text: 'Har god følelse af kontrol over symptomerne.', isDefault: true, exclude: ['ap_ctrl_some', 'ap_ctrl_little', 'ap_ctrl_none'] },
-            { id: 'ap_ctrl_some', label: 'Nogen kontrol', category: 'Symptomtryk & Mestring', text: 'Har nogen følelse af kontrol over symptomerne.', exclude: ['ap_ctrl_good', 'ap_ctrl_little', 'ap_ctrl_none'] },
-            { id: 'ap_ctrl_little', label: 'Lidt kontrol', category: 'Symptomtryk & Mestring', text: 'Har lidt følelse af kontrol over symptomerne.', exclude: ['ap_ctrl_good', 'ap_ctrl_some', 'ap_ctrl_none'] },
-            { id: 'ap_ctrl_none', label: 'Ingen kontrol', category: 'Symptomtryk & Mestring', text: 'Har ingen følelse af kontrol over symptomerne.', exclude: ['ap_ctrl_good', 'ap_ctrl_some', 'ap_ctrl_little'] },
-            
             { id: 'ap_risk_none', label: 'Ingen selvskade/tanker', category: 'Selvskade & Risiko', text: 'Benægter aktuelle selvmordstanker, planer eller intentioner. Benægter ligeledes aktuel selvskade.', isDefault: true, exclude: ['ap_risk_thoughts', 'ap_risk_plans', 'ap_risk_sh_curr'] },
             { id: 'ap_risk_thoughts', label: 'Selvmordstanker', category: 'Selvskade & Risiko', text: 'Tilkendegiver selvmordstanker', hasInput: true, inputPlaceholder: 'Karakter/Hyppighed', exclude: ['ap_risk_none'] },
             { id: 'ap_risk_plans', label: 'Konkrete planer', category: 'Selvskade & Risiko', text: 'Har konkrete planer om selvmord', hasInput: true, inputPlaceholder: 'Beskriv planer', exclude: ['ap_risk_none'] },
@@ -177,7 +159,6 @@
             { id: 'ap_risk_hist_sui', label: 'Tidl. selvmordsforsøg', category: 'Selvskade & Risiko', text: 'Tidligere selvmordsforsøg i anamnesen', hasInput: true, inputPlaceholder: 'Hvornår? Metode?' },
             { id: 'ap_risk_hist_sh', label: 'Tidl. selvskade', category: 'Selvskade & Risiko', text: 'Tidligere selvskadende adfærd i anamnesen', hasInput: true, inputPlaceholder: 'Type? Periode?' },
             
-            // PSYKOTISKE SYMPTOMER - Flyttet og opgraderet til Anamnese (Aktuelt Psykisk)
             { id: 'ap_hallu_none', label: 'Ingen hallucinationer', category: 'Perception (Hallucinationer)', text: 'Beskriver ingen hallucinationer.', isDefault: true, exclude: ['ap_hallu_audit', 'ap_hallu_visual', 'ap_hallu_olfact'] },
             { id: 'ap_hallu_audit', label: 'Hørehallucinationer', category: 'Perception (Hallucinationer)', text: 'Beskriver hørehallucinationer', hasInput: true, exclude: ['ap_hallu_none'], smartMerge: { prefix: 'Patienten beskriver ', item: 'hørehallucinationer', suffix: ':' } },
             { id: 'ap_hallu_visual', label: 'Synshallucinationer', category: 'Perception (Hallucinationer)', text: 'Beskriver synshallucinationer', hasInput: true, exclude: ['ap_hallu_none'], smartMerge: { prefix: 'Patienten beskriver ', item: 'synshallucinationer', suffix: ':' } },
@@ -192,9 +173,7 @@
             
             { id: 'ap_mot_yes', label: 'Motiveret', category: 'Motivation & Ønsker', text: 'Er motiveret for behandling.', isDefault: true, exclude: ['ap_mot_no'] },
             { id: 'ap_mot_no', label: 'Ikke motiveret', category: 'Motivation & Ønsker', text: 'Er ikke motiveret for behandling.', exclude: ['ap_mot_yes'] },
-            { id: 'ap_help_yes', label: 'Ønsker hjælp (Fritekst)', category: 'Motivation & Ønsker', text: 'Ønsker specifik hjælp til', hasInput: true, inputPlaceholder: 'Hjælp til...' },
-            { id: 'ap_help_no', label: 'Afviser hjælp (Fritekst)', category: 'Motivation & Ønsker', text: 'Afviser tilbud om', hasInput: true, inputPlaceholder: 'Afviser hjælp til...' },
-            { id: 'ap_plan', label: 'Behandlingsplan (Fritekst)', category: 'Motivation & Ønsker', text: 'Patienten ønsker at følgende indgår i behandlingsplanen:', hasInput: true, inputPlaceholder: 'Ønsker til plan...' },
+            { id: 'ap_plan', label: 'Ønsker til plan (Fritekst)', category: 'Motivation & Ønsker', text: 'Patienten ønsker at følgende indgår i behandlingsplanen:', hasInput: true, inputPlaceholder: 'Hjælp til/Ønsker for forløbet...' },
         ];
 
         // RENT OBJEKTIVT PSYKISK (Klassisk MSE)
@@ -420,12 +399,13 @@
 
             const formatWithDetail = (opt, detail) => {
                 let base = opt.text.trim();
-                
-                if (!detail || detail.trim() === '') {
+                const d = detail ? detail.trim() : '';
+
+                if (d === '') {
+                    // Hvis ingen detalje er givet, ryd op i hængende kolon
+                    if (base.endsWith(':')) return base.slice(0, -1) + '.';
                     return base + (base.match(/[.:?!]$/) ? '' : '.');
                 }
-                
-                let d = detail.trim();
                 
                 if (opt.detailInParens) {
                     let cleanBase = base.replace(/\.$/, ''); 
@@ -437,12 +417,12 @@
                 }
                 
                 if (base.match(/[:?!]$/)) {
-                    d = d.charAt(0).toUpperCase() + d.slice(1);
-                    return `${base} ${d}${d.endsWith('.') ? '' : '.'}`;
+                    const formattedDetail = d.charAt(0).toUpperCase() + d.slice(1);
+                    return `${base} ${formattedDetail}${formattedDetail.endsWith('.') ? '' : '.'}`;
                 }
                 
-                d = d.charAt(0).toUpperCase() + d.slice(1);
-                return `${base} ${d}${d.endsWith('.') ? '' : '.'}`;
+                const formattedDetail = d.charAt(0).toUpperCase() + d.slice(1);
+                return `${base} ${formattedDetail}${formattedDetail.endsWith('.') ? '' : '.'}`;
             };
 
             const calculateDepressionSeverity = (selectedSet) => {
@@ -489,7 +469,11 @@
                     const suffix = opts[0].smartMerge.suffix || '.';
                     const mergedItems = formatList(items);
 
-                    lines.push(capitalize(`${prefix}${mergedItems}${suffix}`));
+                    // Fejlsikring mod tomme suffixer eller kolon-afslutning for samlede items uden input
+                    let safeSuffix = suffix.trim();
+                    if (safeSuffix === ':' || safeSuffix.endsWith(':')) safeSuffix = safeSuffix.replace(/:$/, '.');
+                    
+                    lines.push(capitalize(`${prefix}${mergedItems}${safeSuffix}`));
                     prefixUsage.add(prefix.trim()); 
                 });
 
@@ -497,7 +481,7 @@
                     const prefix = opt.smartMerge.prefix || '';
                     const item = opt.smartMerge.item;
                     const suffix = opt.smartMerge.suffix || '.';
-                    const cleanedDetail = detail.trim();
+                    const cleanedDetail = detail ? detail.trim() : '';
 
                     let finalSentence = "";
                     const cleanPrefix = prefix.trim();
@@ -507,16 +491,22 @@
                     let effectivePrefix = shouldDropPrefix ? "" : prefix;
                     let formattedItem = shouldDropPrefix ? capitalize(item) : item;
 
-                    if (opt.detailInParens) {
-                        finalSentence = capitalize(`${effectivePrefix}${formattedItem} (${cleanedDetail})${suffix}`);
+                    if (cleanedDetail === '') {
+                        let fallbackS = suffix.trim();
+                        if (fallbackS === ':' || fallbackS.endsWith(':')) fallbackS = fallbackS.replace(/:$/, '.');
+                        if (!fallbackS.endsWith('.')) fallbackS += '.';
+                        finalSentence = capitalize(`${effectivePrefix}${formattedItem}${fallbackS}`);
                     } else {
-                        let cleanS = suffix.trim();
-                        // Tillad at suffix kan være f.eks. ':' uden at der klistres et punktum lige bagefter.
-                        if (cleanS === ':' || cleanS.endsWith(':')) {
-                             finalSentence = capitalize(`${effectivePrefix}${formattedItem}${cleanS} ${capitalize(cleanedDetail)}.`);
+                        if (opt.detailInParens) {
+                            finalSentence = capitalize(`${effectivePrefix}${formattedItem} (${cleanedDetail})${suffix}`);
                         } else {
-                             if (!cleanS.endsWith('.')) cleanS += '.';
-                             finalSentence = capitalize(`${effectivePrefix}${formattedItem}${cleanS} ${capitalize(cleanedDetail)}.`);
+                            let cleanS = suffix.trim();
+                            if (cleanS === ':' || cleanS.endsWith(':')) {
+                                 finalSentence = capitalize(`${effectivePrefix}${formattedItem}${cleanS} ${capitalize(cleanedDetail)}.`);
+                            } else {
+                                 if (!cleanS.endsWith('.')) cleanS += '.';
+                                 finalSentence = capitalize(`${effectivePrefix}${formattedItem}${cleanS} ${capitalize(cleanedDetail)}.`);
+                            }
                         }
                     }
 
@@ -614,7 +604,7 @@
                         } else {
                             sectionLines.push("Kostanamnese (eksempler fra sidste 14 dage):");
                             diets.forEach(day => {
-                                sectionLines.push(`${day.label}:`);
+                                sectionLines.push(`${day.label || 'Uden navn'}:`);
                                 if (day.meals.morgen) sectionLines.push(`- Morgen: ${day.meals.morgen}`);
                                 if (day.meals.formiddag) sectionLines.push(`- Før frokost: ${day.meals.formiddag}`);
                                 if (day.meals.frokost) sectionLines.push(`- Frokost: ${day.meals.frokost}`);
@@ -660,7 +650,7 @@
             }, [selectedIds, activeSection, showSummary, optionDetails, contactReasonText, timelineText, dietDays, isUniformDiet]);
 
             const changeSection = (newSection) => {
-                setManualEditMode(false);
+                if (manualEditMode) setManualEditMode(false);
                 setActiveSection(newSection);
             };
             
@@ -670,54 +660,6 @@
             };
 
             const toggleOption = (option) => {
-                if (manualEditMode) {
-                    const isSelected = selectedIds.has(option.id);
-                    const nextIds = new Set(selectedIds);
-
-                    if (isSelected) {
-                        nextIds.delete(option.id);
-                        setNotification({ message: 'Tekst skal slettes manuelt i fritekst-tilstand', type: 'error' });
-                    } else {
-                        nextIds.add(option.id);
-                        option.exclude?.forEach(id => nextIds.delete(id));
-
-                        let textLine = "";
-                        const detail = optionDetails[option.id];
-                        
-                        if (option.smartMerge) {
-                             let p = option.smartMerge.prefix || '';
-                             let s = option.smartMerge.suffix || '.';
-                             let i = option.smartMerge.item;
-                             if (detail && detail.trim() !== '') {
-                                 if (option.detailInParens) {
-                                     textLine = capitalize(`${p}${i} (${detail.trim()})${s}`);
-                                 } else {
-                                     let cleanS = s.trim();
-                                     if (cleanS === ':' || cleanS.endsWith(':')) {
-                                          textLine = capitalize(`${p}${i}${cleanS} ${capitalize(detail.trim())}.`);
-                                     } else {
-                                          if (!cleanS.endsWith('.')) cleanS += '.';
-                                          textLine = capitalize(`${p}${i}${cleanS} ${capitalize(detail.trim())}.`);
-                                     }
-                                 }
-                             } else {
-                                 textLine = capitalize(`${p}${i}${s}`);
-                             }
-                        } else {
-                            textLine = formatWithDetail(option, detail);
-                        }
-                        
-                        const newText = generatedText.trim() + "\n" + textLine;
-                        setGeneratedText(newText);
-                        
-                        setNotification({ message: 'Tilføjet i bunden (Manuel tilstand)', type: 'success' });
-                    }
-                    
-                    setSelectedIds(nextIds);
-                    setTimeout(() => setNotification(null), 2000);
-                    return;
-                }
-
                 const isSelected = selectedIds.has(option.id);
                 const newSelection = new Set(selectedIds);
                 
@@ -728,6 +670,11 @@
                     option.exclude?.forEach(exId => newSelection.delete(exId));
                 }
                 setSelectedIds(newSelection);
+                
+                if (manualEditMode) {
+                    setNotification({ message: 'Valg gemt. Tekst opdateres ikke i manuel tilstand.', type: 'error' });
+                    setTimeout(() => setNotification(null), 2500);
+                }
             };
 
             const setNormalStatus = () => {
@@ -740,6 +687,9 @@
                 } else if (activeSection === 'somatic_obj') {
                     sectionOptions = SOMATIC_OBJ_OPTIONS;
                     normalIds = SOMATIC_NORMAL_IDS;
+                } else if (activeSection === 'somatic_act') {
+                    sectionOptions = SOMATIC_ACT_OPTIONS;
+                    normalIds = SOMATIC_ACT_NORMAL_IDS;
                 } else {
                     return; 
                 }
@@ -748,19 +698,13 @@
                 sectionOptions.forEach(opt => newSet.delete(opt.id));
                 normalIds.forEach(id => newSet.add(id));
                 
+                setSelectedIds(newSet);
+                
                 if (manualEditMode) {
-                    const normalTexts = sectionOptions
-                        .filter(opt => normalIds.includes(opt.id))
-                        .map(opt => opt.text)
-                        .join(' ');
-                    
-                    setGeneratedText(generatedText.trim() + "\n" + normalTexts);
-                    setNotification({ message: 'Normalstatus tilføjet i bunden', type: 'success' });
+                    setNotification({ message: 'Normalstatus sat. Tekst opdateres ikke i manuel tilstand.', type: 'error' });
                 } else {
                     setNotification({ message: 'Normalstatus indsat', type: 'success' });
                 }
-                
-                setSelectedIds(newSet);
                 setTimeout(() => setNotification(null), 3000);
             };
 
@@ -800,7 +744,13 @@
                 if (newState) {
                      setNotification({ message: 'Tilstand aktiveret: Spiser det samme hver dag', type: 'success' });
                      if (dietDays.length === 0) {
-                         addDietDay();
+                         const newId = Date.now();
+                         const newDay = {
+                             id: newId, label: 'Dag 1',
+                             meals: { morgen: '', formiddag: '', frokost: '', eftermiddag: '', aften: '', sen_aften: '', vaeske: '' }
+                         };
+                         setDietDays([newDay]);
+                         setActiveDietDayId(newId);
                      } else {
                          setActiveDietDayId(dietDays[0].id);
                      }
@@ -830,9 +780,13 @@
             };
 
              const clearAll = () => {
-                if (confirm('Er du sikker på, at du vil rydde data for denne visning?')) {
+                if (confirm('Er du sikker på, at du vil rydde alle valg for denne sektion? (Fritekstfelter slettes også)')) {
                     if (activeSection === 'full_note') {
-                        setSelectedIds(new Set());
+                        const defaults = new Set();
+                        [...PSYCH_OPTIONS, ...SOMATIC_OBJ_OPTIONS, ...SOMATIC_ACT_OPTIONS, ...ACTUAL_PSYCH_OPTIONS, ...ANOREXIA_OPTIONS].forEach(opt => {
+                            if (opt.isDefault) defaults.add(opt.id);
+                        });
+                        setSelectedIds(defaults);
                         setOptionDetails({});
                         setContactReasonText('');
                         setTimelineText('');
@@ -853,6 +807,9 @@
                             delete newDetails[o.id];
                         });
                         
+                        // Sørg for at default options er valgt igen
+                        currentOptions.filter(o => o.isDefault).forEach(o => newSet.add(o.id));
+                        
                         if (activeSection === 'psych_actual') {
                             setContactReasonText('');
                             setTimelineText('');
@@ -868,9 +825,39 @@
                     setManualEditMode(false);
                 }
             };
+
+            const resetSection = () => {
+                let currentOptions = [];
+                 if (activeSection === 'psych_actual') currentOptions = ACTUAL_PSYCH_OPTIONS;
+                else if (activeSection === 'psych') currentOptions = PSYCH_OPTIONS;
+                else if (activeSection === 'somatic_obj') currentOptions = SOMATIC_OBJ_OPTIONS;
+                else if (activeSection === 'somatic_act') currentOptions = SOMATIC_ACT_OPTIONS;
+                else if (activeSection === 'diagnosis_anorexia') currentOptions = ANOREXIA_OPTIONS;
+                else if (activeSection === 'full_note') {
+                    // Full note resetter vi ikke, brug Ryd i stedet
+                    return;
+                }
+
+                const newSet = new Set(selectedIds);
+                const newDetails = { ...optionDetails };
+                
+                currentOptions.forEach(o => {
+                    newSet.delete(o.id);
+                    delete newDetails[o.id];
+                });
+                
+                currentOptions.filter(o => o.isDefault).forEach(o => newSet.add(o.id));
+                
+                setSelectedIds(newSet);
+                setOptionDetails(newDetails);
+                setManualEditMode(false);
+                
+                setNotification({ message: 'Sektion nulstillet (fritekst bevaret)', type: 'success' });
+                setTimeout(() => setNotification(null), 2500);
+            };
             
             const forceSync = () => {
-                if (confirm("Er du sikker? Dette vil slette dine manuelle ændringer og gendanne teksten baseret på dine valg.")) {
+                if (confirm("Gendan synkronisering vil slette dine manuelle ændringer i højre side og genopbygge teksten baseret på formularen. Fortsæt?")) {
                     setManualEditMode(false);
                 }
             };
@@ -892,58 +879,12 @@
                     setIsFullscreen(false);
                 }
             };
-            
-            const resetSection = () => {
-                let currentOptions = [];
-                 if (activeSection === 'psych_actual') currentOptions = ACTUAL_PSYCH_OPTIONS;
-                else if (activeSection === 'psych') currentOptions = PSYCH_OPTIONS;
-                else if (activeSection === 'somatic_obj') currentOptions = SOMATIC_OBJ_OPTIONS;
-                else if (activeSection === 'somatic_act') currentOptions = SOMATIC_ACT_OPTIONS;
-                else if (activeSection === 'diagnosis_anorexia') currentOptions = ANOREXIA_OPTIONS;
-                else if (activeSection === 'full_note') {
-                     const defaults = new Set();
-                    [...PSYCH_OPTIONS, ...SOMATIC_OBJ_OPTIONS, ...SOMATIC_ACT_OPTIONS, ...ACTUAL_PSYCH_OPTIONS, ...ANOREXIA_OPTIONS].forEach(opt => {
-                        if (opt.isDefault) defaults.add(opt.id);
-                    });
-                    setSelectedIds(defaults);
-                    setOptionDetails({});
-                    setContactReasonText('');
-                    setTimelineText('');
-                    setDietDays([]);
-                    setIsUniformDiet(false);
-                    setManualEditMode(false);
-                    return;
-                }
-
-                const newSet = new Set(selectedIds);
-                const newDetails = { ...optionDetails };
-                
-                currentOptions.forEach(o => {
-                    newSet.delete(o.id);
-                    delete newDetails[o.id];
-                });
-                
-                currentOptions.filter(o => o.isDefault).forEach(o => newSet.add(o.id));
-                
-                if (activeSection === 'psych_actual') {
-                    setContactReasonText('');
-                    setTimelineText('');
-                }
-                if (activeSection === 'diagnosis_anorexia') {
-                    setDietDays([]);
-                    setIsUniformDiet(false);
-                }
-                
-                setSelectedIds(newSet);
-                setOptionDetails(newDetails);
-                setManualEditMode(false);
-            };
 
 
             const renderCardGrid = (dataSet) => {
                 const categories = Array.from(new Set(dataSet.map(o => o.category)));
                 return (
-                    <div className="pb-20">
+                    <div className={`pb-20 transition-all duration-300 ${manualEditMode ? 'opacity-50 pointer-events-none grayscale-[30%]' : ''}`}>
                         {activeSection === 'psych_actual' && (
                              <div className="mb-6 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                                 <div className="bg-slate-50 px-4 py-3 border-b border-slate-200 flex items-center gap-2">
@@ -955,7 +896,7 @@
                                         <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5 ml-1">Kontaktårsag</label>
                                         <textarea 
                                             className="w-full h-16 p-3 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 resize-none transition-all placeholder:text-slate-400"
-                                            placeholder="Hvorfor henvender patienten sig i dag? (fx henvist af egen læge pga. forværring i depressive symptomer...)"
+                                            placeholder="Hvorfor henvender patienten sig i dag? Hvad er det primære problem?"
                                             value={contactReasonText}
                                             onChange={(e) => setContactReasonText(e.target.value)}
                                         ></textarea>
@@ -1046,7 +987,7 @@
                                                                     <div className={`w-1.5 h-8 rounded-full ${isActive ? 'bg-indigo-500' : 'bg-slate-300'}`}></div>
                                                                     <div>
                                                                         <div className={`text-sm font-semibold ${isActive ? 'text-indigo-700' : 'text-slate-600'}`}>
-                                                                            {isUniformDiet ? 'Standard Dag (Dag 1)' : day.label}
+                                                                            {isUniformDiet ? 'Standard Dag (Dag 1)' : (day.label || 'Uden navn')}
                                                                         </div>
                                                                         <div className="text-[10px] text-slate-400">{Object.values(day.meals).filter(v => v).length} måltider</div>
                                                                     </div>
@@ -1170,7 +1111,7 @@
                             <div className="bg-indigo-600 p-1.5 rounded-lg"><Activity className="text-white h-5 w-5" /></div>
                             <div>
                                 <h1 className="text-lg font-bold text-slate-800 leading-tight">Psykiatrisk Journalværktøj</h1>
-                                <div className="flex items-center gap-1.5 text-xs text-slate-500"><span>Klinisk dokumentationsstøtte</span><span className="text-slate-300">•</span><span>v9.0 (Clean MSE Flow)</span></div>
+                                <div className="flex items-center gap-1.5 text-xs text-slate-500"><span>Klinisk dokumentationsstøtte</span><span className="text-slate-300">•</span><span>v10.1 (Klinisk UX Fix)</span></div>
                             </div>
                         </div>
                         <div className="flex items-center gap-4">
@@ -1226,16 +1167,34 @@
                                         </h2>
                                     </div>
                                     <div className="flex gap-3">
-                                        {(activeSection === 'psych' || activeSection === 'somatic_obj') && (
+                                        {(activeSection === 'psych' || activeSection === 'somatic_obj' || activeSection === 'somatic_act') && (
                                             <button onClick={setNormalStatus} className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-colors shadow-sm">
                                                 <Star className="h-4 w-4" /> Sæt Normalstatus
                                             </button>
                                         )}
-                                        <button onClick={resetSection} className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-indigo-600 transition-colors shadow-sm">
-                                            <RotateCcw className="h-4 w-4" /> Nulstil
-                                        </button>
+                                        {activeSection !== 'full_note' && (
+                                            <button onClick={resetSection} className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-indigo-600 transition-colors shadow-sm">
+                                                <RotateCcw className="h-4 w-4" /> Nulstil valg
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
+                                
+                                {manualEditMode && activeSection !== 'full_note' && (
+                                    <div className="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center justify-between shadow-sm animate-in fade-in slide-in-from-top-2">
+                                        <div className="flex items-center gap-3">
+                                            <AlertCircle className="w-6 h-6 text-amber-500" />
+                                            <div>
+                                                <h4 className="font-bold text-amber-800 text-sm">Fri redigering er aktiv</h4>
+                                                <p className="text-amber-700 text-xs mt-0.5">Formularen er frosset for at beskytte dine manuelle indtastninger i højre side. Gendan synkronisering for at bruge formularen igen.</p>
+                                            </div>
+                                        </div>
+                                        <button onClick={forceSync} className="px-4 py-2 bg-white text-indigo-700 border border-indigo-200 rounded-lg shadow-sm text-sm font-bold hover:bg-indigo-50 transition-colors whitespace-nowrap">
+                                            Gendan Synkronisering
+                                        </button>
+                                    </div>
+                                )}
+
                                 {activeSection === 'psych_actual' && renderCardGrid(ACTUAL_PSYCH_OPTIONS)}
                                 {activeSection === 'psych' && renderCardGrid(PSYCH_OPTIONS)}
                                 {activeSection === 'somatic_act' && renderCardGrid(SOMATIC_ACT_OPTIONS)}
@@ -1257,16 +1216,15 @@
                             </div>
                             <div className="flex-1 relative">
                                 <textarea 
-                                    className={`absolute inset-0 w-full h-full p-5 border-none resize-none focus:ring-0 text-sm leading-relaxed text-slate-800 font-mono bg-white focus:outline-none ${manualEditMode ? 'bg-amber-50/10' : ''}`}
+                                    className={`absolute inset-0 w-full h-full p-5 border-none resize-none focus:ring-0 text-sm leading-relaxed text-slate-800 font-mono bg-white focus:outline-none ${manualEditMode ? 'bg-amber-50/20' : ''}`}
                                     value={generatedText}
                                     onChange={handleManualTextChange}
                                     spellCheck="false"
                                 ></textarea>
                             </div>
                             {manualEditMode && (
-                                <div className="bg-slate-50 px-4 py-2 border-t border-slate-200 flex items-center justify-between text-xs">
-                                    <div className="flex items-center gap-1.5 text-slate-500"><PenLine className="w-3.5 h-3.5" /><span>Fri redigering aktiv.</span></div>
-                                    <button onClick={forceSync} className="text-indigo-600 hover:text-indigo-800 font-medium hover:underline px-2 py-1">Gendan Standard</button>
+                                <div className="bg-amber-50 px-4 py-2 border-t border-amber-200 flex items-center justify-between text-xs">
+                                    <div className="flex items-center gap-1.5 text-amber-700 font-medium"><PenLine className="w-3.5 h-3.5" /><span>Fri redigering aktiv.</span></div>
                                 </div>
                             )}
                             <div className="p-4 bg-slate-50 border-t border-slate-200">
